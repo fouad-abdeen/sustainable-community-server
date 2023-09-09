@@ -1,0 +1,317 @@
+{
+    "components": {
+        "schemas": {
+            "LoginRequest": {
+                "properties": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "email",
+                    "password"
+                ]
+            },
+            "SignupRequest": {
+                "properties": {
+                    "email": {
+                        "format": "email",
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "enum": [
+                            "customer",
+                            "vendor",
+                            "admin"
+                        ],
+                        "type": "string"
+                    },
+                    "firstName": {
+                        "type": "string"
+                    },
+                    "lastName": {
+                        "type": "string"
+                    },
+                    "vendorName": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "email",
+                    "password",
+                    "role"
+                ]
+            },
+            "PasswordResetRequest": {
+                "properties": {
+                    "token": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "token",
+                    "password"
+                ]
+            },
+            "RefreshTokenRequest": {
+                "properties": {
+                    "accessToken": {
+                        "type": "string"
+                    },
+                    "refreshToken": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "accessToken",
+                    "refreshToken"
+                ]
+            }
+        }
+    },
+    "info": {
+        "title": "sustainable-community-server API",
+        "version": "1.0.0",
+        "description": "Generated with `routing-controllers-openapi`"
+    },
+    "openapi": "3.0.0",
+    "paths": {
+        "/login": {
+            "post": {
+                "operationId": "AuthContoller.login",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            }
+                        }
+                    },
+                    "description": "LoginRequest",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthInfo"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "401": {
+                        "description": "Authentication failed"
+                    }
+                },
+                "summary": "Authenticate user",
+                "tags": [
+                    "Auth Contoller"
+                ]
+            }
+        },
+        "/logout": {
+            "get": {
+                "operationId": "AuthContoller.logout",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "accessToken",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "refreshToken",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "403": {
+                        "description": "Sign out failed"
+                    }
+                },
+                "summary": "Sign out user",
+                "tags": [
+                    "Auth Contoller"
+                ]
+            }
+        },
+        "/signup": {
+            "post": {
+                "operationId": "AuthContoller.signup",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignupRequest"
+                            }
+                        }
+                    },
+                    "description": "SignupRequest",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Signup failed"
+                    }
+                },
+                "summary": "Sign up user",
+                "tags": [
+                    "Auth Contoller"
+                ]
+            }
+        },
+        "/email/verify": {
+            "put": {
+                "operationId": "AuthContoller.verifyEmail",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "token",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Email verification failed"
+                    }
+                },
+                "summary": "Verify email address",
+                "tags": [
+                    "Auth Contoller"
+                ]
+            }
+        },
+        "/password/reset": {
+            "get": {
+                "operationId": "AuthContoller.requestPasswordReset",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "email",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "403": {
+                        "description": "Requesting password reset failed"
+                    }
+                },
+                "summary": "Send password reset link",
+                "tags": [
+                    "Auth Contoller"
+                ]
+            },
+            "post": {
+                "operationId": "AuthContoller.resetPassword",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetRequest"
+                            }
+                        }
+                    },
+                    "description": "PasswordResetRequest",
+                    "required": false
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "403": {
+                        "description": "Password reset failed"
+                    }
+                },
+                "summary": "Reset user's password",
+                "tags": [
+                    "Auth Contoller"
+                ]
+            }
+        },
+        "/token/refresh": {
+            "put": {
+                "operationId": "AuthContoller.refreshAccessToken",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RefreshTokenRequest"
+                            }
+                        }
+                    },
+                    "description": "RefreshTokenRequest",
+                    "required": false
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    }
+                },
+                "summary": "Refresh access token",
+                "tags": [
+                    "Auth Contoller"
+                ]
+            }
+        }
+    }
+}
