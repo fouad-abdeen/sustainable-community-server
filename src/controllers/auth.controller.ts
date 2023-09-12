@@ -48,6 +48,7 @@ export class AuthContoller extends BaseService {
   // #endregion
 
   // #region Logout
+  @Authorized()
   @Get("/logout")
   @OpenAPI({
     summary: "Sign out user",

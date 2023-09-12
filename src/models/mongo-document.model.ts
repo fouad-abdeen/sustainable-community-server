@@ -19,14 +19,14 @@ export class MongoDocument {
   public createdBy?: string;
 
   /**
-   * Modified date
+   * Updated date
    */
   @prop({ type: Number })
-  public modifiedAt?: number;
+  public updatedAt?: number;
 
   /**
-   * Key of user who modified the object
+   * Key of user who updated the object
    */
   @prop({ type: String })
-  public modifiedBy?: string;
+  public updatedBy?: string;
 }

@@ -1,6 +1,7 @@
 import { AnyParamConstructor } from "@typegoose/typegoose/lib/types";
 import { Logger } from "../../..";
 import { FilterQuery, UpdateQuery } from "mongoose";
+import { MongoConnection } from "./mongo.connection";
 
 export interface IMongoConnectionProvider {
   /**
@@ -11,13 +12,13 @@ export interface IMongoConnectionProvider {
 
   /**
    * Creates a new wrapper of the connection to the specified database, then returns it.
-   * @param cls Unintialized Mongo Class (used to create mongoose model from class).
+   * @param documentClass Unintialized MongoDB Document Class (used to create mongoose model from class).
    * @param logger Logger used in the main app (optional).
    */
-  getConnection<T, U extends AnyParamConstructor<T> = AnyParamConstructor<T>>(
-    cls: U,
+  getConnection<T, U extends AnyParamConstructor<T>>(
+    documentClass: U,
     logger?: Logger
-  ): IMongoConnection<T>;
+  ): MongoConnection<T, U>;
 
   /**
    * Closes the current connection created when initializing the service.
@@ -42,41 +43,31 @@ export interface IMongoConnection<T> {
 
   /**
    * Creates multiple records in the collection that the model belongs to.
-   * @param objects The new records that will be created.
+   * @param objectsList The new records that will be created.
    */
-  insert(objects: T[]): Promise<T[]>;
+  insert(objectsList: T[]): Promise<T[]>;
 
   /**
    *  Queries one record depending on certain conditions.
    * @param conditions The conditions to decide which record to query.
-   * @param leanEnabled Enable or disable the lean option that tells Mongoose to skip hydrating the result document.
    * @returns Requested object as a document or lean document.
    */
-  queryOne<U>(conditions: FilterQuery<U>, leanEnabled?: boolean): Promise<T>;
+  queryOne<U>(conditions: FilterQuery<U>): Promise<T>;
 
   /**
    *  Queries multiple records depending on certain conditions.
-   * @param options options to apply on the query operation
-   * @param leanEnabled Enable or disable the lean option that tells Mongoose to skip hydrating the result document.
+   * @param options options to apply on the query operation.
    * @returns The requested array of documents, lean documents, or the chosen data structure.
    */
-  query<U, V, S>(
-    options: MongooseQueryOptions<U, V>,
-    leanEnabled?: boolean
-  ): Promise<T[] | S>;
+  query<U, V, S>(options: MongooseQueryOptions<U, V>): Promise<T[] | S>;
 
   /**
    *  Updates a document with new data depending on certain conditions.
    * @param conditions The conditions to decide which record to update.
    * @param data An object consists of the new data.
-   * @param leanEnabled Enable or disable the lean option that tells Mongoose to skip hydrating the result document.
    * @returns Updated object as a document or lean document.
    */
-  updateOne<U, V>(
-    conditions: FilterQuery<U>,
-    data: UpdateQuery<V>,
-    leanEnabled?: boolean
-  ): Promise<T>;
+  updateOne<U, V>(conditions: FilterQuery<U>, data: UpdateQuery<V>): Promise<T>;
 
   /**
    *  Updates multiple documents with new data depending on certain conditions.

@@ -25,12 +25,12 @@ export class MongoConnectionProvider implements IMongoConnectionProvider {
     this._dbName = dbName;
   }
 
-  getConnection<T, U extends AnyParamConstructor<T> = AnyParamConstructor<T>>(
-    cls: U,
+  getConnection<T, U extends AnyParamConstructor<T>>(
+    documentClass: U,
     logger?: Logger
-  ): MongoConnection<T> {
+  ): MongoConnection<T, U> {
     this.dbConnectionCheck();
-    return new MongoConnection(cls, this._connection, logger);
+    return new MongoConnection(documentClass, this._connection, logger);
   }
 
   private dbConnectionCheck() {
