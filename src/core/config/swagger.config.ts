@@ -1,16 +1,19 @@
 import path from "path";
 import fs from "fs";
 import { validationMetadatasToSchemas } from "class-validator-jsonschema";
-import { getMetadataArgsStorage } from "routing-controllers";
+import {
+  RoutingControllersOptions,
+  getMetadataArgsStorage,
+} from "routing-controllers";
 import { routingControllersToSpec } from "routing-controllers-openapi";
 import { defaultMetadataStorage as classTransformerdefaultMetadataStorage } from "class-transformer/cjs/storage";
 import { env } from ".";
 import { defaultLogger as logger } from "..";
 
 export const getSwaggerSpec = (dirname: string) => {
-  const routingControllersOptions = {
+  const routingControllersOptions: RoutingControllersOptions = {
     controllers: [dirname + "/controllers/*.ts"],
-    routerPrefix: env.app.routePrefix,
+    routePrefix: env.app.routePrefix,
   };
 
   const schemas = validationMetadatasToSchemas({

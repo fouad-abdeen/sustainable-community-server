@@ -1,6 +1,36 @@
 {
     "components": {
         "schemas": {
+            "SellerItemRequest": {
+                "properties": {
+                    "sellerId": {
+                        "type": "string"
+                    },
+                    "categoryId": {
+                        "type": "string"
+                    },
+                    "isAvailable": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "CategoryRequest": {
+                "properties": {
+                    "type": {
+                        "enum": [
+                            "Item",
+                            "Product",
+                            "Service"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "type"
+                ]
+            },
             "LoginRequest": {
                 "properties": {
                     "email": {
@@ -89,6 +119,146 @@
     },
     "openapi": "3.0.0",
     "paths": {
+        "/items/{id}": {
+            "get": {
+                "operationId": "SellerItemController.getOneItem",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "404": {
+                        "description": "Item not found"
+                    }
+                },
+                "summary": "Get item by id",
+                "tags": [
+                    "Seller Item"
+                ]
+            }
+        },
+        "/items": {
+            "get": {
+                "operationId": "SellerItemController.getListOfItems",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "sellerId",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "categoryId",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "isAvailable",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "404": {
+                        "description": "Items not found"
+                    }
+                },
+                "summary": "Get list of items",
+                "tags": [
+                    "Seller Item"
+                ]
+            }
+        },
+        "/categories/{id}": {
+            "get": {
+                "operationId": "CategoryController.getOneCategory",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "404": {
+                        "description": "Category not found"
+                    }
+                },
+                "summary": "Get category by id",
+                "tags": [
+                    "Category"
+                ]
+            }
+        },
+        "/categories": {
+            "get": {
+                "operationId": "CategoryController.getListOfCategories",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "type",
+                        "required": true,
+                        "schema": {
+                            "enum": [
+                                "Item",
+                                "Product",
+                                "Service"
+                            ],
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "404": {
+                        "description": "Categories not found"
+                    }
+                },
+                "summary": "Get list of categories",
+                "tags": [
+                    "Category"
+                ]
+            }
+        },
         "/login": {
             "post": {
                 "operationId": "AuthContoller.login",
