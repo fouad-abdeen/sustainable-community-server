@@ -1,11 +1,23 @@
 import { User } from "../../models";
 
-export interface IAuthRepository {
+export interface IUserRepository {
   /**
-   *
-   * @param user user to add to the database
+   * Creates a new user in the database
+   * @param user user to create in the database
    */
-  addUser(user: User): Promise<User>;
+  createUser(user: User): Promise<User>;
+
+  /**
+   * Updates user's data
+   * @param user user's data to update
+   */
+  updateUser(user: User): Promise<User>;
+
+  /**
+   * Gets user by id
+   * @param id user's id
+   */
+  getUserById(id: string): Promise<User>;
 
   /**
    * Gets user by email
@@ -18,10 +30,4 @@ export interface IAuthRepository {
     email: string,
     throwErrorIfUserNotFound?: boolean
   ): Promise<User>;
-
-  /**
-   * Updates user's data
-   * @param user user's data to update
-   */
-  updateUser(user: User): Promise<User>;
 }

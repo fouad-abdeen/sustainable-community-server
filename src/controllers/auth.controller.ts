@@ -21,7 +21,7 @@ import { CustomerProfile, UserRole, VendorProfile } from "../models";
 
 @JsonController()
 @Service()
-export class AuthContoller extends BaseService {
+export class AuthController extends BaseService {
   constructor(private _authService: AuthService) {
     super(__filename);
   }

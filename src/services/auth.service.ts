@@ -10,14 +10,14 @@ import {
 } from "../core";
 import { CustomerProfile, User, UserRole, VendorProfile } from "../models";
 import { UserInfo } from "../models";
-import { AuthRepository } from "../repositories";
+import { UserRepository } from "../repositories";
 import { LoginRequest } from "../controllers/request/auth.request";
 import { Action } from "routing-controllers";
 
 @Service()
 export class AuthService extends BaseService {
   constructor(
-    private _authRepository: AuthRepository,
+    private _userRepository: UserRepository,
     private _hashService: AuthHashProvider,
     private _tokenService: AuthTokenProvider,
     private _mailService: MailProvider
@@ -33,7 +33,7 @@ export class AuthService extends BaseService {
     user.email = user.email.toLowerCase();
 
     this._logger.info(`Verifying user's email ${user.email}`);
-    const alreadySignedUp = await this._authRepository.getUserByEmail(
+    const alreadySignedUp = await this._userRepository.getUserByEmail(
       user.email,
       false
     );
@@ -43,10 +43,10 @@ export class AuthService extends BaseService {
     this._logger.info(`Hashing user's password`);
     user.password = await this._hashService.hashPassword(user.password);
 
-    const addedUser = await this._authRepository.addUser(user);
+    const createdUser = await this._userRepository.createUser(user);
 
     // #region Send Email Verification Email
-    const { _id, email, role } = addedUser;
+    const { _id, email, role } = createdUser;
     const id = (_id as string).toString();
     const name =
       user.role === UserRole.VENDOR
@@ -132,7 +132,7 @@ export class AuthService extends BaseService {
     }
     // #endregion
 
-    const user = await this._authRepository.getUserByEmail(emailAddress);
+    const user = await this._userRepository.getUserByEmail(emailAddress);
 
     this._logger.info(
       "Adding access and refresh tokens to the user's blocklist"
@@ -144,7 +144,7 @@ export class AuthService extends BaseService {
       { token: tokens.refreshToken, expiresIn: refreshTokenExpiry },
     ];
 
-    await this._authRepository.updateUser({
+    await this._userRepository.updateUser({
       _id: identityId,
       tokensBlocklist,
     } as User);
@@ -154,7 +154,7 @@ export class AuthService extends BaseService {
     email = email.toLowerCase();
 
     this._logger.info(`Verifying user's email ${email}`);
-    const user = await this._authRepository.getUserByEmail(email);
+    const user = await this._userRepository.getUserByEmail(email);
 
     // #region Clear Expired Tokens
     this._logger.info("Clearing user's expired tokens from blocklist");
@@ -167,7 +167,7 @@ export class AuthService extends BaseService {
       (token) => token.expiresIn > currentTimestampInSeconds
     );
 
-    await this._authRepository.updateUser({
+    await this._userRepository.updateUser({
       _id: user._id,
       tokensBlocklist: updatedTokensBlocklist,
     } as User);
@@ -217,7 +217,7 @@ export class AuthService extends BaseService {
       throw new Error(`Failed to verify authorization token, ${error.message}`);
     }
 
-    const user = await this._authRepository.getUserByEmail(payload.email);
+    const user = await this._userRepository.getUserByEmail(payload.email);
 
     if (user.tokensBlocklist?.find((object) => object.token === token))
       throw new Error("Token is not valid anymore");
@@ -241,7 +241,7 @@ export class AuthService extends BaseService {
     }
 
     try {
-      const user = await this._authRepository.getUserByEmail(email);
+      const user = await this._userRepository.getUserByEmail(email);
       if (user.verified) throw new Error(`${email} is already verified`);
     } catch (error: any) {
       throw new Error(`Failed to verify email address, ${error.message}`);
@@ -249,7 +249,7 @@ export class AuthService extends BaseService {
 
     this._logger.info(`Verifying email address for user with email ${email}`);
 
-    await this._authRepository.updateUser({
+    await this._userRepository.updateUser({
       _id: id,
       verified: true,
     } as User);
@@ -259,7 +259,7 @@ export class AuthService extends BaseService {
     email = email.toLowerCase();
 
     this._logger.info(`Verifying user's email ${email}`);
-    const user = await this._authRepository.getUserByEmail(email);
+    const user = await this._userRepository.getUserByEmail(email);
 
     if (!user.verified) throw new Error(`${email} is not verified`);
 
@@ -308,7 +308,7 @@ export class AuthService extends BaseService {
     }
 
     try {
-      const user = await this._authRepository.getUserByEmail(email);
+      const user = await this._userRepository.getUserByEmail(email);
       if (!user.verified) throw new Error(`${email} is not verified`);
       if (user.tokensBlocklist?.find((object) => object.token === token))
         throw new Error(`token is already used`);
@@ -321,7 +321,7 @@ export class AuthService extends BaseService {
 
     const hashedPassword = await this._hashService.hashPassword(password);
 
-    const user = await this._authRepository.updateUser({
+    const user = await this._userRepository.updateUser({
       _id: id,
       password: hashedPassword,
     } as User);
@@ -333,7 +333,7 @@ export class AuthService extends BaseService {
       { token, expiresIn: tokenExpiry },
     ];
 
-    await this._authRepository.updateUser({
+    await this._userRepository.updateUser({
       _id: id,
       tokensBlocklist,
     } as User);

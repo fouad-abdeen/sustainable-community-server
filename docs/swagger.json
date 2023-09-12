@@ -193,6 +193,64 @@
                 ]
             }
         },
+        "/customer/whishlist": {
+            "post": {
+                "operationId": "CustomerController.addItemTowhishlist",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "itemId",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Failed to add item to whishlist"
+                    }
+                },
+                "summary": "Add item to customer's whishlist",
+                "tags": [
+                    "Customer"
+                ]
+            },
+            "delete": {
+                "operationId": "CustomerController.removeItemFromwhishlist",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "itemId",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Failed to remove item from whishlist"
+                    }
+                },
+                "summary": "Remove item from customer's whishlist",
+                "tags": [
+                    "Customer"
+                ]
+            }
+        },
         "/categories/{id}": {
             "get": {
                 "operationId": "CategoryController.getOneCategory",
@@ -261,7 +319,7 @@
         },
         "/login": {
             "post": {
-                "operationId": "AuthContoller.login",
+                "operationId": "AuthController.login",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -290,13 +348,13 @@
                 },
                 "summary": "Authenticate user",
                 "tags": [
-                    "Auth Contoller"
+                    "Auth"
                 ]
             }
         },
         "/logout": {
             "get": {
-                "operationId": "AuthContoller.logout",
+                "operationId": "AuthController.logout",
                 "parameters": [
                     {
                         "in": "query",
@@ -328,13 +386,13 @@
                 },
                 "summary": "Sign out user",
                 "tags": [
-                    "Auth Contoller"
+                    "Auth"
                 ]
             }
         },
         "/signup": {
             "post": {
-                "operationId": "AuthContoller.signup",
+                "operationId": "AuthController.signup",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -359,13 +417,13 @@
                 },
                 "summary": "Sign up user",
                 "tags": [
-                    "Auth Contoller"
+                    "Auth"
                 ]
             }
         },
         "/email/verify": {
             "put": {
-                "operationId": "AuthContoller.verifyEmail",
+                "operationId": "AuthController.verifyEmail",
                 "parameters": [
                     {
                         "in": "query",
@@ -389,13 +447,13 @@
                 },
                 "summary": "Verify email address",
                 "tags": [
-                    "Auth Contoller"
+                    "Auth"
                 ]
             }
         },
         "/password/reset": {
             "get": {
-                "operationId": "AuthContoller.requestPasswordReset",
+                "operationId": "AuthController.requestPasswordReset",
                 "parameters": [
                     {
                         "in": "query",
@@ -419,11 +477,11 @@
                 },
                 "summary": "Send password reset link",
                 "tags": [
-                    "Auth Contoller"
+                    "Auth"
                 ]
             },
             "post": {
-                "operationId": "AuthContoller.resetPassword",
+                "operationId": "AuthController.resetPassword",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -448,13 +506,13 @@
                 },
                 "summary": "Reset user's password",
                 "tags": [
-                    "Auth Contoller"
+                    "Auth"
                 ]
             }
         },
         "/token/refresh": {
             "put": {
-                "operationId": "AuthContoller.refreshAccessToken",
+                "operationId": "AuthController.refreshAccessToken",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -479,7 +537,7 @@
                 },
                 "summary": "Refresh access token",
                 "tags": [
-                    "Auth Contoller"
+                    "Auth"
                 ]
             }
         }

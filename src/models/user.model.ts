@@ -29,8 +29,7 @@ export class CustomerProfile {
   lastName: string;
   phone: string;
   address: string;
-  // Items ids
-  wishlist: string[];
+  whishlist: string[];
 }
 // The customer profile API response should include an array of items instead of ids only
 
