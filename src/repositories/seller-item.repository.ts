@@ -1,9 +1,9 @@
 import Container, { Service } from "typedi";
-import { BaseRepository, MongoConnectionProvider } from "../core";
+import { BaseRepository, Context, MongoConnectionProvider } from "../core";
 import { SellerItem } from "../models";
 import { ISellerItemRepository } from "./interfaces";
 import { MongoConnection } from "../core/providers/database/mongo/mongo.connection";
-import { SellerItemRequest } from "../controllers/request/seller-item.request";
+import { SellerItemQuery } from "../controllers/request/seller-item.request";
 
 @Service()
 export class SellerItemRepository
@@ -18,16 +18,7 @@ export class SellerItemRepository
     this._connection = mongoService.getConnection(SellerItem, this._logger);
   }
 
-  async getOneItem(id: string): Promise<SellerItem> {
-    this._logger.info(`Getting item with id: ${id}`);
-    try {
-      return await this._connection.queryOne({ _id: id });
-    } catch (error) {
-      throw new Error(`Item with id ${id} not found`);
-    }
-  }
-
-  async getListOfItems(conditions: SellerItemRequest): Promise<SellerItem[]> {
+  async getListOfItems(conditions: SellerItemQuery): Promise<SellerItem[]> {
     this._logger.info(
       `Getting list of items with the properties: ${JSON.stringify(
         conditions,
@@ -37,7 +28,7 @@ export class SellerItemRepository
     );
 
     const items = await this._connection.query<
-      SellerItemRequest,
+      SellerItemQuery,
       unknown,
       SellerItem[]
     >({ conditions: conditions });
@@ -49,5 +40,38 @@ export class SellerItemRepository
       );
 
     return items;
+  }
+
+  async getItem(id: string): Promise<SellerItem> {
+    this._logger.info(`Getting item with id: ${id}`);
+    try {
+      const item = await this._connection.queryOne({ _id: id });
+      if (!item) throw new Error();
+      return item;
+    } catch (error) {
+      throw new Error(`Item with id ${id} not found`);
+    }
+  }
+
+  async createItem(item: SellerItem): Promise<SellerItem> {
+    this._logger.info(`Creating item with name: ${item.name}`);
+    return await this._connection.insertOne({
+      ...item,
+      createdAt: +new Date(),
+      createdBy: Context.getUser()._id,
+    });
+  }
+
+  async updateItem(item: SellerItem): Promise<SellerItem> {
+    this._logger.info(`Updating item with id: ${item._id}`);
+    return await this._connection.updateOne(
+      { _id: item._id },
+      { ...item, updatedAt: +new Date(), updatedBy: Context.getUser()._id }
+    );
+  }
+
+  async deleteItem(id: string): Promise<void> {
+    this._logger.info(`Deleting item with id: ${id}`);
+    await this._connection.deleteOne({ _id: id });
   }
 }

@@ -1,7 +1,74 @@
 {
     "components": {
         "schemas": {
-            "SellerItemRequest": {
+            "SellerItemCreationRequest": {
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "categoryId": {
+                        "type": "string"
+                    },
+                    "sellerId": {
+                        "type": "string"
+                    },
+                    "isAvailable": {
+                        "type": "boolean"
+                    },
+                    "quantity": {
+                        "type": "number"
+                    },
+                    "imageUrl": {
+                        "format": "url",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "description",
+                    "price",
+                    "categoryId",
+                    "sellerId"
+                ]
+            },
+            "SellerItemUpdateRequest": {
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "categoryId": {
+                        "type": "string"
+                    },
+                    "sellerId": {
+                        "type": "string"
+                    },
+                    "isAvailable": {
+                        "type": "boolean"
+                    },
+                    "quantity": {
+                        "type": "number"
+                    },
+                    "imageUrl": {
+                        "format": "url",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "SellerItemQuery": {
                 "properties": {
                     "sellerId": {
                         "type": "string"
@@ -57,9 +124,9 @@
                     },
                     "role": {
                         "enum": [
-                            "customer",
-                            "vendor",
-                            "admin"
+                            "Customer",
+                            "Seller",
+                            "Admin"
                         ],
                         "type": "string"
                     },
@@ -69,7 +136,7 @@
                     "lastName": {
                         "type": "string"
                     },
-                    "vendorName": {
+                    "sellerName": {
                         "type": "string"
                     }
                 },
@@ -119,37 +186,6 @@
     },
     "openapi": "3.0.0",
     "paths": {
-        "/items/{id}": {
-            "get": {
-                "operationId": "SellerItemController.getOneItem",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "required": true,
-                        "schema": {
-                            "pattern": "[^\\/#\\?]+?",
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {}
-                        },
-                        "description": "Successful response"
-                    },
-                    "404": {
-                        "description": "Item not found"
-                    }
-                },
-                "summary": "Get item by id",
-                "tags": [
-                    "Seller Item"
-                ]
-            }
-        },
         "/items": {
             "get": {
                 "operationId": "SellerItemController.getListOfItems",
@@ -188,6 +224,135 @@
                     }
                 },
                 "summary": "Get list of items",
+                "tags": [
+                    "Seller Item"
+                ]
+            },
+            "post": {
+                "operationId": "SellerItemController.createItem",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SellerItemCreationRequest"
+                            }
+                        }
+                    },
+                    "description": "SellerItemCreationRequest",
+                    "required": false
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                },
+                "summary": "Create an item",
+                "tags": [
+                    "Seller Item"
+                ]
+            }
+        },
+        "/items/{id}": {
+            "get": {
+                "operationId": "SellerItemController.getItem",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "404": {
+                        "description": "Item not found"
+                    }
+                },
+                "summary": "Get item by id",
+                "tags": [
+                    "Seller Item"
+                ]
+            },
+            "put": {
+                "operationId": "SellerItemController.updateItem",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SellerItemUpdateRequest"
+                            }
+                        }
+                    },
+                    "description": "SellerItemUpdateRequest",
+                    "required": false
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                },
+                "summary": "Update an item",
+                "tags": [
+                    "Seller Item"
+                ]
+            },
+            "delete": {
+                "operationId": "SellerItemController.deleteItem",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                },
+                "summary": "Delete an item",
                 "tags": [
                     "Seller Item"
                 ]

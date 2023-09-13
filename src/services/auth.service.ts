@@ -8,7 +8,7 @@ import {
   MailTemplateType,
   env,
 } from "../core";
-import { CustomerProfile, User, UserRole, VendorProfile } from "../models";
+import { CustomerProfile, User, UserRole, SellerProfile } from "../models";
 import { UserInfo } from "../models";
 import { UserRepository } from "../repositories";
 import { LoginRequest } from "../controllers/request/auth.request";
@@ -49,8 +49,8 @@ export class AuthService extends BaseService {
     const { _id, email, role } = createdUser;
     const id = (_id as string).toString();
     const name =
-      user.role === UserRole.VENDOR
-        ? (user.profile as VendorProfile).name
+      user.role === UserRole.SELLER
+        ? (user.profile as SellerProfile).name
         : (user.profile as CustomerProfile).firstName;
 
     const emailVerificationToken =
@@ -204,8 +204,8 @@ export class AuthService extends BaseService {
     const token = action.request.headers["authorization"];
 
     // Verify token coming from authorization header
-    this._logger.info("Verifying access token");
-    if (!token) throw new Error("Token is undefined");
+    this._logger.info("Verifying authorization token");
+    if (!token) throw new Error("Unauthorized, missing authorization token");
 
     let payload: AuthPayload;
 
@@ -218,6 +218,7 @@ export class AuthService extends BaseService {
     }
 
     const user = await this._userRepository.getUserByEmail(payload.email);
+    user._id = (user._id as string).toString();
 
     if (user.tokensBlocklist?.find((object) => object.token === token))
       throw new Error("Token is not valid anymore");
@@ -234,7 +235,7 @@ export class AuthService extends BaseService {
       const authPayload = this._tokenService.verifyToken<AuthPayload>(token);
       id = authPayload.identityId;
       email = authPayload.email;
-    } catch (error: any) {
+    } catch (error) {
       throw new Error(
         "Failed to verify email address, invalid verification token"
       );
@@ -265,8 +266,8 @@ export class AuthService extends BaseService {
 
     const id = (user._id as string).toString();
     const name =
-      user.role === UserRole.VENDOR
-        ? (user.profile as VendorProfile).name
+      user.role === UserRole.SELLER
+        ? (user.profile as SellerProfile).name
         : (user.profile as CustomerProfile).firstName;
 
     const passwordResetToken = this._tokenService.generateToken<AuthPayload>(
@@ -303,7 +304,7 @@ export class AuthService extends BaseService {
       id = authPayload.identityId;
       email = authPayload.email;
       tokenExpiry = authPayload.exp;
-    } catch (error: any) {
+    } catch (error) {
       throw new Error("Failed to reset password, invalid reset token");
     }
 

@@ -15,7 +15,7 @@ export class User extends MongoDocument {
   public verified?: boolean;
 
   @prop({ type: Object, default: {} })
-  public profile?: CustomerProfile | VendorProfile;
+  public profile!: CustomerProfile | SellerProfile;
 
   @prop({ type: Array<object>, default: [] })
   public tokensBlocklist?: {
@@ -33,7 +33,7 @@ export class CustomerProfile {
 }
 // The customer profile API response should include an array of items instead of ids only
 
-export class VendorProfile {
+export class SellerProfile {
   name: string;
   description: string;
   phone: string;
@@ -44,4 +44,4 @@ export class VendorProfile {
   logoUrl?: string;
   websiteUrl?: string;
 }
-// The vendor profile API response should include an array of items and the category object instead of id only
+// The Seller profile API response should include an array of items and the category object instead of id only

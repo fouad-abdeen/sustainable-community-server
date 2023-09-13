@@ -18,10 +18,10 @@ export class SellerItem extends MongoDocument {
   public sellerId!: string;
 
   @prop({ type: Boolean, default: true })
-  public isAvailable: boolean;
+  public isAvailable!: boolean;
 
-  @prop({ type: Number })
-  public quantity?: number;
+  @prop({ type: Number, default: Infinity })
+  public quantity!: number;
 
   @prop({ type: String })
   public imageUrl?: string;

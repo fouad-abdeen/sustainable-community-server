@@ -28,7 +28,7 @@ export class CustomerRepository
 
     await this.updateUser({
       _id: userId,
-      profile: { ...user.profile, whishlist } as CustomerProfile,
+      profile: { ...user.profile, whishlist },
     } as User);
   }
 
@@ -49,7 +49,7 @@ export class CustomerRepository
 
     await this.updateUser({
       _id: userId,
-      profile: { ...user.profile, whishlist } as CustomerProfile,
+      profile: { ...user.profile, whishlist },
     } as User);
   }
 }

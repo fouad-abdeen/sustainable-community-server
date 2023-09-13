@@ -51,7 +51,7 @@ export class SignupRequest {
 
   @IsString()
   @IsOptional()
-  vendorName?: string;
+  sellerName?: string;
 }
 
 export class PasswordResetRequest {

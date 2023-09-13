@@ -5,7 +5,7 @@ export class UserInfo {
 }
 
 export enum UserRole {
-  CUSTOMER = "customer",
-  VENDOR = "vendor",
-  ADMIN = "admin",
+  CUSTOMER = "Customer",
+  SELLER = "Seller",
+  ADMIN = "Admin",
 }

@@ -17,7 +17,7 @@ import {
   RefreshTokenRequest,
   SignupRequest,
 } from "./request/auth.request";
-import { CustomerProfile, UserRole, VendorProfile } from "../models";
+import { CustomerProfile, UserRole, SellerProfile } from "../models";
 
 @JsonController()
 @Service()
@@ -89,8 +89,8 @@ export class AuthController extends BaseService {
       password,
       role: role,
       profile:
-        role === UserRole.VENDOR
-          ? ({ name: signupRequest.vendorName } as VendorProfile)
+        role === UserRole.SELLER
+          ? ({ name: signupRequest.sellerName } as SellerProfile)
           : ({
               firstName: signupRequest.firstName,
               lastName: signupRequest.lastName,
