@@ -44,13 +44,9 @@ export class SellerItemRepository
 
   async getItem(id: string): Promise<SellerItem> {
     this._logger.info(`Getting item with id: ${id}`);
-    try {
-      const item = await this._connection.queryOne({ _id: id });
-      if (!item) throw new Error();
-      return item;
-    } catch (error) {
-      throw new Error(`Item with id ${id} not found`);
-    }
+    const item = await this._connection.queryOne({ _id: id });
+    if (!item) throw new Error(`Item with id ${id} not found`);
+    return item;
   }
 
   async createItem(item: SellerItem): Promise<SellerItem> {

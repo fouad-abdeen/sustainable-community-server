@@ -16,19 +16,19 @@ export interface ISellerItemRepository {
 
   /**
    * Creates a new item
-   * @param item The item to be created
+   * @param item the item to be created
    */
   createItem(item: SellerItem): Promise<SellerItem>;
 
   /**
    * Updates an existing item
-   * @param item The item's data to be updated
+   * @param item the item to be updated
    */
   updateItem(item: SellerItem): Promise<SellerItem>;
 
   /**
    * Deletes an existing item
-   * @param id The id of the item to be deleted
+   * @param id id of the item to be deleted
    */
   deleteItem(id: string): Promise<void>;
 }

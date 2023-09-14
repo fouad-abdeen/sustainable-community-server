@@ -135,4 +135,5 @@ export class SellerItemController extends BaseService {
     this._logger.info(`Received a request to delete an item with id: ${id}`);
     await this._sellerItemService.deleteItem(id);
   }
+  // #endregion
 }

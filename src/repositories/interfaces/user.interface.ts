@@ -2,14 +2,14 @@ import { User } from "../../models";
 
 export interface IUserRepository {
   /**
-   * Creates a new user in the database
-   * @param user user to create in the database
+   * Creates a new user
+   * @param user user to create
    */
   createUser(user: User): Promise<User>;
 
   /**
-   * Updates user's data
-   * @param user user's data to update
+   * Updates an existing user
+   * @param user user to update
    */
   updateUser(user: User): Promise<User>;
 

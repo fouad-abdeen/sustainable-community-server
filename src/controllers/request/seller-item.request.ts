@@ -1,5 +1,7 @@
 import {
   IsBoolean,
+  IsMongoId,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -7,27 +9,29 @@ import {
 } from "class-validator";
 
 export class SellerItemCreationRequest {
-  @IsString()
+  @IsNotEmpty({ message: "Name cannot be empty" })
+  @IsString({ message: "Invalid or missing name's value" })
   name: string;
 
-  @IsString()
+  @IsNotEmpty({ message: "Description cannot be empty" })
+  @IsString({ message: "Invalid description's value" })
   description: string;
 
-  @IsNumber()
+  @IsNumber({}, { message: "Invalid or missing price's value" })
   price: number;
 
-  @IsString()
+  @IsMongoId({ message: "Invalid or missing category's id" })
   categoryId: string;
 
-  @IsString()
+  @IsMongoId({ message: "Invalid or missing seller's id" })
   sellerId: string;
 
   @IsOptional()
-  @IsBoolean()
+  @IsBoolean({ message: "Invalid availability's value" })
   isAvailable?: boolean;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({}, { message: "Invalid quantity's value" })
   quantity?: number;
 
   @IsOptional()
@@ -37,31 +41,33 @@ export class SellerItemCreationRequest {
 
 export class SellerItemUpdateRequest {
   @IsOptional()
-  @IsString()
+  @IsNotEmpty({ message: "Name cannot be empty" })
+  @IsString({ message: "Invalid name's value" })
   name?: string;
 
   @IsOptional()
-  @IsString()
+  @IsNotEmpty({ message: "Description cannot be empty" })
+  @IsString({ message: "Invalid description's value" })
   description?: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({}, { message: "Invalid price's value" })
   price?: number;
 
   @IsOptional()
-  @IsString()
+  @IsMongoId({ message: "Invalid category's id" })
   categoryId?: string;
 
   @IsOptional()
-  @IsString()
+  @IsMongoId({ message: "Invalid seller's id" })
   sellerId?: string;
 
   @IsOptional()
-  @IsBoolean()
+  @IsBoolean({ message: "Invalid availability's value" })
   isAvailable?: boolean;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({}, { message: "Invalid quantity's value" })
   quantity?: number;
 
   @IsOptional()
@@ -71,14 +77,14 @@ export class SellerItemUpdateRequest {
 
 export class SellerItemQuery {
   @IsOptional()
-  @IsString()
+  @IsMongoId({ message: "Invalid seller's id" })
   sellerId?: string;
 
   @IsOptional()
-  @IsString()
+  @IsMongoId({ message: "Invalid category's id" })
   categoryId?: string;
 
   @IsOptional()
-  @IsBoolean()
+  @IsBoolean({ message: "Invalid availability's value" })
   isAvailable?: boolean;
 }

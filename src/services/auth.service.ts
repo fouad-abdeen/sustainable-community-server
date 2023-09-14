@@ -31,6 +31,7 @@ export class AuthService extends BaseService {
 
   async signUpUser(user: User): Promise<AuthInfo> {
     user.email = user.email.toLowerCase();
+    this._logger.info(`Attempting to sign up user with email ${user.email}`);
 
     this._logger.info(`Verifying user's email ${user.email}`);
     const alreadySignedUp = await this._userRepository.getUserByEmail(
@@ -82,8 +83,6 @@ export class AuthService extends BaseService {
       email: email,
     } as AuthPayload);
 
-    this._logger.info(`Signing up user with email ${user.email}`);
-
     return {
       userInfo: {
         id,
@@ -95,7 +94,7 @@ export class AuthService extends BaseService {
   }
 
   async signOutUser(tokens: Tokens): Promise<void> {
-    this._logger.info(`Signing out user by blocking their tokens`);
+    this._logger.info(`Attempting to sign out user by blocking their tokens`);
 
     let identityId: string,
       emailAddress: string,
@@ -152,6 +151,7 @@ export class AuthService extends BaseService {
 
   async authenticateUser({ email, password }: LoginRequest): Promise<AuthInfo> {
     email = email.toLowerCase();
+    this._logger.info(`Attempting to authenticate user with email ${email}`);
 
     this._logger.info(`Verifying user's email ${email}`);
     const user = await this._userRepository.getUserByEmail(email);
@@ -188,8 +188,6 @@ export class AuthService extends BaseService {
       email: user.email,
     } as AuthPayload);
 
-    this._logger.info(`Authenticating user with email ${email}`);
-
     return {
       userInfo: {
         id,
@@ -202,6 +200,7 @@ export class AuthService extends BaseService {
 
   async authorizeUser(action: Action): Promise<void> {
     const token = action.request.headers["authorization"];
+    this._logger.info(`Attempting to authorize user with token ${token}`);
 
     // Verify token coming from authorization header
     this._logger.info("Verifying authorization token");
@@ -301,6 +300,7 @@ export class AuthService extends BaseService {
       const authPayload = this._tokenService.verifyToken<
         AuthPayload & { exp: number }
       >(token);
+
       id = authPayload.identityId;
       email = authPayload.email;
       tokenExpiry = authPayload.exp;
@@ -310,7 +310,9 @@ export class AuthService extends BaseService {
 
     try {
       const user = await this._userRepository.getUserByEmail(email);
+
       if (!user.verified) throw new Error(`${email} is not verified`);
+
       if (user.tokensBlocklist?.find((object) => object.token === token))
         throw new Error(`token is already used`);
     } catch (error: any) {

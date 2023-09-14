@@ -4,18 +4,22 @@
             "SellerItemCreationRequest": {
                 "properties": {
                     "name": {
-                        "type": "string"
+                        "type": "string",
+                        "minLength": 1
                     },
                     "description": {
-                        "type": "string"
+                        "type": "string",
+                        "minLength": 1
                     },
                     "price": {
                         "type": "number"
                     },
                     "categoryId": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
                         "type": "string"
                     },
                     "sellerId": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
                         "type": "string"
                     },
                     "isAvailable": {
@@ -41,18 +45,22 @@
             "SellerItemUpdateRequest": {
                 "properties": {
                     "name": {
-                        "type": "string"
+                        "type": "string",
+                        "minLength": 1
                     },
                     "description": {
-                        "type": "string"
+                        "type": "string",
+                        "minLength": 1
                     },
                     "price": {
                         "type": "number"
                     },
                     "categoryId": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
                         "type": "string"
                     },
                     "sellerId": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
                         "type": "string"
                     },
                     "isAvailable": {
@@ -71,9 +79,11 @@
             "SellerItemQuery": {
                 "properties": {
                     "sellerId": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
                         "type": "string"
                     },
                     "categoryId": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
                         "type": "string"
                     },
                     "isAvailable": {
@@ -82,7 +92,66 @@
                 },
                 "type": "object"
             },
-            "CategoryRequest": {
+            "WhishlistQueryParams": {
+                "properties": {
+                    "itemId": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "itemId"
+                ]
+            },
+            "CategoryCreationRequest": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "description": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "type": {
+                        "enum": [
+                            "Item",
+                            "Product",
+                            "Service"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "description",
+                    "type"
+                ]
+            },
+            "CategoryUpdateRequest": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "description": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "type": {
+                        "enum": [
+                            "Item",
+                            "Product",
+                            "Service"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "CategoryQuery": {
                 "properties": {
                     "type": {
                         "enum": [
@@ -101,10 +170,12 @@
             "LoginRequest": {
                 "properties": {
                     "email": {
+                        "format": "email",
                         "type": "string"
                     },
                     "password": {
-                        "type": "string"
+                        "type": "string",
+                        "minLength": 1
                     }
                 },
                 "type": "object",
@@ -131,13 +202,16 @@
                         "type": "string"
                     },
                     "firstName": {
-                        "type": "string"
+                        "type": "string",
+                        "minLength": 1
                     },
                     "lastName": {
-                        "type": "string"
+                        "type": "string",
+                        "minLength": 1
                     },
                     "sellerName": {
-                        "type": "string"
+                        "type": "string",
+                        "minLength": 1
                     }
                 },
                 "type": "object",
@@ -194,6 +268,7 @@
                         "in": "query",
                         "name": "sellerId",
                         "schema": {
+                            "pattern": "^[0-9a-fA-F]{24}$",
                             "type": "string"
                         }
                     },
@@ -201,6 +276,7 @@
                         "in": "query",
                         "name": "categoryId",
                         "schema": {
+                            "pattern": "^[0-9a-fA-F]{24}$",
                             "type": "string"
                         }
                     },
@@ -365,8 +441,9 @@
                     {
                         "in": "query",
                         "name": "itemId",
-                        "required": false,
+                        "required": true,
                         "schema": {
+                            "pattern": "^[0-9a-fA-F]{24}$",
                             "type": "string"
                         }
                     }
@@ -393,8 +470,9 @@
                     {
                         "in": "query",
                         "name": "itemId",
-                        "required": false,
+                        "required": true,
                         "schema": {
+                            "pattern": "^[0-9a-fA-F]{24}$",
                             "type": "string"
                         }
                     }
@@ -445,6 +523,75 @@
                 "tags": [
                     "Category"
                 ]
+            },
+            "put": {
+                "operationId": "CategoryController.updateCategory",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CategoryUpdateRequest"
+                            }
+                        }
+                    },
+                    "description": "CategoryUpdateRequest",
+                    "required": false
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                },
+                "summary": "Update a category",
+                "tags": [
+                    "Category"
+                ]
+            },
+            "delete": {
+                "operationId": "CategoryController.deleteCategory",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                },
+                "summary": "Delete a category",
+                "tags": [
+                    "Category"
+                ]
             }
         },
         "/categories": {
@@ -477,6 +624,35 @@
                     }
                 },
                 "summary": "Get list of categories",
+                "tags": [
+                    "Category"
+                ]
+            },
+            "post": {
+                "operationId": "CategoryController.createCategory",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CategoryCreationRequest"
+                            }
+                        }
+                    },
+                    "description": "CategoryCreationRequest",
+                    "required": false
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                },
+                "summary": "Create a category",
                 "tags": [
                     "Category"
                 ]

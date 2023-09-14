@@ -36,13 +36,9 @@ export class UserRepository extends BaseRepository implements IUserRepository {
 
   async getUserById(id: string): Promise<User> {
     this._logger.info(`Getting user by id: ${id}`);
-    try {
-      const user = await this._connection.queryOne({ _id: id });
-      if (!user) throw new Error();
-      return user;
-    } catch (error) {
-      throw new Error(`User with id ${id} not found`);
-    }
+    const user = await this._connection.queryOne({ _id: id });
+    if (!user) throw new Error(`User with id ${id} not found`);
+    return user;
   }
 
   async getUserByEmail(
@@ -51,11 +47,8 @@ export class UserRepository extends BaseRepository implements IUserRepository {
   ): Promise<User> {
     this._logger.info(`Getting user by email: ${email}`);
     const user = await this._connection.queryOne({ email });
-
-    if (!user && throwErrorIfUserNotFound) {
+    if (!user && throwErrorIfUserNotFound)
       throw new Error(`User with email ${email} not found`);
-    }
-
     return user;
   }
 }

@@ -1,6 +1,7 @@
 import Container, { Service } from "typedi";
 import {
   BaseRepository,
+  Context,
   IMongoConnection,
   MongoConnectionProvider,
 } from "../core";
@@ -22,13 +23,9 @@ export class CategoryRepository
 
   async getOneCategory(id: string): Promise<Category> {
     this._logger.info(`Getting category with id: ${id}`);
-    try {
-      const category = await this._connection.queryOne({ _id: id });
-      if (!category) throw new Error();
-      return category;
-    } catch (error) {
-      throw new Error(`Category with id ${id} not found`);
-    }
+    const category = await this._connection.queryOne({ _id: id });
+    if (!category) throw new Error(`Item with id ${id} not found`);
+    return category;
   }
 
   async getListOfCategories(type: CategoryType): Promise<Category[]> {
@@ -44,5 +41,29 @@ export class CategoryRepository
       throw new Error(`No categories found with the properties: ${type}`);
 
     return categories;
+  }
+
+  async createCategory(category: Category): Promise<Category> {
+    this._logger.info(
+      `Creating category of type ${category.type} with name: ${category.name}`
+    );
+    return await this._connection.insertOne({
+      ...category,
+      createdAt: +new Date(),
+      createdBy: Context.getUser()._id,
+    });
+  }
+
+  async updateCategory(category: Category): Promise<Category> {
+    this._logger.info(`Updating category with id: ${category._id}`);
+    return await this._connection.updateOne(
+      { _id: category._id },
+      { ...category, updatedAt: +new Date(), updatedBy: Context.getUser()._id }
+    );
+  }
+
+  async deleteCategory(id: string): Promise<void> {
+    this._logger.info(`Deleting category with id: ${id}`);
+    await this._connection.deleteOne({ _id: id });
   }
 }
