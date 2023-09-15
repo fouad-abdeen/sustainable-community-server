@@ -12,16 +12,16 @@ export class User extends MongoDocument {
   public role!: UserRole;
 
   @prop({ type: Boolean, default: false })
-  public verified?: boolean;
+  public verified!: boolean;
 
   @prop({ type: Object, default: {} })
   public profile!: CustomerProfile | SellerProfile;
 
   @prop({ type: Array<object>, default: [] })
-  public tokensBlocklist?: {
-    token: string;
-    expiresIn: number;
-  }[];
+  public tokensBlocklist!: TokenObject[];
+
+  @prop({ type: Number, default: +new Date() })
+  public passwordUpdatedAt!: number;
 }
 
 export class CustomerProfile {
@@ -45,3 +45,8 @@ export class SellerProfile {
   websiteUrl?: string;
 }
 // The Seller profile API response should include an array of items and the category object instead of id only
+
+export interface TokenObject {
+  token: string;
+  expiresIn: number;
+}

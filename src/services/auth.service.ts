@@ -8,7 +8,13 @@ import {
   MailTemplateType,
   env,
 } from "../core";
-import { CustomerProfile, User, UserRole, SellerProfile } from "../models";
+import {
+  CustomerProfile,
+  User,
+  UserRole,
+  SellerProfile,
+  TokenObject,
+} from "../models";
 import { UserInfo } from "../models";
 import { UserRepository } from "../repositories";
 import { LoginRequest } from "../controllers/request/auth.request";
@@ -54,12 +60,15 @@ export class AuthService extends BaseService {
         ? (user.profile as SellerProfile).name
         : (user.profile as CustomerProfile).firstName;
 
+    const requestId = Context.getRequestId();
+
     const emailVerificationToken =
       this._tokenService.generateToken<AuthPayload>(
         {
+          requestId,
           identityId: id,
           email,
-        } as AuthPayload,
+        },
         { expiresIn: env.auth.emailVerificationTokenExpiresIn }
       );
 
@@ -79,9 +88,11 @@ export class AuthService extends BaseService {
     // #endregion
 
     const tokens = this.getTokens({
+      requestId,
       identityId: id,
       email: email,
-    } as AuthPayload);
+      signedAt: +new Date(),
+    });
 
     return {
       userInfo: {
@@ -138,7 +149,7 @@ export class AuthService extends BaseService {
     );
 
     const tokensBlocklist = [
-      ...(user.tokensBlocklist as []),
+      ...user.tokensBlocklist,
       { token: tokens.accessToken, expiresIn: accessTokenExpiry },
       { token: tokens.refreshToken, expiresIn: refreshTokenExpiry },
     ];
@@ -163,7 +174,7 @@ export class AuthService extends BaseService {
     const currentTimestampInSeconds = Math.floor(Date.now() / 1000); // Convert milliseconds to seconds
 
     // Filter tokens that have not yet expired
-    const updatedTokensBlocklist = (user.tokensBlocklist ?? []).filter(
+    const updatedTokensBlocklist = user.tokensBlocklist.filter(
       (token) => token.expiresIn > currentTimestampInSeconds
     );
 
@@ -184,9 +195,11 @@ export class AuthService extends BaseService {
     const id = (user._id as string).toString();
 
     const tokens = this.getTokens({
+      requestId: Context.getRequestId(),
       identityId: id,
       email: user.email,
-    } as AuthPayload);
+      signedAt: +new Date(),
+    });
 
     return {
       userInfo: {
@@ -199,7 +212,9 @@ export class AuthService extends BaseService {
   }
 
   async authorizeUser(action: Action): Promise<void> {
-    const token = action.request.headers["authorization"];
+    let token = action.request.headers["authorization"];
+    token = token.split("Bearer ").length > 1 ? token.split(" ")[1] : token;
+
     this._logger.info(`Attempting to authorize user with token ${token}`);
 
     // Verify token coming from authorization header
@@ -209,9 +224,7 @@ export class AuthService extends BaseService {
     let payload: AuthPayload;
 
     try {
-      payload = this._tokenService.verifyToken<AuthPayload>(
-        token.split("Bearer ").length > 1 ? token.split(" ")[1] : token
-      );
+      payload = this._tokenService.verifyToken<AuthPayload>(token);
     } catch (error: any) {
       throw new Error(`Failed to verify authorization token, ${error.message}`);
     }
@@ -219,8 +232,17 @@ export class AuthService extends BaseService {
     const user = await this._userRepository.getUserByEmail(payload.email);
     user._id = (user._id as string).toString();
 
-    if (user.tokensBlocklist?.find((object) => object.token === token))
-      throw new Error("Token is not valid anymore");
+    if (
+      (payload.signedAt as number) < user.passwordUpdatedAt ||
+      user.tokensBlocklist.find((object) => object.token === token)
+    )
+      throw new Error("Authorization token is not valid anymore");
+
+    if (
+      !user.verified &&
+      action.request.originalUrl.split("logout").length === 1
+    )
+      throw new Error(`${user.email} is not verified`);
 
     // Set user in Context
     this._logger.info("Setting user in Context");
@@ -271,9 +293,10 @@ export class AuthService extends BaseService {
 
     const passwordResetToken = this._tokenService.generateToken<AuthPayload>(
       {
+        requestId: Context.getRequestId(),
         identityId: id,
         email,
-      } as AuthPayload,
+      },
       { expiresIn: env.auth.passwordResetTokenExpiresIn }
     );
 
@@ -293,7 +316,10 @@ export class AuthService extends BaseService {
   }
 
   async resetPassword(token: string, password: string): Promise<void> {
-    let id: string, email: string, tokenExpiry: number;
+    let id: string,
+      email: string,
+      tokenExpiry: number,
+      tokensBlocklist: TokenObject[];
 
     // #region Verify Token
     try {
@@ -313,32 +339,52 @@ export class AuthService extends BaseService {
 
       if (!user.verified) throw new Error(`${email} is not verified`);
 
-      if (user.tokensBlocklist?.find((object) => object.token === token))
+      tokensBlocklist = user.tokensBlocklist;
+
+      if (tokensBlocklist.find((object) => object.token === token))
         throw new Error(`token is already used`);
     } catch (error: any) {
       throw new Error(`Failed to reset password, ${error.message}`);
     }
     // #endregion
 
-    this._logger.info(`Resetting password for user with email ${email}`);
-
-    const hashedPassword = await this._hashService.hashPassword(password);
-
-    const user = await this._userRepository.updateUser({
-      _id: id,
-      password: hashedPassword,
-    } as User);
-
     this._logger.info("Adding password reset token to the user's blocklist");
-
-    const tokensBlocklist = [
-      ...(user.tokensBlocklist as []),
+    const updatedTokensBlocklist = [
+      ...tokensBlocklist,
       { token, expiresIn: tokenExpiry },
     ];
 
+    const hashedPassword = await this._hashService.hashPassword(password);
+
+    this._logger.info(`Resetting password for user with email ${email}`);
     await this._userRepository.updateUser({
       _id: id,
-      tokensBlocklist,
+      password: hashedPassword,
+      passwordUpdatedAt: +new Date(),
+      tokensBlocklist: updatedTokensBlocklist,
+    } as User);
+  }
+
+  async updatePassword(
+    currentPassword: string,
+    newPassword: string
+  ): Promise<void> {
+    const user = Context.getUser();
+
+    const passwordMatch = await this._hashService.verifyPassword(
+      currentPassword,
+      user.password
+    );
+    if (!passwordMatch) throw new Error("Current password is incorrect");
+
+    const hashedPassword = await this._hashService.hashPassword(newPassword);
+
+    this._logger.info(`Updating password for user with id ${user._id}`);
+
+    await this._userRepository.updateUser({
+      _id: user._id,
+      password: hashedPassword,
+      passwordUpdatedAt: +new Date(),
     } as User);
   }
 
@@ -361,17 +407,16 @@ export class AuthService extends BaseService {
   }
 
   private getTokens(
-    { identityId, email }: AuthPayload,
+    { requestId, identityId, email, signedAt }: AuthPayload,
     refreshToken?: string
   ): Tokens {
-    const requestId = Context.getRequestId();
-
     const generateToken = (expiry) =>
       this._tokenService.generateToken<AuthPayload>(
         {
           requestId,
           identityId,
           email,
+          signedAt,
         },
         {
           // If expiry is not a number, keep it as it is (in string format)
@@ -409,4 +454,5 @@ export interface AuthPayload {
   requestId: string;
   identityId: string;
   email: string;
+  signedAt?: number;
 }

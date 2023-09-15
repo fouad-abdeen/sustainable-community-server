@@ -61,7 +61,6 @@ export class PasswordResetRequest {
   @IsJWT({ message: "Invalid or missing token" })
   token: string;
 
-  @IsString()
   @IsStrongPassword(
     {
       minLength: 8,
@@ -75,7 +74,30 @@ export class PasswordResetRequest {
         "Weak password. Password should contain at least 8 characters, 1 lowercase, 1 uppercase, 1 number and 1 symbol",
     }
   )
+  @IsString({ message: "Invalid or missing password" })
   password: string;
+}
+
+export class PasswordUpdateRequest {
+  @IsNotEmpty({ message: "Current password cannot be empty" })
+  @IsString({ message: "Current password is invalid or missing" })
+  currentPassword: string;
+
+  @IsStrongPassword(
+    {
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+    },
+    {
+      message:
+        "New password is weak. It should contain at least 8 characters, 1 lowercase, 1 uppercase, 1 number and 1 symbol",
+    }
+  )
+  @IsString({ message: "New password is invalid or missing" })
+  newPassword: string;
 }
 
 export class RefreshTokenRequest {

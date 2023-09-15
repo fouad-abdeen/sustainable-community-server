@@ -236,6 +236,22 @@
                     "password"
                 ]
             },
+            "PasswordUpdateRequest": {
+                "properties": {
+                    "currentPassword": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "newPassword": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "currentPassword",
+                    "newPassword"
+                ]
+            },
             "RefreshTokenRequest": {
                 "properties": {
                     "accessToken": {
@@ -846,6 +862,37 @@
                     }
                 },
                 "summary": "Reset user's password",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/password": {
+            "put": {
+                "operationId": "AuthController.updatePassword",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordUpdateRequest"
+                            }
+                        }
+                    },
+                    "description": "PasswordUpdateRequest",
+                    "required": false
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "403": {
+                        "description": "Password update failed"
+                    }
+                },
+                "summary": "Update user's password",
                 "tags": [
                     "Auth"
                 ]

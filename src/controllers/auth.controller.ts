@@ -14,10 +14,11 @@ import { AuthInfo, AuthService, Tokens } from "../services";
 import {
   LoginRequest,
   PasswordResetRequest,
+  PasswordUpdateRequest,
   RefreshTokenRequest,
   SignupRequest,
 } from "./request/auth.request";
-import { CustomerProfile, UserRole, SellerProfile } from "../models";
+import { CustomerProfile, UserRole, SellerProfile, User } from "../models";
 
 @JsonController()
 @Service()
@@ -95,8 +96,7 @@ export class AuthController extends BaseService {
               firstName: signupRequest.firstName,
               lastName: signupRequest.lastName,
             } as CustomerProfile),
-      verified: false,
-    });
+    } as User);
   }
   // #endregion
 
@@ -151,6 +151,25 @@ export class AuthController extends BaseService {
   ): Promise<void> {
     this._logger.info("Requesting password reset");
     await this._authService.resetPassword(token, password);
+  }
+  // #endregion
+
+  // #region Update Password
+  @Authorized()
+  @Put("/password")
+  @OpenAPI({
+    summary: "Update user's password",
+    responses: {
+      "403": {
+        description: "Password update failed",
+      },
+    },
+  })
+  async updatePassword(
+    @Body() { currentPassword, newPassword }: PasswordUpdateRequest
+  ): Promise<void> {
+    this._logger.info("Requesting password update");
+    await this._authService.updatePassword(currentPassword, newPassword);
   }
   // #endregion
 

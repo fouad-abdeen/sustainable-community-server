@@ -22,6 +22,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     const addedUser = await this._connection.insertOne({
       ...user,
       createdAt: +new Date(),
+      passwordUpdatedAt: +new Date(),
     });
     return addedUser;
   }
