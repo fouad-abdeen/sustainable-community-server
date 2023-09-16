@@ -1,16 +1,10 @@
 import {
-  IsMongoId,
   IsOptional,
   IsPhoneNumber,
   IsString,
   MaxLength,
   MinLength,
 } from "class-validator";
-
-export class WhishlistQueryParams {
-  @IsMongoId({ message: "Invalid or missing item's id" })
-  itemId: string;
-}
 
 export class ProfileUpdateRequest {
   @IsOptional()

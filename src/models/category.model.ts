@@ -13,7 +13,7 @@ export class Category extends MongoDocument {
 }
 
 export enum CategoryType {
-  item = "Item",
-  product = "Product",
-  service = "Service",
+  ITEM = "Item",
+  PRODUCT = "Product",
+  SERVICE = "Service",
 }

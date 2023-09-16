@@ -137,18 +137,6 @@
                 },
                 "type": "object"
             },
-            "WhishlistQueryParams": {
-                "properties": {
-                    "itemId": {
-                        "pattern": "^[0-9a-fA-F]{24}$",
-                        "type": "string"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "itemId"
-                ]
-            },
             "CategoryCreationRequest": {
                 "properties": {
                     "name": {
@@ -360,6 +348,46 @@
                 ]
             }
         },
+        "/seller/{id}/category/{categoryId}": {
+            "put": {
+                "operationId": "SellerController.updateCategory",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "categoryId",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Failed to update seller category"
+                    }
+                },
+                "summary": "Update seller category",
+                "tags": [
+                    "Seller"
+                ]
+            }
+        },
         "/items": {
             "get": {
                 "operationId": "SellerItemController.getListOfItems",
@@ -534,16 +562,16 @@
                 ]
             }
         },
-        "/customer/whishlist": {
+        "/customer/whishlist/items/{itemId}": {
             "post": {
                 "operationId": "CustomerController.addItemTowhishlist",
                 "parameters": [
                     {
-                        "in": "query",
+                        "in": "path",
                         "name": "itemId",
                         "required": true,
                         "schema": {
-                            "pattern": "^[0-9a-fA-F]{24}$",
+                            "pattern": "[^\\/#\\?]+?",
                             "type": "string"
                         }
                     }
@@ -568,11 +596,11 @@
                 "operationId": "CustomerController.removeItemFromwhishlist",
                 "parameters": [
                     {
-                        "in": "query",
+                        "in": "path",
                         "name": "itemId",
                         "required": true,
                         "schema": {
-                            "pattern": "^[0-9a-fA-F]{24}$",
+                            "pattern": "[^\\/#\\?]+?",
                             "type": "string"
                         }
                     }

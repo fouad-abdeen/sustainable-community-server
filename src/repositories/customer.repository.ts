@@ -2,6 +2,7 @@ import { Service } from "typedi";
 import { ICustomerRepository } from "./interfaces";
 import { UserRepository } from "./user.repository";
 import { CustomerProfile, User } from "../models";
+import { Context } from "../core";
 
 @Service()
 export class CustomerRepository
@@ -17,7 +18,7 @@ export class CustomerRepository
       `Adding item with id: ${itemId} to whishlist of user with id: ${userId}`
     );
 
-    const user = await this.getUserById(userId);
+    const user = Context.getUser();
     const whishlist = (user.profile as CustomerProfile).whishlist ?? [];
 
     if (whishlist.includes(itemId)) {

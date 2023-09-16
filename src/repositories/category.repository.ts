@@ -24,7 +24,7 @@ export class CategoryRepository
   async getOneCategory(id: string): Promise<Category> {
     this._logger.info(`Getting category with id: ${id}`);
     const category = await this._connection.queryOne({ _id: id });
-    if (!category) throw new Error(`Item with id ${id} not found`);
+    if (!category) throw new Error(`Category with id ${id} not found`);
     return category;
   }
 
