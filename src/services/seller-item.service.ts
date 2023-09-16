@@ -51,6 +51,8 @@ export class SellerItemService extends BaseService {
   }
 
   private async validateItem(item: SellerItem): Promise<void> {
+    // To-DO: Use class-validator decorators to reduce validations here
+
     if (item.name)
       if (item.name.length > 75)
         throw new Error("Name cannot be longer than 75");

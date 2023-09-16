@@ -27,7 +27,7 @@ export class User extends MongoDocument {
 export class CustomerProfile {
   firstName: string;
   lastName: string;
-  phone: string;
+  phoneNumber: string;
   address: string;
   whishlist: string[];
 }
@@ -36,11 +36,10 @@ export class CustomerProfile {
 export class SellerProfile {
   name: string;
   description: string;
-  phone: string;
+  phoneNumber: string;
   address: string;
   businessEmail: string;
-  // Category id
-  category: string;
+  categoryId: string;
   logoUrl?: string;
   websiteUrl?: string;
 }

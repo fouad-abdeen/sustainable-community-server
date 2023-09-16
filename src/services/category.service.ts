@@ -13,19 +13,13 @@ export class CategoryService extends BaseService {
     this._logger.info(
       `Attempting to create category with name: ${category.name}`
     );
-
     this.verifyUser("create");
-    this.validateCategory(category);
-
     return await this._categoryRepository.createCategory(category);
   }
 
   async updateCategory(category: Category): Promise<Category> {
     this._logger.info(`Attempting to update category with id: ${category._id}`);
-
     this.verifyUser("update");
-    this.validateCategory(category);
-
     return await this._categoryRepository.updateCategory(category);
   }
 
@@ -35,19 +29,10 @@ export class CategoryService extends BaseService {
     await this._categoryRepository.deleteCategory(id);
   }
 
+  // TO-DO: Create a custom decorator to verify user permissions
   private verifyUser(action: string): void {
     const user = Context.getUser();
     if (user.role !== UserRole.ADMIN)
       throw new Error(`Unauthorized to ${action} a category`);
-  }
-
-  private validateCategory(category: Category): void {
-    if (category.name)
-      if (category.name.length > 50)
-        throw new Error("Name cannot be longer than 50 characters");
-
-    if (category.description)
-      if (category.description.length > 250)
-        throw new Error("Description cannot be longer than 250 characters");
   }
 }

@@ -52,4 +52,13 @@ export class CustomerRepository
       profile: { ...user.profile, whishlist },
     } as User);
   }
+
+  async updateProfile(userId: string, profile: CustomerProfile): Promise<void> {
+    this._logger.info(`Updating profile of user with id: ${userId}`);
+    const profileKeys = ["firstName", "lastName", "phoneNumber", "address"];
+    Object.keys(profile).forEach((key) => {
+      if (!profileKeys.includes(key)) delete profile[key];
+    });
+    await this.updateUser({ _id: userId, profile } as User);
+  }
 }

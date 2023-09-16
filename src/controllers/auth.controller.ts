@@ -20,7 +20,7 @@ import {
 } from "./request/auth.request";
 import { CustomerProfile, UserRole, SellerProfile, User } from "../models";
 
-@JsonController()
+@JsonController("/auth")
 @Service()
 export class AuthController extends BaseService {
   constructor(private _authService: AuthService) {
@@ -91,7 +91,10 @@ export class AuthController extends BaseService {
       role: role,
       profile:
         role === UserRole.SELLER
-          ? ({ name: signupRequest.sellerName } as SellerProfile)
+          ? ({
+              name: signupRequest.sellerName,
+              categoryId: signupRequest.categoryId,
+            } as SellerProfile)
           : ({
               firstName: signupRequest.firstName,
               lastName: signupRequest.lastName,
@@ -117,7 +120,7 @@ export class AuthController extends BaseService {
   // #endregion
 
   // #region Request Password Reset
-  @Get("/password/reset")
+  @Get("/password")
   @OpenAPI({
     summary: "Send password reset link",
     responses: {
@@ -137,7 +140,7 @@ export class AuthController extends BaseService {
   // #endregion
 
   // #region Reset Password
-  @Post("/password/reset")
+  @Post("/password")
   @OpenAPI({
     summary: "Reset user's password",
     responses: {

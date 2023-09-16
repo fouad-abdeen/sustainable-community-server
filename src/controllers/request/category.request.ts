@@ -1,12 +1,24 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import {
+  IsEnum,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from "class-validator";
 import { CategoryType } from "../../models";
 
 export class CategoryCreationRequest {
-  @IsNotEmpty({ message: "Name cannot be empty" })
+  @MinLength(5, { message: "Name cannot be shorter than 5 characters" })
+  @MaxLength(50, { message: "Name cannot be longer than 50 characters" })
   @IsString({ message: "Invalid or missing name's value" })
   name: string;
 
-  @IsNotEmpty({ message: "Description cannot be empty" })
+  @MinLength(25, {
+    message: "Description cannot be shorter than 25 characters",
+  })
+  @MaxLength(250, {
+    message: "Description cannot be longer than 250 characters",
+  })
   @IsString({ message: "Invalid or missing description's value" })
   description: string;
 
@@ -16,12 +28,18 @@ export class CategoryCreationRequest {
 
 export class CategoryUpdateRequest {
   @IsOptional()
-  @IsNotEmpty({ message: "Name cannot be empty" })
+  @MinLength(5, { message: "Name cannot be shorter than 5 characters" })
+  @MaxLength(50, { message: "Name cannot be longer than 50 characters" })
   @IsString({ message: "Invalid name's value" })
   name?: string;
 
   @IsOptional()
-  @IsNotEmpty({ message: "Description cannot be empty" })
+  @MinLength(25, {
+    message: "Description cannot be shorter than 25 characters",
+  })
+  @MaxLength(250, {
+    message: "Description cannot be longer than 250 characters",
+  })
   @IsString({ message: "Invalid description's value" })
   description?: string;
 

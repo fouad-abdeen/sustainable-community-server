@@ -2,6 +2,7 @@ import {
   IsEmail,
   IsEnum,
   IsJWT,
+  IsMongoId,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -51,10 +52,14 @@ export class SignupRequest {
   @IsOptional()
   lastName?: string;
 
-  @IsNotEmpty({ message: "Name cannot be empty" })
-  @IsString({ message: "Invalid name's value" })
+  @IsNotEmpty({ message: "The seller name cannot be empty" })
+  @IsString({ message: "Invalid value for the seller name" })
   @IsOptional()
   sellerName?: string;
+
+  @IsMongoId({ message: "Invalid seller's category id" })
+  @IsOptional()
+  categoryId?: string;
 }
 
 export class PasswordResetRequest {
