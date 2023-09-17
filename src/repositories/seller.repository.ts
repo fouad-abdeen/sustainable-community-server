@@ -41,4 +41,51 @@ export class SellerRepository
       profile: { ...profile, categoryId },
     } as User);
   }
+
+  async assignItemCategory(
+    userId: string,
+    categoryId: string,
+    profile: SellerProfile
+  ): Promise<void> {
+    this._logger.info(`Assigning item category to seller with id: ${userId}`);
+
+    const categories = profile.itemCategories ?? [];
+
+    if (categories.includes(categoryId)) {
+      throw new Error(
+        `Category with id ${categoryId} already exists in the item categories`
+      );
+    }
+
+    categories.push(categoryId);
+
+    await this.updateUser({
+      _id: userId,
+      profile: { ...profile, itemCategories: categories },
+    } as User);
+  }
+
+  async removeItemCategory(
+    userId: string,
+    categoryId: string,
+    profile: SellerProfile
+  ): Promise<void> {
+    this._logger.info(`Removing item category from seller with id: ${userId}`);
+
+    const categories = (profile as SellerProfile).itemCategories ?? [];
+
+    if (!categories.includes(categoryId)) {
+      throw new Error(
+        `Category with id ${categoryId} does not exist in the item categories`
+      );
+    }
+
+    const categoryIndex = categories.indexOf(categoryId);
+    categories.splice(categoryIndex, 1);
+
+    await this.updateUser({
+      _id: userId,
+      profile: { ...profile, itemCategories: categories },
+    } as User);
+  }
 }

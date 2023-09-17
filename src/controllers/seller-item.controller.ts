@@ -19,7 +19,7 @@ import {
   SellerItemQuery,
   SellerItemUpdateRequest,
 } from "./request/seller-item.request";
-import { SellerItem } from "../models";
+import { SellerItem, UserRole } from "../models";
 import { SellerItemService } from "../services";
 
 @JsonController()
@@ -75,7 +75,10 @@ export class SellerItemController extends BaseService {
   // #endregion
 
   // #region Create Item
-  @Authorized()
+  @Authorized({
+    roles: [UserRole.SELLER],
+    disclaimer: "Only sellers can create an item",
+  })
   @Post("/items")
   @OpenAPI({
     summary: "Create an item",
@@ -97,7 +100,10 @@ export class SellerItemController extends BaseService {
   // #endregion
 
   // #region Update Item
-  @Authorized()
+  @Authorized({
+    roles: [UserRole.SELLER, UserRole.ADMIN],
+    disclaimer: "Only sellers and admins can update an item",
+  })
   @Put("/items/:id")
   @OpenAPI({
     summary: "Update an item",
@@ -121,7 +127,10 @@ export class SellerItemController extends BaseService {
   // #endregion
 
   // #region Delete Item
-  @Authorized()
+  @Authorized({
+    roles: [UserRole.SELLER],
+    disclaimer: "Only sellers can delete an item",
+  })
   @Delete("/items/:id")
   @OpenAPI({
     summary: "Delete an item",

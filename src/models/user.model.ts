@@ -31,7 +31,6 @@ export class CustomerProfile {
   address: string;
   whishlist: string[];
 }
-// The customer profile API response should include an array of items instead of ids only
 
 export class SellerProfile {
   name: string;
@@ -40,10 +39,10 @@ export class SellerProfile {
   address: string;
   businessEmail: string;
   categoryId: string;
+  itemCategories?: string[];
   logoUrl?: string;
   websiteUrl?: string;
 }
-// The Seller profile API response should include an array of items and the category object instead of id only
 
 export interface TokenObject {
   token: string;

@@ -6,17 +6,29 @@ import {
   IsOptional,
   IsString,
   IsUrl,
+  MaxLength,
+  Min,
+  MinLength,
 } from "class-validator";
 
 export class SellerItemCreationRequest {
   @IsNotEmpty({ message: "Name cannot be empty" })
+  @MinLength(5, { message: "Name cannot be shorter than 5 characters" })
+  @MaxLength(75, { message: "Name cannot be longer than 75 characters" })
   @IsString({ message: "Invalid or missing name's value" })
   name: string;
 
   @IsNotEmpty({ message: "Description cannot be empty" })
+  @MinLength(100, {
+    message: "Description cannot be shorter than 100 characters",
+  })
+  @MaxLength(1000, {
+    message: "Description cannot be longer than 1000 characters",
+  })
   @IsString({ message: "Invalid description's value" })
   description: string;
 
+  @Min(0, { message: "Price cannot be negative" })
   @IsNumber({}, { message: "Invalid or missing price's value" })
   price: number;
 
@@ -31,6 +43,7 @@ export class SellerItemCreationRequest {
   isAvailable?: boolean;
 
   @IsOptional()
+  @Min(0, { message: "Quantity cannot be negative" })
   @IsNumber({}, { message: "Invalid quantity's value" })
   quantity?: number;
 
@@ -41,16 +54,23 @@ export class SellerItemCreationRequest {
 
 export class SellerItemUpdateRequest {
   @IsOptional()
-  @IsNotEmpty({ message: "Name cannot be empty" })
+  @MinLength(5, { message: "Name cannot be shorter than 5 characters" })
+  @MaxLength(75, { message: "Name cannot be longer than 75 characters" })
   @IsString({ message: "Invalid name's value" })
   name?: string;
 
   @IsOptional()
-  @IsNotEmpty({ message: "Description cannot be empty" })
+  @MinLength(100, {
+    message: "Description cannot be shorter than 100 characters",
+  })
+  @MaxLength(1000, {
+    message: "Description cannot be longer than 1000 characters",
+  })
   @IsString({ message: "Invalid description's value" })
-  description?: string;
+  descripsction?: string;
 
   @IsOptional()
+  @Min(0, { message: "Price cannot be negative" })
   @IsNumber({}, { message: "Invalid price's value" })
   price?: number;
 
@@ -67,6 +87,7 @@ export class SellerItemUpdateRequest {
   isAvailable?: boolean;
 
   @IsOptional()
+  @Min(0, { message: "Quantity cannot be negative" })
   @IsNumber({}, { message: "Invalid quantity's value" })
   quantity?: number;
 

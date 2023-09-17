@@ -50,14 +50,17 @@
                 "properties": {
                     "name": {
                         "type": "string",
+                        "maxLength": 75,
                         "minLength": 1
                     },
                     "description": {
                         "type": "string",
+                        "maxLength": 1000,
                         "minLength": 1
                     },
                     "price": {
-                        "type": "number"
+                        "type": "number",
+                        "minimum": 0
                     },
                     "categoryId": {
                         "pattern": "^[0-9a-fA-F]{24}$",
@@ -71,7 +74,8 @@
                         "type": "boolean"
                     },
                     "quantity": {
-                        "type": "number"
+                        "type": "number",
+                        "minimum": 0
                     },
                     "imageUrl": {
                         "format": "url",
@@ -91,14 +95,17 @@
                 "properties": {
                     "name": {
                         "type": "string",
-                        "minLength": 1
+                        "maxLength": 75,
+                        "minLength": 5
                     },
-                    "description": {
+                    "descripsction": {
                         "type": "string",
-                        "minLength": 1
+                        "maxLength": 1000,
+                        "minLength": 100
                     },
                     "price": {
-                        "type": "number"
+                        "type": "number",
+                        "minimum": 0
                     },
                     "categoryId": {
                         "pattern": "^[0-9a-fA-F]{24}$",
@@ -112,7 +119,8 @@
                         "type": "boolean"
                     },
                     "quantity": {
-                        "type": "number"
+                        "type": "number",
+                        "minimum": 0
                     },
                     "imageUrl": {
                         "format": "url",
@@ -383,6 +391,84 @@
                     }
                 },
                 "summary": "Update seller category",
+                "tags": [
+                    "Seller"
+                ]
+            }
+        },
+        "/seller/{id}/item-categories/{categoryId}": {
+            "post": {
+                "operationId": "SellerController.assignItemCategory",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "categoryId",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Failed to assign item category to seller"
+                    }
+                },
+                "summary": "Assign item category to seller",
+                "tags": [
+                    "Seller"
+                ]
+            },
+            "delete": {
+                "operationId": "SellerController.removeItemCategory",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "categoryId",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Failed to remove item category from seller"
+                    }
+                },
+                "summary": "Remove item category from seller",
                 "tags": [
                     "Seller"
                 ]

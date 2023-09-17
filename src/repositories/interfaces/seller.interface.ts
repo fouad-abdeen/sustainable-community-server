@@ -15,4 +15,28 @@ export interface ISellerRepository extends IUserRepository {
    * @param categoryId id of the category
    */
   updateCategory(userId: string, categoryId: string): Promise<void>;
+
+  /**
+   * Assigns an item category to a seller
+   * @param userId id of the seller
+   * @param categoryId id of the category
+   * @param profile the profile of the seller
+   */
+  assignItemCategory(
+    userId: string,
+    categoryId: string,
+    profile: SellerProfile
+  ): Promise<void>;
+
+  /**
+   * Removes an item category from a seller
+   * @param userId id of the seller
+   * @param categoryId id of the category
+   * @param profile the profile of the seller
+   */
+  removeItemCategory(
+    userId: string,
+    categoryId: string,
+    profile: SellerProfile
+  ): Promise<void>;
 }

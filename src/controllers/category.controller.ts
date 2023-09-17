@@ -19,16 +19,12 @@ import {
   CategoryQuery,
   CategoryUpdateRequest,
 } from "./request/category.request";
-import { Category } from "../models";
-import { CategoryService } from "../services";
+import { Category, UserRole } from "../models";
 
 @JsonController()
 @Service()
 export class CategoryController extends BaseService {
-  constructor(
-    private _categoryService: CategoryService,
-    private _categoryRepository: CategoryRepository
-  ) {
+  constructor(private _categoryRepository: CategoryRepository) {
     super(__filename);
   }
 
@@ -71,7 +67,10 @@ export class CategoryController extends BaseService {
   // #endregion
 
   // #region Create Category
-  @Authorized()
+  @Authorized({
+    roles: [UserRole.ADMIN],
+    disclaimer: "Only admins can create a category",
+  })
   @Post("/categories")
   @OpenAPI({
     summary: "Create a category",
@@ -87,13 +86,16 @@ export class CategoryController extends BaseService {
     this._logger.info(
       `Received a request to create category with name: ${category.name}`
     );
-    const newCategory = await this._categoryService.createCategory(category);
+    const newCategory = await this._categoryRepository.createCategory(category);
     return CategoryResponse.getCategoryResponse(newCategory);
   }
   // #endregion
 
   // #region Update Category
-  @Authorized()
+  @Authorized({
+    roles: [UserRole.ADMIN],
+    disclaimer: "Only admins can update a category",
+  })
   @Put("/categories/:id")
   @OpenAPI({
     summary: "Update a category",
@@ -108,7 +110,7 @@ export class CategoryController extends BaseService {
     @Body() category: CategoryUpdateRequest
   ): Promise<CategoryResponse> {
     this._logger.info(`Received a request to update category with id: ${id}`);
-    const updatedCategory = await this._categoryService.updateCategory({
+    const updatedCategory = await this._categoryRepository.updateCategory({
       _id: id,
       ...category,
     } as Category);
@@ -117,7 +119,10 @@ export class CategoryController extends BaseService {
   // #endregion
 
   // #region Delete Category
-  @Authorized()
+  @Authorized({
+    roles: [UserRole.ADMIN],
+    disclaimer: "Only admins can delete a category",
+  })
   @Delete("/categories/:id")
   @OpenAPI({
     summary: "Delete a category",
@@ -129,7 +134,7 @@ export class CategoryController extends BaseService {
   })
   async deleteCategory(@Param("id") id: string): Promise<void> {
     this._logger.info(`Received a request to delete category with id: ${id}`);
-    await this._categoryService.deleteCategory(id);
+    await this._categoryRepository.deleteCategory(id);
   }
   // #endregion
 }

@@ -211,14 +211,19 @@ export class AuthService extends BaseService {
     };
   }
 
-  async authorizeUser(action: Action): Promise<void> {
-    let token = action.request.headers["authorization"];
+  async authorizeUser(
+    action: Action,
+    rolesAndPermission: RolesAndPermission[]
+  ): Promise<void> {
+    let user: User,
+      token = action.request.headers["authorization"];
     token = token.split("Bearer ").length > 1 ? token.split(" ")[1] : token;
 
     this._logger.info(`Attempting to authorize user with token ${token}`);
 
-    // Verify token coming from authorization header
+    // #region Verify Authorization Token
     this._logger.info("Verifying authorization token");
+
     if (!token) throw new Error("Unauthorized, missing authorization token");
 
     let payload: AuthPayload;
@@ -229,7 +234,7 @@ export class AuthService extends BaseService {
       throw new Error(`Failed to verify authorization token, ${error.message}`);
     }
 
-    const user = await this._userRepository.getUserByEmail(payload.email);
+    user = await this._userRepository.getUserByEmail(payload.email);
     user._id = (user._id as string).toString();
 
     if (
@@ -237,12 +242,26 @@ export class AuthService extends BaseService {
       user.tokensBlocklist.find((object) => object.token === token)
     )
       throw new Error("Authorization token is not valid anymore");
+    // #endregion
 
     if (
       !user.verified &&
       action.request.originalUrl.split("logout").length === 1
     )
       throw new Error(`${user.email} is not verified`);
+
+    // #region Verify Role and Permission
+    const { roles, disclaimer } = rolesAndPermission[0];
+
+    this._logger.info("Verifying user's role");
+
+    /*** To Do: Implement Permission Verification ***/
+
+    if (!roles.includes(user.role))
+      throw new Error(
+        disclaimer ?? "Unauthorized, user does not have the required role"
+      );
+    // #endregion
 
     // Set user in Context
     this._logger.info("Setting user in Context");
@@ -455,4 +474,10 @@ export interface AuthPayload {
   identityId: string;
   email: string;
   signedAt?: number;
+}
+
+export interface RolesAndPermission {
+  roles: UserRole[];
+  permission?: string;
+  disclaimer?: string;
 }
