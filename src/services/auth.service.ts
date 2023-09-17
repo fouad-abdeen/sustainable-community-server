@@ -52,7 +52,7 @@ export class AuthService extends BaseService {
 
     const createdUser = await this._userRepository.createUser(user);
 
-    // #region Send Email Verification Email
+    // #region Send Email Verification Mail
     const { _id, email, role } = createdUser;
     const id = (_id as string).toString();
     const name =
@@ -217,7 +217,6 @@ export class AuthService extends BaseService {
   ): Promise<void> {
     let user: User,
       token = action.request.headers["authorization"];
-    token = token.split("Bearer ").length > 1 ? token.split(" ")[1] : token;
 
     this._logger.info(`Attempting to authorize user with token ${token}`);
 
@@ -225,6 +224,7 @@ export class AuthService extends BaseService {
     this._logger.info("Verifying authorization token");
 
     if (!token) throw new Error("Unauthorized, missing authorization token");
+    token = token.split("Bearer ").length > 1 ? token.split(" ")[1] : token;
 
     let payload: AuthPayload;
 
@@ -248,7 +248,7 @@ export class AuthService extends BaseService {
       !user.verified &&
       action.request.originalUrl.split("logout").length === 1
     )
-      throw new Error(`${user.email} is not verified`);
+      throw new Error(`User account with email ${user.email} is not verified`);
 
     // #region Verify Role and Permission
     const { roles, disclaimer } = rolesAndPermission[0];

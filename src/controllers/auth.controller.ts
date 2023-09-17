@@ -3,6 +3,7 @@ import {
   Body,
   Get,
   JsonController,
+  Param,
   Post,
   Put,
   QueryParam,
@@ -19,11 +20,16 @@ import {
   SignupRequest,
 } from "./request/auth.request";
 import { CustomerProfile, UserRole, SellerProfile, User } from "../models";
+import { UserRepository } from "../repositories";
+import { isMongoId } from "class-validator";
 
 @JsonController("/auth")
 @Service()
 export class AuthController extends BaseService {
-  constructor(private _authService: AuthService) {
+  constructor(
+    private _authService: AuthService,
+    private _userRepository: UserRepository
+  ) {
     super(__filename);
   }
 
@@ -191,6 +197,52 @@ export class AuthController extends BaseService {
   ): Promise<Tokens> {
     this._logger.info("Requesting access token refresh");
     return this._authService.refreshAccessToken(refreshToken);
+  }
+  // #endregion
+
+  // #region Acknowledge User Account
+  @Authorized({
+    roles: [UserRole.ADMIN],
+    disclaimer: "Only admins can acknowledge a user account",
+  })
+  @Put("/users/:id/acknowledge")
+  @OpenAPI({
+    summary: "Acknowledge user account",
+    responses: {
+      "403": {
+        description: "Failed to acknowledge user account",
+      },
+    },
+  })
+  async acknowledgeUserAccount(@Param("id") id: string): Promise<void> {
+    if (!isMongoId(id)) throw new Error("Invalid or missing user's id");
+
+    this._logger.info(`Acknowledging user account with id: ${id}`);
+
+    await this._userRepository.updateUser({ _id: id, verified: true } as User);
+  }
+  // #endregion
+
+  // #region Deny User Account
+  @Authorized({
+    roles: [UserRole.ADMIN],
+    disclaimer: "Only admins can deny a user account",
+  })
+  @Put("/users/:id/deny")
+  @OpenAPI({
+    summary: "Deny user account",
+    responses: {
+      "403": {
+        description: "Failed to deny user account",
+      },
+    },
+  })
+  async denyUserAccount(@Param("id") id: string): Promise<void> {
+    if (!isMongoId(id)) throw new Error("Invalid or missing user's id");
+
+    this._logger.info(`Denying user account with id: ${id}`);
+
+    await this._userRepository.updateUser({ _id: id, verified: false } as User);
   }
   // #endregion
 }
