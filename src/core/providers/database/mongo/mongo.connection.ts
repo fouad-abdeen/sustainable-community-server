@@ -56,13 +56,19 @@ export class MongoConnection<T, U extends AnyParamConstructor<T>>
     }
   }
 
-  async queryOne<U>(conditions: FilterQuery<U>): Promise<T> {
+  async queryOne<U>(
+    conditions: FilterQuery<U>,
+    projection?: string
+  ): Promise<T> {
     try {
       // 1. When using lean(), Mongoose returns plain JSON objects instead of memory and resource-heavy documents. It makes queries faster and less expensive on the CPU.
       //    The downside of enabling lean is that lean docs don't have: change tracking, casting and validation, getters and setters, virtuals, and save().
       // 2. When using Promises in combination with Mongoose async operations, note that Mongoose queries are not Promises.
       //    Queries do return a thenable. But, if you need a real Promise, you should use the exec method.
-      return (await this._model.findOne(conditions).lean().exec()) as T;
+      return (await this._model
+        .findOne(conditions, projection)
+        .lean()
+        .exec()) as T;
     } catch (err) {
       this.logger.error("An error has occurred while executing queryOne", err);
       throw new Error("Unable to get value from the database");

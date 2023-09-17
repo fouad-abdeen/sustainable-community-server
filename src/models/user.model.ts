@@ -29,7 +29,7 @@ export class CustomerProfile {
   lastName: string;
   phoneNumber: string;
   address: string;
-  whishlist: string[];
+  wishlist: string[];
 }
 
 export class SellerProfile {

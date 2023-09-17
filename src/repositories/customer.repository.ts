@@ -1,57 +1,74 @@
 import { Service } from "typedi";
-import { ICustomerRepository } from "./interfaces";
+import { ICustomerRepository, WishlistItem } from "./interfaces";
 import { UserRepository } from "./user.repository";
 import { CustomerProfile, User } from "../models";
 import { Context } from "../core";
+import { SellerItemRepository } from "./seller-item.repository";
 
 @Service()
 export class CustomerRepository
   extends UserRepository
   implements ICustomerRepository
 {
-  constructor() {
+  constructor(private _sellerItemRepository: SellerItemRepository) {
     super();
   }
 
-  async addItemToWhishlist(userId: string, itemId: string): Promise<void> {
+  async addItemToWishlist(userId: string, itemId: string): Promise<void> {
     this._logger.info(
-      `Adding item with id: ${itemId} to whishlist of user with id: ${userId}`
+      `Adding item with id: ${itemId} to wishlist of user with id: ${userId}`
     );
 
     const user = Context.getUser();
-    const whishlist = (user.profile as CustomerProfile).whishlist ?? [];
+    const wishlist = (user.profile as CustomerProfile).wishlist ?? [];
 
-    if (whishlist.includes(itemId)) {
-      throw new Error(`Item with id ${itemId} already exists in the whishlist`);
+    if (wishlist.includes(itemId)) {
+      throw new Error(`Item with id ${itemId} already exists in the wishlist`);
     }
 
-    whishlist.push(itemId);
+    wishlist.push(itemId);
 
     await this.updateUser({
       _id: userId,
-      profile: { ...user.profile, whishlist },
+      profile: { ...user.profile, wishlist },
     } as User);
   }
 
-  async removeItemFromWhishlist(userId: string, itemId: string): Promise<void> {
+  async removeItemFromWishlist(userId: string, itemId: string): Promise<void> {
     this._logger.info(
-      `Removing item with id: ${itemId} from whishlist of user with id: ${userId}`
+      `Removing item with id: ${itemId} from wishlist of user with id: ${userId}`
     );
 
     const user = await this.getUserById(userId);
-    const whishlist = (user.profile as CustomerProfile).whishlist ?? [];
+    const wishlist = (user.profile as CustomerProfile).wishlist ?? [];
 
-    if (!whishlist.includes(itemId)) {
-      throw new Error(`Item with id ${itemId} does not exist in the whishlist`);
+    if (!wishlist.includes(itemId)) {
+      throw new Error(`Item with id ${itemId} does not exist in the wishlist`);
     }
 
-    const itemIndex = whishlist.indexOf(itemId);
-    whishlist.splice(itemIndex, 1);
+    const itemIndex = wishlist.indexOf(itemId);
+    wishlist.splice(itemIndex, 1);
 
     await this.updateUser({
       _id: userId,
-      profile: { ...user.profile, whishlist },
+      profile: { ...user.profile, wishlist },
     } as User);
+  }
+
+  async getWishlistItems(userId: string): Promise<WishlistItem[]> {
+    this._logger.info(`Getting wishlist items of user with id: ${userId}`);
+
+    const user = Context.getUser();
+    const wishlist = (user.profile as CustomerProfile).wishlist ?? [];
+
+    return await Promise.all(
+      wishlist.map(async (itemId) => {
+        return (await this._sellerItemRepository.getItem(
+          itemId,
+          "_id name description price imageUrl"
+        )) as WishlistItem;
+      })
+    );
   }
 
   async updateProfile(userId: string, profile: CustomerProfile): Promise<void> {

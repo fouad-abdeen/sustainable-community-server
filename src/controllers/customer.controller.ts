@@ -2,6 +2,7 @@ import {
   Authorized,
   Body,
   Delete,
+  Get,
   JsonController,
   Param,
   Post,
@@ -14,6 +15,7 @@ import { isMongoId } from "class-validator";
 import { CustomerRepository, SellerItemRepository } from "../repositories";
 import { ProfileUpdateRequest } from "./request/customer.request";
 import { CustomerProfile, UserRole } from "../models";
+import { WishlistItem } from "../repositories/interfaces";
 
 @JsonController("/customer")
 @Service()
@@ -25,67 +27,88 @@ export class CustomerController extends BaseService {
     super(__filename);
   }
 
-  // #region Add Item to Whishlist
+  // #region Add Item to Wishlist
   @Authorized({
     roles: [UserRole.CUSTOMER],
-    disclaimer: "User must be a customer to add an item to their whishlist",
+    disclaimer: "User must be a customer to add an item to their wishlist",
   })
-  @Post("/whishlist/items/:itemId")
+  @Post("/wishlist/items/:itemId")
   @OpenAPI({
-    summary: "Add item to customer's whishlist",
+    summary: "Add item to customer's wishlist",
     responses: {
       "400": {
-        description: "Failed to add item to whishlist",
+        description: "Failed to add item to wishlist",
       },
     },
   })
-  async addItemTowhishlist(@Param("itemId") itemId: string): Promise<void> {
+  async addItemToWishlist(@Param("itemId") itemId: string): Promise<void> {
     const { _id } = Context.getUser();
 
     this._logger.info(
-      `Received a request to add item with id: ${itemId} to whishlist of customer with id: ${_id}`
+      `Received a request to add item with id: ${itemId} to wishlist of customer with id: ${_id}`
     );
 
     if (!isMongoId(itemId)) throw new Error("Invalid or missing item's id");
     await this._sellerItemRepository.getItem(itemId);
 
-    await this._customerRepository.addItemToWhishlist(_id as string, itemId);
+    await this._customerRepository.addItemToWishlist(_id as string, itemId);
   }
   // #endregion
 
-  // #region Remove Item from Whishlist
+  // #region Remove Item from Wishlist
   @Authorized({
     roles: [UserRole.CUSTOMER],
-    disclaimer:
-      "User must be a customer to remove an item from their whishlist",
+    disclaimer: "User must be a customer to remove an item from their wishlist",
   })
-  @Delete("/whishlist/items/:itemId")
+  @Delete("/wishlist/items/:itemId")
   @OpenAPI({
-    summary: "Remove item from customer's whishlist",
+    summary: "Remove item from customer's wishlist",
     responses: {
       "400": {
-        description: "Failed to remove item from whishlist",
+        description: "Failed to remove item from wishlist",
       },
     },
   })
-  async removeItemFromwhishlist(
-    @Param("itemId") itemId: string
-  ): Promise<void> {
+  async removeItemFromWishlist(@Param("itemId") itemId: string): Promise<void> {
     const { _id } = Context.getUser();
 
     this._logger.info(
-      `Received a request to remove item with id: ${itemId} from whishlist of customer with id: ${_id}`
+      `Received a request to remove item with id: ${itemId} from wishlist of customer with id: ${_id}`
     );
 
     if (!isMongoId(itemId)) throw new Error("Invalid or missing item's id");
     await this._sellerItemRepository.getItem(itemId);
 
-    await this._customerRepository.removeItemFromWhishlist(
+    await this._customerRepository.removeItemFromWishlist(
       _id as string,
       itemId
     );
   }
   // #endregion
+
+  // #region Get Wishlist Items
+  @Authorized({
+    roles: [UserRole.CUSTOMER],
+    disclaimer: "User must be a customer to get their wishlist items",
+  })
+  @Get("/wishlist/items")
+  @OpenAPI({
+    summary: "Get customer's wishlist items",
+    responses: {
+      "404": {
+        description: "Wishlist items not found",
+      },
+    },
+  })
+  async getWishlistItems(): Promise<WishlistItem[]> {
+    const { _id } = Context.getUser();
+
+    this._logger.info(
+      `Received a request to get wishlist items of customer with id: ${_id}`
+    );
+
+    return await this._customerRepository.getWishlistItems(_id as string);
+  }
 
   // #region Update Profile
   @Authorized({

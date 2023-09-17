@@ -31,7 +31,7 @@ export class SellerItemRepository
       SellerItemQuery,
       unknown,
       SellerItem[]
-    >({ conditions: conditions });
+    >({ conditions });
 
     if (!items || items.length === 0)
       throw new Error(
@@ -42,10 +42,11 @@ export class SellerItemRepository
     return items;
   }
 
-  async getItem(id: string): Promise<SellerItem> {
+  async getItem(id: string, projection?: string): Promise<SellerItem> {
     this._logger.info(`Getting item with id: ${id}`);
-    const item = await this._connection.queryOne({ _id: id });
+    const item = await this._connection.queryOne({ _id: id }, projection);
     if (!item) throw new Error(`Item with id ${id} not found`);
+    item._id = (item._id as string).toString();
     return item;
   }
 

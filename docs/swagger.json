@@ -648,9 +648,9 @@
                 ]
             }
         },
-        "/customer/whishlist/items/{itemId}": {
+        "/customer/wishlist/items/{itemId}": {
             "post": {
-                "operationId": "CustomerController.addItemTowhishlist",
+                "operationId": "CustomerController.addItemToWishlist",
                 "parameters": [
                     {
                         "in": "path",
@@ -670,16 +670,16 @@
                         "description": "Successful response"
                     },
                     "400": {
-                        "description": "Failed to add item to whishlist"
+                        "description": "Failed to add item to wishlist"
                     }
                 },
-                "summary": "Add item to customer's whishlist",
+                "summary": "Add item to customer's wishlist",
                 "tags": [
                     "Customer"
                 ]
             },
             "delete": {
-                "operationId": "CustomerController.removeItemFromwhishlist",
+                "operationId": "CustomerController.removeItemFromWishlist",
                 "parameters": [
                     {
                         "in": "path",
@@ -699,10 +699,30 @@
                         "description": "Successful response"
                     },
                     "400": {
-                        "description": "Failed to remove item from whishlist"
+                        "description": "Failed to remove item from wishlist"
                     }
                 },
-                "summary": "Remove item from customer's whishlist",
+                "summary": "Remove item from customer's wishlist",
+                "tags": [
+                    "Customer"
+                ]
+            }
+        },
+        "/customer/wishlist/items": {
+            "get": {
+                "operationId": "CustomerController.getWishlistItems",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "404": {
+                        "description": "Wishlist items not found"
+                    }
+                },
+                "summary": "Get customer's wishlist items",
                 "tags": [
                     "Customer"
                 ]
@@ -1151,6 +1171,68 @@
                     }
                 },
                 "summary": "Refresh access token",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/auth/users/{id}/acknowledge": {
+            "put": {
+                "operationId": "AuthController.acknowledgeUserAccount",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "403": {
+                        "description": "Failed to acknowledge user account"
+                    }
+                },
+                "summary": "Acknowledge user account",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/auth/users/{id}/deny": {
+            "put": {
+                "operationId": "AuthController.denyUserAccount",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "403": {
+                        "description": "Failed to deny user account"
+                    }
+                },
+                "summary": "Deny user account",
                 "tags": [
                     "Auth"
                 ]

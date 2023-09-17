@@ -1,17 +1,12 @@
 import { Service } from "typedi";
 import { BaseService, Context } from "../core";
 import { SellerItem, SellerProfile, UserRole } from "../models";
-import {
-  CategoryRepository,
-  SellerItemRepository,
-  UserRepository,
-} from "../repositories";
+import { SellerItemRepository, UserRepository } from "../repositories";
 
 @Service()
 export class SellerItemService extends BaseService {
   constructor(
     private _sellerItemRepository: SellerItemRepository,
-    private _categoryRepository: CategoryRepository,
     private _userRepository: UserRepository
   ) {
     super(__filename);
