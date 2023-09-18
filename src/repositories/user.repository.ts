@@ -3,6 +3,7 @@ import {
   BaseRepository,
   IMongoConnection,
   MongoConnectionProvider,
+  throwError,
 } from "../core";
 import { IUserRepository } from "./interfaces";
 import { User } from "../models";
@@ -37,8 +38,10 @@ export class UserRepository extends BaseRepository implements IUserRepository {
 
   async getUserById(id: string): Promise<User> {
     this._logger.info(`Getting user by id: ${id}`);
-    const user = await this._connection.queryOne({ _id: id });
-    if (!user) throw new Error(`User with id ${id} not found`);
+    const user = await this._connection.queryOne<{ _id: string }, User>({
+      _id: id,
+    });
+    if (!user) throwError(`User with id ${id} not found`, 404);
     return user;
   }
 
@@ -47,9 +50,11 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     throwErrorIfUserNotFound = true
   ): Promise<User> {
     this._logger.info(`Getting user by email: ${email}`);
-    const user = await this._connection.queryOne({ email });
+    const user = await this._connection.queryOne<{ email: string }, User>({
+      email,
+    });
     if (!user && throwErrorIfUserNotFound)
-      throw new Error(`User with email ${email} not found`);
+      throwError(`User with email ${email} not found`, 404);
     return user;
   }
 }

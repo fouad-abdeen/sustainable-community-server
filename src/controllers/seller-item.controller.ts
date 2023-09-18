@@ -22,7 +22,7 @@ import {
 import { SellerItem, UserRole } from "../models";
 import { SellerItemService } from "../services";
 
-@JsonController()
+@JsonController("/items")
 @Service()
 export class SellerItemController extends BaseService {
   constructor(
@@ -33,7 +33,7 @@ export class SellerItemController extends BaseService {
   }
 
   // #region Get List of Items
-  @Get("/items")
+  @Get("")
   @OpenAPI({
     summary: "Get list of items",
     responses: {
@@ -58,7 +58,7 @@ export class SellerItemController extends BaseService {
   // #endregion
 
   // #region Get Item
-  @Get("/items/:id")
+  @Get("/:id")
   @OpenAPI({
     summary: "Get item by id",
     responses: {
@@ -69,7 +69,7 @@ export class SellerItemController extends BaseService {
   })
   async getItem(@Param("id") id: string): Promise<SellerItemResponse> {
     this._logger.info(`Received a request to get item with id: ${id}`);
-    const item = await this._sellerItemRepository.getItem(id);
+    const item = await this._sellerItemRepository.getItem<SellerItem>(id);
     return SellerItemResponse.getItemResponse(item);
   }
   // #endregion
@@ -79,7 +79,7 @@ export class SellerItemController extends BaseService {
     roles: [UserRole.SELLER],
     disclaimer: "Only sellers can create an item",
   })
-  @Post("/items")
+  @Post("")
   @OpenAPI({
     summary: "Create an item",
     responses: {
@@ -104,7 +104,7 @@ export class SellerItemController extends BaseService {
     roles: [UserRole.SELLER, UserRole.ADMIN],
     disclaimer: "Only sellers and admins can update an item",
   })
-  @Put("/items/:id")
+  @Put("/:id")
   @OpenAPI({
     summary: "Update an item",
     responses: {
@@ -131,7 +131,7 @@ export class SellerItemController extends BaseService {
     roles: [UserRole.SELLER],
     disclaimer: "Only sellers can delete an item",
   })
-  @Delete("/items/:id")
+  @Delete("/:id")
   @OpenAPI({
     summary: "Delete an item",
     responses: {

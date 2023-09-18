@@ -7,6 +7,7 @@ import {
   MailProvider,
   MailTemplateType,
   env,
+  throwError,
 } from "../core";
 import {
   CustomerProfile,
@@ -45,7 +46,7 @@ export class AuthService extends BaseService {
       false
     );
 
-    if (alreadySignedUp) throw new Error("User already exists");
+    if (alreadySignedUp) throwError("User already exists", 400);
 
     this._logger.info(`Hashing user's password`);
     user.password = await this._hashService.hashPassword(user.password);
@@ -53,7 +54,7 @@ export class AuthService extends BaseService {
     const createdUser = await this._userRepository.createUser(user);
 
     // #region Send Email Verification Mail
-    const { _id, email, role } = createdUser;
+    const { _id, email, role, profile } = createdUser;
     const id = (_id as string).toString();
     const name =
       user.role === UserRole.SELLER
@@ -99,6 +100,7 @@ export class AuthService extends BaseService {
         id,
         email,
         role,
+        profile,
       },
       tokens,
     };
@@ -107,10 +109,10 @@ export class AuthService extends BaseService {
   async signOutUser(tokens: Tokens): Promise<void> {
     this._logger.info(`Attempting to sign out user by blocking their tokens`);
 
-    let identityId: string,
-      emailAddress: string,
-      accessTokenExpiry: number,
-      refreshTokenExpiry: number;
+    let identityId = "",
+      emailAddress = "",
+      accessTokenExpiry = 0,
+      refreshTokenExpiry = 0;
 
     // #region Verify Access and Refresh Tokens
     try {
@@ -122,13 +124,13 @@ export class AuthService extends BaseService {
         tokens.accessToken
       );
 
-      if (!id || !email) throw new Error("malformed token");
+      if (!id || !email) throwError("malformed token", 401);
 
       identityId = id;
       emailAddress = email;
       accessTokenExpiry = exp;
     } catch (error: any) {
-      throw new Error(`Failed to verify access token, ${error.message}`);
+      throwError(`Failed to verify access token, ${error.message}`, 401);
     }
 
     try {
@@ -138,7 +140,7 @@ export class AuthService extends BaseService {
 
       refreshTokenExpiry = exp;
     } catch (error: any) {
-      throw new Error(`Failed to verify refresh token, ${error.message}`);
+      throwError(`Failed to verify refresh token, ${error.message}`, 401);
     }
     // #endregion
 
@@ -190,7 +192,7 @@ export class AuthService extends BaseService {
       user.password
     );
 
-    if (!passwordMatch) throw new Error("Invalid password");
+    if (!passwordMatch) throwError("Invalid password", 401);
 
     const id = (user._id as string).toString();
 
@@ -206,6 +208,7 @@ export class AuthService extends BaseService {
         id,
         email,
         role: user.role,
+        profile: user.profile,
       },
       tokens,
     };
@@ -223,15 +226,15 @@ export class AuthService extends BaseService {
     // #region Verify Authorization Token
     this._logger.info("Verifying authorization token");
 
-    if (!token) throw new Error("Unauthorized, missing authorization token");
+    if (!token) throwError("Unauthorized, missing authorization token", 401);
     token = token.split("Bearer ").length > 1 ? token.split(" ")[1] : token;
 
-    let payload: AuthPayload;
+    let payload = {} as AuthPayload;
 
     try {
       payload = this._tokenService.verifyToken<AuthPayload>(token);
     } catch (error: any) {
-      throw new Error(`Failed to verify authorization token, ${error.message}`);
+      throwError(`Failed to verify authorization token, ${error.message}`, 401);
     }
 
     user = await this._userRepository.getUserByEmail(payload.email);
@@ -241,14 +244,14 @@ export class AuthService extends BaseService {
       (payload.signedAt as number) < user.passwordUpdatedAt ||
       user.tokensBlocklist.find((object) => object.token === token)
     )
-      throw new Error("Authorization token is not valid anymore");
+      throwError("Authorization token is not valid anymore", 401);
     // #endregion
 
     if (
       !user.verified &&
       action.request.originalUrl.split("logout").length === 1
     )
-      throw new Error(`User account with email ${user.email} is not verified`);
+      throwError(`User account with email ${user.email} is not verified`, 403);
 
     // #region Verify Role and Permission
     const { roles, disclaimer } = rolesAndPermission[0];
@@ -258,8 +261,9 @@ export class AuthService extends BaseService {
     /*** To Do: Implement Permission Verification ***/
 
     if (!roles.includes(user.role))
-      throw new Error(
-        disclaimer ?? "Unauthorized, user does not have the required role"
+      throwError(
+        disclaimer ?? "Unauthorized, user does not have the required role",
+        403
       );
     // #endregion
 
@@ -269,23 +273,25 @@ export class AuthService extends BaseService {
   }
 
   async verifyEmailAddress(token: string): Promise<void> {
-    let id: string, email: string;
+    let id = "",
+      email = "";
 
     try {
       const authPayload = this._tokenService.verifyToken<AuthPayload>(token);
       id = authPayload.identityId;
       email = authPayload.email;
     } catch (error) {
-      throw new Error(
-        "Failed to verify email address, invalid verification token"
+      throwError(
+        "Failed to verify email address, invalid verification token",
+        401
       );
     }
 
     try {
       const user = await this._userRepository.getUserByEmail(email);
-      if (user.verified) throw new Error(`${email} is already verified`);
+      if (user.verified) throwError(`${email} is already verified`, 400);
     } catch (error: any) {
-      throw new Error(`Failed to verify email address, ${error.message}`);
+      throwError(`Failed to verify email address, ${error.message}`, 400);
     }
 
     this._logger.info(`Verifying email address for user with email ${email}`);
@@ -302,7 +308,7 @@ export class AuthService extends BaseService {
     this._logger.info(`Verifying user's email ${email}`);
     const user = await this._userRepository.getUserByEmail(email);
 
-    if (!user.verified) throw new Error(`${email} is not verified`);
+    if (!user.verified) throwError(`${email} is not verified`, 403);
 
     const id = (user._id as string).toString();
     const name =
@@ -335,10 +341,11 @@ export class AuthService extends BaseService {
   }
 
   async resetPassword(token: string, password: string): Promise<void> {
-    let id: string,
-      email: string,
-      tokenExpiry: number,
-      tokensBlocklist: TokenObject[];
+    let id = "",
+      email = "",
+      verified = false,
+      tokenExpiry = 0,
+      tokensBlocklist: TokenObject[] = [];
 
     // #region Verify Token
     try {
@@ -350,22 +357,23 @@ export class AuthService extends BaseService {
       email = authPayload.email;
       tokenExpiry = authPayload.exp;
     } catch (error) {
-      throw new Error("Failed to reset password, invalid reset token");
+      throwError("Failed to reset password, invalid reset token", 401);
     }
 
     try {
       const user = await this._userRepository.getUserByEmail(email);
 
-      if (!user.verified) throw new Error(`${email} is not verified`);
-
+      verified = user.verified;
       tokensBlocklist = user.tokensBlocklist;
 
       if (tokensBlocklist.find((object) => object.token === token))
-        throw new Error(`token is already used`);
+        throwError(`token is already used`, 401);
     } catch (error: any) {
-      throw new Error(`Failed to reset password, ${error.message}`);
+      throwError(`Failed to reset password, ${error.message}`, 401);
     }
     // #endregion
+
+    if (verified) throwError(`${email} is not verified`, 403);
 
     this._logger.info("Adding password reset token to the user's blocklist");
     const updatedTokensBlocklist = [
@@ -394,7 +402,7 @@ export class AuthService extends BaseService {
       currentPassword,
       user.password
     );
-    if (!passwordMatch) throw new Error("Current password is incorrect");
+    if (!passwordMatch) throwError("Current password is incorrect", 401);
 
     const hashedPassword = await this._hashService.hashPassword(newPassword);
 

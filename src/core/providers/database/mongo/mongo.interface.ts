@@ -50,14 +50,18 @@ export interface IMongoConnection<T> {
   /**
    *  Queries one record depending on certain conditions.
    * @param conditions The conditions to decide which record to query.
-   * @returns Requested object as a document or lean document.
+   * @param projection The fields to be returned.
+   * @returns The requested object as a lean document or the chosen data structure.
    */
-  queryOne<U>(conditions: FilterQuery<U>): Promise<T>;
+  queryOne<U, S>(
+    conditions: FilterQuery<U>,
+    projection?: string
+  ): Promise<T | S>;
 
   /**
    *  Queries multiple records depending on certain conditions.
    * @param options options to apply on the query operation.
-   * @returns The requested array of documents, lean documents, or the chosen data structure.
+   * @returns The requested array of lean documents or the chosen data structure.
    */
   query<U, V, S>(options: MongooseQueryOptions<U, V>): Promise<T[] | S>;
 
@@ -65,7 +69,7 @@ export interface IMongoConnection<T> {
    *  Updates a document with new data depending on certain conditions.
    * @param conditions The conditions to decide which record to update.
    * @param data An object consists of the new data.
-   * @returns Updated object as a document or lean document.
+   * @returns Updated object as a lean document.
    */
   updateOne<U, V>(conditions: FilterQuery<U>, data: UpdateQuery<V>): Promise<T>;
 
@@ -79,7 +83,7 @@ export interface IMongoConnection<T> {
   /**
    *  Deletes a document depending on certain conditions.
    * @param conditions The conditions to decide which record to delete.
-   * @returns Deleted object as a lean document (lean enabled by default).
+   * @returns Deleted object as a lean document.
    */
   deleteOne<U>(conditions: FilterQuery<U>): Promise<T>;
 

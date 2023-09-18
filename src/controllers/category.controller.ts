@@ -21,7 +21,7 @@ import {
 } from "./request/category.request";
 import { Category, UserRole } from "../models";
 
-@JsonController()
+@JsonController("/categories")
 @Service()
 export class CategoryController extends BaseService {
   constructor(private _categoryRepository: CategoryRepository) {
@@ -29,7 +29,7 @@ export class CategoryController extends BaseService {
   }
 
   // #region Get Category
-  @Get("/categories/:id")
+  @Get("/:id")
   @OpenAPI({
     summary: "Get category by id",
     responses: {
@@ -40,13 +40,15 @@ export class CategoryController extends BaseService {
   })
   async getOneCategory(@Param("id") id: string): Promise<CategoryResponse> {
     this._logger.info(`Received a request to get category with id: ${id}`);
-    const category = await this._categoryRepository.getOneCategory(id);
+    const category = await this._categoryRepository.getOneCategory<Category>(
+      id
+    );
     return CategoryResponse.getCategoryResponse(category);
   }
   // #endregion
 
   // #region Get List of Categories
-  @Get("/categories")
+  @Get("")
   @OpenAPI({
     summary: "Get list of categories",
     responses: {
@@ -71,7 +73,7 @@ export class CategoryController extends BaseService {
     roles: [UserRole.ADMIN],
     disclaimer: "Only admins can create a category",
   })
-  @Post("/categories")
+  @Post("")
   @OpenAPI({
     summary: "Create a category",
     responses: {
@@ -96,7 +98,7 @@ export class CategoryController extends BaseService {
     roles: [UserRole.ADMIN],
     disclaimer: "Only admins can update a category",
   })
-  @Put("/categories/:id")
+  @Put("/:id")
   @OpenAPI({
     summary: "Update a category",
     responses: {
@@ -123,7 +125,7 @@ export class CategoryController extends BaseService {
     roles: [UserRole.ADMIN],
     disclaimer: "Only admins can delete a category",
   })
-  @Delete("/categories/:id")
+  @Delete("/:id")
   @OpenAPI({
     summary: "Delete a category",
     responses: {

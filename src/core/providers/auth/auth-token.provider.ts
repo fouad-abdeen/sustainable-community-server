@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { sign, SignOptions, verify, VerifyOptions } from "jsonwebtoken";
 import { IAuthTokenProvider, TokenSignOptions } from "./auth.interface";
 
@@ -42,8 +41,8 @@ export class AuthTokenProvider implements IAuthTokenProvider {
         numberOfSeconds = parseInt(expiresIn.split("d")[0]) * 86400;
     }
 
-    if (numberOfSeconds > 172800)
-      throw new Error("The expiry duration should not exceed two days");
+    // The maximum value of expiry duration is 48 hours (172800 seconds)
+    if (numberOfSeconds > 172800) numberOfSeconds = 172800;
     // #endregion
 
     try {

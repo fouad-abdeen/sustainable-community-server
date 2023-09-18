@@ -35,8 +35,8 @@ export class MongoConnection<T, U extends AnyParamConstructor<T>>
       const document = new this._model(object);
       await document.save();
       return document;
-    } catch (err) {
-      this.logger.error("An error has occurred during the insert", err);
+    } catch (error) {
+      this.logger.error("An error has occurred during the insert", error);
       throw new Error("Unable to add value to the database");
     }
   }
@@ -50,16 +50,16 @@ export class MongoConnection<T, U extends AnyParamConstructor<T>>
         documentsList.push(document);
       }
       return documentsList;
-    } catch (err) {
-      this.logger.error("An error has occurred during bulk insert", err);
+    } catch (error) {
+      this.logger.error("An error has occurred during bulk insert", error);
       throw new Error("Unable to add values to the database");
     }
   }
 
-  async queryOne<U>(
+  async queryOne<U, S>(
     conditions: FilterQuery<U>,
     projection?: string
-  ): Promise<T> {
+  ): Promise<T | S> {
     try {
       // 1. When using lean(), Mongoose returns plain JSON objects instead of memory and resource-heavy documents. It makes queries faster and less expensive on the CPU.
       //    The downside of enabling lean is that lean docs don't have: change tracking, casting and validation, getters and setters, virtuals, and save().
@@ -69,8 +69,11 @@ export class MongoConnection<T, U extends AnyParamConstructor<T>>
         .findOne(conditions, projection)
         .lean()
         .exec()) as T;
-    } catch (err) {
-      this.logger.error("An error has occurred while executing queryOne", err);
+    } catch (error) {
+      this.logger.error(
+        "An error has occurred while executing queryOne",
+        error
+      );
       throw new Error("Unable to get value from the database");
     }
   }
@@ -84,8 +87,8 @@ export class MongoConnection<T, U extends AnyParamConstructor<T>>
         .where(filters ? filters : {})
         .lean()
         .exec();
-    } catch (err) {
-      this.logger.error("An error has occured while executing query", err);
+    } catch (error) {
+      this.logger.error("An error has occured while executing query", error);
       throw new Error("Unable to get values from the database");
     }
   }
@@ -99,8 +102,11 @@ export class MongoConnection<T, U extends AnyParamConstructor<T>>
         .findOneAndUpdate(conditions, data, { new: true })
         .lean()
         .exec()) as T;
-    } catch (err) {
-      this.logger.error("An error has occurred while executing updateOne", err);
+    } catch (error) {
+      this.logger.error(
+        "An error has occurred while executing updateOne",
+        error
+      );
       throw new Error("Unable to update the value in the database");
     }
   }
@@ -111,8 +117,8 @@ export class MongoConnection<T, U extends AnyParamConstructor<T>>
   ): Promise<void> {
     try {
       await this._model.updateMany(conditions, data).lean().exec();
-    } catch (err) {
-      this.logger.error("An error has occurred while executing update", err);
+    } catch (error) {
+      this.logger.error("An error has occurred while executing update", error);
       throw new Error("Unable to update the values in the database");
     }
   }
@@ -123,8 +129,11 @@ export class MongoConnection<T, U extends AnyParamConstructor<T>>
         .findOneAndDelete(conditions)
         .lean()
         .exec()) as T;
-    } catch (err) {
-      this.logger.error("An error has occurred while executing deleteOne", err);
+    } catch (error) {
+      this.logger.error(
+        "An error has occurred while executing deleteOne",
+        error
+      );
       throw new Error("Unable to delete the value in the database");
     }
   }
@@ -132,8 +141,8 @@ export class MongoConnection<T, U extends AnyParamConstructor<T>>
   async delete<U>(conditions: FilterQuery<U>): Promise<void> {
     try {
       await this._model.deleteMany(conditions).lean().exec();
-    } catch (err) {
-      this.logger.error("An error has occurred while executing delete", err);
+    } catch (error) {
+      this.logger.error("An error has occurred while executing delete", error);
       throw new Error("Unable to delete the values in the database");
     }
   }

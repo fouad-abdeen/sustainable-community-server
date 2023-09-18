@@ -10,7 +10,7 @@ import {
 } from "routing-controllers";
 import { OpenAPI, ResponseSchema } from "routing-controllers-openapi";
 import { Service } from "typedi";
-import { BaseService } from "../core";
+import { BaseService, throwError } from "../core";
 import { AuthInfo, AuthService, Tokens } from "../services";
 import {
   LoginRequest,
@@ -215,7 +215,7 @@ export class AuthController extends BaseService {
     },
   })
   async acknowledgeUserAccount(@Param("id") id: string): Promise<void> {
-    if (!isMongoId(id)) throw new Error("Invalid or missing user's id");
+    if (!isMongoId(id)) throwError("Invalid or missing user's id", 400);
 
     this._logger.info(`Acknowledging user account with id: ${id}`);
 
@@ -238,7 +238,7 @@ export class AuthController extends BaseService {
     },
   })
   async denyUserAccount(@Param("id") id: string): Promise<void> {
-    if (!isMongoId(id)) throw new Error("Invalid or missing user's id");
+    if (!isMongoId(id)) throwError("Invalid or missing user's id", 400);
 
     this._logger.info(`Denying user account with id: ${id}`);
 

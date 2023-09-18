@@ -2,7 +2,7 @@ import { Service } from "typedi";
 import { ICustomerRepository, WishlistItem } from "./interfaces";
 import { UserRepository } from "./user.repository";
 import { CustomerProfile, User } from "../models";
-import { Context } from "../core";
+import { Context, throwError } from "../core";
 import { SellerItemRepository } from "./seller-item.repository";
 
 @Service()
@@ -23,7 +23,7 @@ export class CustomerRepository
     const wishlist = (user.profile as CustomerProfile).wishlist ?? [];
 
     if (wishlist.includes(itemId)) {
-      throw new Error(`Item with id ${itemId} already exists in the wishlist`);
+      throwError(`Item with id ${itemId} already exists in the wishlist`, 400);
     }
 
     wishlist.push(itemId);
@@ -43,7 +43,7 @@ export class CustomerRepository
     const wishlist = (user.profile as CustomerProfile).wishlist ?? [];
 
     if (!wishlist.includes(itemId)) {
-      throw new Error(`Item with id ${itemId} does not exist in the wishlist`);
+      throwError(`Item with id ${itemId} does not exist in the wishlist`, 400);
     }
 
     const itemIndex = wishlist.indexOf(itemId);
@@ -63,10 +63,15 @@ export class CustomerRepository
 
     return await Promise.all(
       wishlist.map(async (itemId) => {
-        return (await this._sellerItemRepository.getItem(
-          itemId,
-          "_id name description price imageUrl"
-        )) as WishlistItem;
+        const wishlistItem = {
+          id: itemId,
+          ...(await this._sellerItemRepository.getItem<WishlistItem>(
+            itemId,
+            "name description price imageUrl"
+          )),
+        };
+        delete wishlistItem["_id"];
+        return wishlistItem;
       })
     );
   }

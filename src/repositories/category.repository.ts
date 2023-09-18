@@ -2,18 +2,19 @@ import Container, { Service } from "typedi";
 import {
   BaseRepository,
   Context,
-  IMongoConnection,
   MongoConnectionProvider,
+  throwError,
 } from "../core";
 import { Category, CategoryType } from "../models";
 import { ICategoryRepository } from "./interfaces";
+import { MongoConnection } from "../core/providers/database/mongo/mongo.connection";
 
 @Service()
 export class CategoryRepository
   extends BaseRepository
   implements ICategoryRepository
 {
-  private readonly _connection: IMongoConnection<Category>;
+  private readonly _connection: MongoConnection<Category, typeof Category>;
 
   constructor(private mongoService: MongoConnectionProvider) {
     if (!mongoService) mongoService = Container.get(MongoConnectionProvider);
@@ -21,10 +22,16 @@ export class CategoryRepository
     this._connection = mongoService.getConnection(Category, this._logger);
   }
 
-  async getOneCategory(id: string): Promise<Category> {
+  async getOneCategory<C>(
+    id: string,
+    projection?: string
+  ): Promise<Category | C> {
     this._logger.info(`Getting category with id: ${id}`);
-    const category = await this._connection.queryOne({ _id: id });
-    if (!category) throw new Error(`Category with id ${id} not found`);
+    const category = await this._connection.queryOne<{ _id: string }, C>(
+      { _id: id },
+      projection
+    );
+    if (!category) throwError(`Category with id ${id} not found`, 404);
     return category;
   }
 
@@ -38,7 +45,7 @@ export class CategoryRepository
     >({ conditions: { type } });
 
     if (!categories || categories.length === 0)
-      throw new Error(`No categories found with the properties: ${type}`);
+      throwError(`No categories found with the properties: ${type}`, 404);
 
     return categories;
   }

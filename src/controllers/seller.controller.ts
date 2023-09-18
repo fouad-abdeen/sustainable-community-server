@@ -2,20 +2,22 @@ import {
   Authorized,
   Body,
   Delete,
+  Get,
   JsonController,
   Param,
   Post,
   Put,
 } from "routing-controllers";
-import { BaseService, Context } from "../core";
+import { BaseService, Context, throwError } from "../core";
 import { Service } from "typedi";
 import { OpenAPI } from "routing-controllers-openapi";
 import { isMongoId } from "class-validator";
 import { ProfileUpdateRequest } from "./request/seller.request";
 import { CategoryRepository, SellerRepository } from "../repositories";
-import { CategoryType, SellerProfile, UserRole } from "../models";
+import { Category, CategoryType, SellerProfile, UserRole } from "../models";
+import { ItemCategory } from "../repositories/interfaces";
 
-@JsonController("/seller")
+@JsonController("/sellers")
 @Service()
 export class SellerController extends BaseService {
   constructor(
@@ -58,7 +60,7 @@ export class SellerController extends BaseService {
     roles: [UserRole.ADMIN],
     disclaimer: "Only admins can update a seller's category",
   })
-  @Put("/:id/category/:categoryId")
+  @Put("/:id/categories/:categoryId")
   @OpenAPI({
     summary: "Update seller category",
     responses: {
@@ -75,20 +77,22 @@ export class SellerController extends BaseService {
       `Received a request to update category of seller with id: ${id}`
     );
 
-    if (!isMongoId(id)) throw new Error("Invalid or missing seller's id");
+    if (!isMongoId(id)) throwError("Invalid or missing seller's id", 400);
     if (!isMongoId(categoryId))
-      throw new Error("Invalid or missing category's id");
+      throwError("Invalid or missing category's id", 400);
 
     const user = await this._sellerRepository.getUserById(id);
     if (user.role !== UserRole.SELLER)
-      throw new Error(`User with id ${id} is not a seller`);
+      throwError(`User with id ${id} is not a seller`, 400);
 
-    const category = await this._categoryRepository.getOneCategory(categoryId);
+    const category = await this._categoryRepository.getOneCategory<Category>(
+      categoryId
+    );
     if (
       category.type !== CategoryType.PRODUCT &&
       category.type !== CategoryType.SERVICE
     )
-      throw new Error("Invalid category type");
+      throwError("Invalid category type", 400);
 
     await this._sellerRepository.updateCategory(id, categoryId);
   }
@@ -116,17 +120,19 @@ export class SellerController extends BaseService {
       `Received a request to assign item category to seller with id: ${id}`
     );
 
-    if (!isMongoId(id)) throw new Error("Invalid or missing seller's id");
+    if (!isMongoId(id)) throwError("Invalid or missing seller's id", 400);
     if (!isMongoId(categoryId))
-      throw new Error("Invalid or missing category's id");
+      throwError("Invalid or missing category's id", 400);
 
     const user = await this._sellerRepository.getUserById(id);
     if (user.role !== UserRole.SELLER)
-      throw new Error(`User with id ${id} is not a seller`);
+      throwError(`User with id ${id} is not a seller`, 400);
 
-    const category = await this._categoryRepository.getOneCategory(categoryId);
+    const category = await this._categoryRepository.getOneCategory<Category>(
+      categoryId
+    );
     if (category.type !== CategoryType.ITEM)
-      throw new Error("Invalid category type");
+      throwError("Invalid category type", 400);
 
     await this._sellerRepository.assignItemCategory(
       id,
@@ -158,19 +164,44 @@ export class SellerController extends BaseService {
       `Received a request to remove item category from seller with id: ${id}`
     );
 
-    if (!isMongoId(id)) throw new Error("Invalid or missing seller's id");
+    if (!isMongoId(id)) throwError("Invalid or missing seller's id", 400);
     if (!isMongoId(categoryId))
-      throw new Error("Invalid or missing category's id");
+      throwError("Invalid or missing category's id", 400);
 
     const user = await this._sellerRepository.getUserById(id);
     if (user.role !== UserRole.SELLER)
-      throw new Error(`User with id ${id} is not a seller`);
+      throwError(`User with id ${id} is not a seller`, 400);
 
     await this._sellerRepository.removeItemCategory(
       id,
       categoryId,
       user.profile as SellerProfile
     );
+  }
+  // #endregion
+
+  // #region Get Item Categories
+  @Get("/:id/item-categories")
+  @OpenAPI({
+    summary: "Get seller's item categories",
+    responses: {
+      "404": {
+        description: "Item categories not found",
+      },
+    },
+  })
+  async getItemCategories(@Param("id") id: string): Promise<ItemCategory[]> {
+    this._logger.info(
+      `Received a request to get item categories of seller with id: ${id}`
+    );
+
+    if (!isMongoId(id)) throwError("Invalid or missing seller's id", 400);
+
+    const user = await this._sellerRepository.getUserById(id);
+    if (user.role !== UserRole.SELLER)
+      throwError(`User with id ${id} is not a seller`, 400);
+
+    return await this._sellerRepository.getItemCategories(id);
   }
   // #endregion
 }

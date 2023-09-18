@@ -39,4 +39,16 @@ export interface ISellerRepository extends IUserRepository {
     categoryId: string,
     profile: SellerProfile
   ): Promise<void>;
+
+  /**
+   * Gets the item categories of a seller
+   * @param userId id of the seller
+   */
+  getItemCategories(userId: string): Promise<ItemCategory[]>;
+}
+
+export interface ItemCategory {
+  id: string;
+  name: string;
+  description: string;
 }

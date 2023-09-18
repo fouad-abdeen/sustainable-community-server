@@ -20,7 +20,7 @@ export class ErrorHandlerMiddleware implements ExpressErrorMiddlewareInterface {
   }
 
   public error(
-    error: Error,
+    error: Error & { httpCode: number },
     req: express.Request,
     res: express.Response,
     next: express.NextFunction
@@ -37,7 +37,7 @@ export class ErrorHandlerMiddleware implements ExpressErrorMiddlewareInterface {
         (Object.values(error["errors"][0]["constraints"])[0] as string) ||
         error.message;
 
-    res.json(
+    res.status(error.httpCode || 500).json(
       new ErrorResponse({
         name: error.name,
         message: error.message,

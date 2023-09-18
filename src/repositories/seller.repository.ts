@@ -1,15 +1,16 @@
 import { Service } from "typedi";
 import { UserRepository } from "./user.repository";
-import { ISellerRepository } from "./interfaces";
+import { ISellerRepository, ItemCategory } from "./interfaces";
 import { SellerProfile, User } from "../models";
-import { Context } from "../core";
+import { Context, throwError } from "../core";
+import { CategoryRepository } from "./category.repository";
 
 @Service()
 export class SellerRepository
   extends UserRepository
   implements ISellerRepository
 {
-  constructor() {
+  constructor(private _categoryRepository: CategoryRepository) {
     super();
   }
 
@@ -52,8 +53,9 @@ export class SellerRepository
     const categories = profile.itemCategories ?? [];
 
     if (categories.includes(categoryId)) {
-      throw new Error(
-        `Category with id ${categoryId} already exists in the item categories`
+      throwError(
+        `Category with id ${categoryId} already exists in the item categories`,
+        400
       );
     }
 
@@ -75,8 +77,9 @@ export class SellerRepository
     const categories = (profile as SellerProfile).itemCategories ?? [];
 
     if (!categories.includes(categoryId)) {
-      throw new Error(
-        `Category with id ${categoryId} does not exist in the item categories`
+      throwError(
+        `Category with id ${categoryId} does not exist in the item categories`,
+        400
       );
     }
 
@@ -87,5 +90,26 @@ export class SellerRepository
       _id: userId,
       profile: { ...profile, itemCategories: categories },
     } as User);
+  }
+
+  async getItemCategories(userId: string): Promise<ItemCategory[]> {
+    this._logger.info(`Getting item categories of seller with id: ${userId}`);
+
+    const user = await this.getUserById(userId);
+    const categories = (user.profile as SellerProfile).itemCategories ?? [];
+
+    return await Promise.all(
+      categories.map(async (categoryId) => {
+        const category = {
+          id: categoryId,
+          ...(await this._categoryRepository.getOneCategory<ItemCategory>(
+            categoryId,
+            "name description"
+          )),
+        };
+        delete category["_id"];
+        return category;
+      })
+    );
   }
 }

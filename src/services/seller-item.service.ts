@@ -1,5 +1,5 @@
 import { Service } from "typedi";
-import { BaseService, Context } from "../core";
+import { BaseService, Context, throwError } from "../core";
 import { SellerItem, SellerProfile, UserRole } from "../models";
 import { SellerItemRepository, UserRepository } from "../repositories";
 
@@ -18,17 +18,18 @@ export class SellerItemService extends BaseService {
     const user = Context.getUser();
 
     if (item.sellerId !== user._id)
-      throw new Error("Cannot create an item for another seller");
+      throwError("Cannot create an item for another seller", 403);
 
     const { profile } = user;
     const itemCategories = (profile as SellerProfile).itemCategories ?? [];
 
     if (itemCategories.length === 0)
-      throw new Error("Seller is not assigned any item categories yet");
+      throwError("Cannot create an item without any assigned category", 403);
 
     if (!itemCategories.includes(item.categoryId))
-      throw new Error(
-        `Item category with id ${item.categoryId} is not assigned to the seller`
+      throwError(
+        `Item category with id ${item.categoryId} is not assigned to the current profile`,
+        400
       );
 
     if (item.isAvailable) this.validateAvailability(item);
@@ -44,11 +45,11 @@ export class SellerItemService extends BaseService {
     if (item.sellerId) {
       if (user.role === UserRole.SELLER) {
         if (item.sellerId !== user._id)
-          throw new Error(`Cannot assign an item to another seller`);
+          throwError(`Cannot assign an item to another seller`, 403);
       } else {
         const seller = await this._userRepository.getUserById(item.sellerId);
         if (seller.role !== UserRole.SELLER)
-          throw new Error("Assigned seller is not a seller");
+          throwError("Assigned seller is not a seller", 400);
       }
     }
 
@@ -57,13 +58,14 @@ export class SellerItemService extends BaseService {
       const itemCategories = (profile as SellerProfile).itemCategories ?? [];
 
       if (!itemCategories.includes(item.categoryId))
-        throw new Error(
-          `Item category with id ${item.categoryId} is not assigned to the seller`
+        throwError(
+          `Item category with id ${item.categoryId} is not assigned to the current profile`,
+          400
         );
     }
 
     if (item.isAvailable) {
-      const currentItem = await this._sellerItemRepository.getItem(
+      const currentItem = await this._sellerItemRepository.getItem<SellerItem>(
         item._id as string
       );
       this.validateAvailability(item, currentItem.quantity);
@@ -77,10 +79,10 @@ export class SellerItemService extends BaseService {
 
     const user = Context.getUser();
 
-    const item = await this._sellerItemRepository.getItem(id);
+    const item = await this._sellerItemRepository.getItem<SellerItem>(id);
 
     if (item.sellerId !== user._id)
-      throw new Error("Cannot delete an item for another seller");
+      throwError("Cannot delete an item for another seller", 403);
 
     await this._sellerItemRepository.deleteItem(id);
   }
@@ -90,11 +92,12 @@ export class SellerItemService extends BaseService {
     currentQuantity?: number
   ): void {
     if (item.quantity === 0)
-      throw new Error("Item cannot be available with quantity equal to 0");
+      throwError("Item cannot be available with quantity equal to 0", 400);
 
     if (currentQuantity === 0)
-      throw new Error(
-        "Item cannot be available while the current quantity is 0"
+      throwError(
+        "Item cannot be available while the current quantity is 0",
+        400
       );
   }
 }

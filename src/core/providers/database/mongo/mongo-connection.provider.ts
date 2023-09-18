@@ -44,12 +44,12 @@ export class MongoConnectionProvider implements IMongoConnectionProvider {
       const mongoose = await connect(this._dbHost + this._dbName);
       this._connection = mongoose.connection;
       this._logger.info("Connected to MongoDB");
-    } catch (err: any) {
+    } catch (error: any) {
       this._logger.error(
         "An error has occurred while connecting to MongoDB",
-        err
+        error
       );
-      throw new Error(err.message || "Error connecting to MongoDB");
+      throw new Error(error.message || "Error connecting to MongoDB");
     }
   }
 

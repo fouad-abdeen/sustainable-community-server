@@ -1,5 +1,10 @@
 import Container, { Service } from "typedi";
-import { BaseRepository, Context, MongoConnectionProvider } from "../core";
+import {
+  BaseRepository,
+  Context,
+  MongoConnectionProvider,
+  throwError,
+} from "../core";
 import { SellerItem } from "../models";
 import { ISellerItemRepository } from "./interfaces";
 import { MongoConnection } from "../core/providers/database/mongo/mongo.connection";
@@ -34,19 +39,22 @@ export class SellerItemRepository
     >({ conditions });
 
     if (!items || items.length === 0)
-      throw new Error(
+      throwError(
         `No items found with the properties: ` +
-          `seller id: ${conditions.sellerId}, category id: ${conditions.categoryId}, is available: ${conditions.isAvailable}`
+          `seller id: ${conditions.sellerId}, category id: ${conditions.categoryId}, is available: ${conditions.isAvailable}`,
+        404
       );
 
     return items;
   }
 
-  async getItem(id: string, projection?: string): Promise<SellerItem> {
+  async getItem<S>(id: string, projection?: string): Promise<SellerItem | S> {
     this._logger.info(`Getting item with id: ${id}`);
-    const item = await this._connection.queryOne({ _id: id }, projection);
-    if (!item) throw new Error(`Item with id ${id} not found`);
-    item._id = (item._id as string).toString();
+    const item = await this._connection.queryOne<{ _id: string }, S>(
+      { _id: id },
+      projection
+    );
+    if (!item) throwError(`Item with id ${id} not found`, 404);
     return item;
   }
 

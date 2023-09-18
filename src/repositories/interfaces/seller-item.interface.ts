@@ -13,7 +13,7 @@ export interface ISellerItemRepository {
    * @param id id of the item
    * @param projection properties to be returned
    */
-  getItem(id: string, projection?: string): Promise<SellerItem>;
+  getItem<S>(id: string, projection?: string): Promise<SellerItem | S>;
 
   /**
    * Creates a new item

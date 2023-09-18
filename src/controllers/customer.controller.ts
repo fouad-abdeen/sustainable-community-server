@@ -8,7 +8,7 @@ import {
   Post,
   Put,
 } from "routing-controllers";
-import { BaseService, Context } from "../core";
+import { BaseService, Context, throwError } from "../core";
 import { Service } from "typedi";
 import { OpenAPI } from "routing-controllers-openapi";
 import { isMongoId } from "class-validator";
@@ -17,7 +17,7 @@ import { ProfileUpdateRequest } from "./request/customer.request";
 import { CustomerProfile, UserRole } from "../models";
 import { WishlistItem } from "../repositories/interfaces";
 
-@JsonController("/customer")
+@JsonController("/customers")
 @Service()
 export class CustomerController extends BaseService {
   constructor(
@@ -48,7 +48,7 @@ export class CustomerController extends BaseService {
       `Received a request to add item with id: ${itemId} to wishlist of customer with id: ${_id}`
     );
 
-    if (!isMongoId(itemId)) throw new Error("Invalid or missing item's id");
+    if (!isMongoId(itemId)) throwError("Invalid or missing item's id", 400);
     await this._sellerItemRepository.getItem(itemId);
 
     await this._customerRepository.addItemToWishlist(_id as string, itemId);
@@ -76,7 +76,7 @@ export class CustomerController extends BaseService {
       `Received a request to remove item with id: ${itemId} from wishlist of customer with id: ${_id}`
     );
 
-    if (!isMongoId(itemId)) throw new Error("Invalid or missing item's id");
+    if (!isMongoId(itemId)) throwError("Invalid or missing item's id", 400);
     await this._sellerItemRepository.getItem(itemId);
 
     await this._customerRepository.removeItemFromWishlist(
@@ -109,6 +109,7 @@ export class CustomerController extends BaseService {
 
     return await this._customerRepository.getWishlistItems(_id as string);
   }
+  // #endregion
 
   // #region Update Profile
   @Authorized({

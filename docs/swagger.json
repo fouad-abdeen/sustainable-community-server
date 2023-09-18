@@ -325,7 +325,7 @@
     },
     "openapi": "3.0.0",
     "paths": {
-        "/seller/profile": {
+        "/sellers/profile": {
             "put": {
                 "operationId": "SellerController.updateProfile",
                 "requestBody": {
@@ -356,7 +356,7 @@
                 ]
             }
         },
-        "/seller/{id}/category/{categoryId}": {
+        "/sellers/{id}/categories/{categoryId}": {
             "put": {
                 "operationId": "SellerController.updateCategory",
                 "parameters": [
@@ -396,7 +396,7 @@
                 ]
             }
         },
-        "/seller/{id}/item-categories/{categoryId}": {
+        "/sellers/{id}/item-categories/{categoryId}": {
             "post": {
                 "operationId": "SellerController.assignItemCategory",
                 "parameters": [
@@ -469,6 +469,37 @@
                     }
                 },
                 "summary": "Remove item category from seller",
+                "tags": [
+                    "Seller"
+                ]
+            }
+        },
+        "/sellers/{id}/item-categories": {
+            "get": {
+                "operationId": "SellerController.getItemCategories",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    },
+                    "404": {
+                        "description": "Item categories not found"
+                    }
+                },
+                "summary": "Get seller's item categories",
                 "tags": [
                     "Seller"
                 ]
@@ -648,7 +679,7 @@
                 ]
             }
         },
-        "/customer/wishlist/items/{itemId}": {
+        "/customers/wishlist/items/{itemId}": {
             "post": {
                 "operationId": "CustomerController.addItemToWishlist",
                 "parameters": [
@@ -708,7 +739,7 @@
                 ]
             }
         },
-        "/customer/wishlist/items": {
+        "/customers/wishlist/items": {
             "get": {
                 "operationId": "CustomerController.getWishlistItems",
                 "responses": {
@@ -728,7 +759,7 @@
                 ]
             }
         },
-        "/customer/profile": {
+        "/customers/profile": {
             "put": {
                 "operationId": "CustomerController.updateProfile",
                 "requestBody": {
