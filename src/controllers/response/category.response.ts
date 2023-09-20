@@ -1,13 +1,29 @@
+import { IsEnum, IsNumber, IsString } from "class-validator";
 import { Category, CategoryType } from "../../models";
 
 export class CategoryResponse {
+  @IsString()
   id: string;
+
+  @IsString()
   name: string;
+
+  @IsString()
   description: string;
+
+  @IsEnum(CategoryType)
   type: CategoryType;
+
+  @IsNumber()
   createdAt?: number;
+
+  @IsString()
   createdBy?: string;
+
+  @IsNumber()
   updatedAt?: number;
+
+  @IsString()
   updatedBy?: string;
 
   public static getCategoryResponse(category: Category): CategoryResponse {

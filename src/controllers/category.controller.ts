@@ -3,6 +3,7 @@ import {
   Body,
   Delete,
   Get,
+  HeaderParam,
   JsonController,
   Param,
   Post,
@@ -13,7 +14,7 @@ import { BaseService } from "../core";
 import { CategoryRepository } from "../repositories";
 import { Service } from "typedi";
 import { CategoryResponse } from "./response/category.response";
-import { OpenAPI } from "routing-controllers-openapi";
+import { OpenAPI, ResponseSchema } from "routing-controllers-openapi";
 import {
   CategoryCreationRequest,
   CategoryQuery,
@@ -32,12 +33,8 @@ export class CategoryController extends BaseService {
   @Get("/:id")
   @OpenAPI({
     summary: "Get category by id",
-    responses: {
-      "404": {
-        description: "Category not found",
-      },
-    },
   })
+  @ResponseSchema(CategoryResponse)
   async getOneCategory(@Param("id") id: string): Promise<CategoryResponse> {
     this._logger.info(`Received a request to get category with id: ${id}`);
     const category = await this._categoryRepository.getOneCategory<Category>(
@@ -48,22 +45,20 @@ export class CategoryController extends BaseService {
   // #endregion
 
   // #region Get List of Categories
-  @Get("")
+  @Get("/")
   @OpenAPI({
     summary: "Get list of categories",
-    responses: {
-      "404": {
-        description: "Categories not found",
-      },
-    },
   })
+  @ResponseSchema(CategoryResponse, { isArray: true })
   async getListOfCategories(
     @QueryParams() { type }: CategoryQuery
   ): Promise<CategoryResponse[]> {
     this._logger.info(
       `Received a request to get list of categories with type: ${type}`
     );
+
     const categories = await this._categoryRepository.getListOfCategories(type);
+
     return CategoryResponse.getListOfCategoriesResponse(categories);
   }
   // #endregion
@@ -73,22 +68,22 @@ export class CategoryController extends BaseService {
     roles: [UserRole.ADMIN],
     disclaimer: "Only admins can create a category",
   })
-  @Post("")
+  @HeaderParam("auth", { required: true })
+  @Post("/")
   @OpenAPI({
     summary: "Create a category",
-    responses: {
-      "400": {
-        description: "Bad request",
-      },
-    },
+    security: [{ bearerAuth: [] }],
   })
+  @ResponseSchema(CategoryResponse)
   async createCategory(
     @Body() category: CategoryCreationRequest
   ): Promise<CategoryResponse> {
     this._logger.info(
       `Received a request to create category with name: ${category.name}`
     );
+
     const newCategory = await this._categoryRepository.createCategory(category);
+
     return CategoryResponse.getCategoryResponse(newCategory);
   }
   // #endregion
@@ -98,24 +93,24 @@ export class CategoryController extends BaseService {
     roles: [UserRole.ADMIN],
     disclaimer: "Only admins can update a category",
   })
+  @HeaderParam("auth", { required: true })
   @Put("/:id")
   @OpenAPI({
     summary: "Update a category",
-    responses: {
-      "400": {
-        description: "Bad request",
-      },
-    },
+    security: [{ bearerAuth: [] }],
   })
+  @ResponseSchema(CategoryResponse)
   async updateCategory(
     @Param("id") id: string,
     @Body() category: CategoryUpdateRequest
   ): Promise<CategoryResponse> {
     this._logger.info(`Received a request to update category with id: ${id}`);
+
     const updatedCategory = await this._categoryRepository.updateCategory({
       _id: id,
       ...category,
     } as Category);
+
     return CategoryResponse.getCategoryResponse(updatedCategory);
   }
   // #endregion
@@ -125,17 +120,15 @@ export class CategoryController extends BaseService {
     roles: [UserRole.ADMIN],
     disclaimer: "Only admins can delete a category",
   })
+  @HeaderParam("auth", { required: true })
   @Delete("/:id")
   @OpenAPI({
     summary: "Delete a category",
-    responses: {
-      "400": {
-        description: "Bad request",
-      },
-    },
+    security: [{ bearerAuth: [] }],
   })
   async deleteCategory(@Param("id") id: string): Promise<void> {
     this._logger.info(`Received a request to delete category with id: ${id}`);
+
     await this._categoryRepository.deleteCategory(id);
   }
   // #endregion

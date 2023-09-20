@@ -3,6 +3,7 @@ import {
   Body,
   Delete,
   Get,
+  HeaderParam,
   JsonController,
   Param,
   Post,
@@ -10,12 +11,11 @@ import {
 } from "routing-controllers";
 import { BaseService, Context, throwError } from "../core";
 import { Service } from "typedi";
-import { OpenAPI } from "routing-controllers-openapi";
+import { OpenAPI, ResponseSchema } from "routing-controllers-openapi";
 import { isMongoId } from "class-validator";
 import { CustomerRepository, SellerItemRepository } from "../repositories";
 import { ProfileUpdateRequest } from "./request/customer.request";
-import { CustomerProfile, UserRole } from "../models";
-import { WishlistItem } from "../repositories/interfaces";
+import { CustomerProfile, UserRole, WishlistItem } from "../models";
 
 @JsonController("/customers")
 @Service()
@@ -32,14 +32,11 @@ export class CustomerController extends BaseService {
     roles: [UserRole.CUSTOMER],
     disclaimer: "User must be a customer to add an item to their wishlist",
   })
+  @HeaderParam("auth", { required: true })
   @Post("/wishlist/items/:itemId")
   @OpenAPI({
     summary: "Add item to customer's wishlist",
-    responses: {
-      "400": {
-        description: "Failed to add item to wishlist",
-      },
-    },
+    security: [{ bearerAuth: [] }],
   })
   async addItemToWishlist(@Param("itemId") itemId: string): Promise<void> {
     const { _id } = Context.getUser();
@@ -60,14 +57,11 @@ export class CustomerController extends BaseService {
     roles: [UserRole.CUSTOMER],
     disclaimer: "User must be a customer to remove an item from their wishlist",
   })
+  @HeaderParam("auth", { required: true })
   @Delete("/wishlist/items/:itemId")
   @OpenAPI({
     summary: "Remove item from customer's wishlist",
-    responses: {
-      "400": {
-        description: "Failed to remove item from wishlist",
-      },
-    },
+    security: [{ bearerAuth: [] }],
   })
   async removeItemFromWishlist(@Param("itemId") itemId: string): Promise<void> {
     const { _id } = Context.getUser();
@@ -91,15 +85,13 @@ export class CustomerController extends BaseService {
     roles: [UserRole.CUSTOMER],
     disclaimer: "User must be a customer to get their wishlist items",
   })
+  @HeaderParam("auth", { required: true })
   @Get("/wishlist/items")
   @OpenAPI({
     summary: "Get customer's wishlist items",
-    responses: {
-      "404": {
-        description: "Wishlist items not found",
-      },
-    },
+    security: [{ bearerAuth: [] }],
   })
+  @ResponseSchema(WishlistItem, { isArray: true })
   async getWishlistItems(): Promise<WishlistItem[]> {
     const { _id } = Context.getUser();
 
@@ -116,14 +108,11 @@ export class CustomerController extends BaseService {
     roles: [UserRole.CUSTOMER],
     disclaimer: "User must be a customer to update their profile",
   })
+  @HeaderParam("auth", { required: true })
   @Put("/profile")
   @OpenAPI({
     summary: "Update customer's profile",
-    responses: {
-      "400": {
-        description: "Failed to update profile",
-      },
-    },
+    security: [{ bearerAuth: [] }],
   })
   async updateProfile(@Body() profile: ProfileUpdateRequest): Promise<void> {
     const { _id, profile: currentProfile } = Context.getUser();

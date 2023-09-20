@@ -1,6 +1,301 @@
 {
     "components": {
         "schemas": {
+            "CustomerProfile": {
+                "properties": {
+                    "firstName": {
+                        "type": "string"
+                    },
+                    "lastName": {
+                        "type": "string"
+                    },
+                    "phoneNumber": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "type": "string"
+                    },
+                    "wishlist": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "firstName",
+                    "lastName",
+                    "phoneNumber",
+                    "address",
+                    "wishlist"
+                ]
+            },
+            "SellerProfile": {
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "phoneNumber": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "type": "string"
+                    },
+                    "businessEmail": {
+                        "type": "string"
+                    },
+                    "categoryId": {
+                        "type": "string"
+                    },
+                    "itemCategories": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "logoUrl": {
+                        "type": "string"
+                    },
+                    "websiteUrl": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "description",
+                    "phoneNumber",
+                    "address",
+                    "businessEmail",
+                    "categoryId",
+                    "itemCategories",
+                    "logoUrl",
+                    "websiteUrl"
+                ]
+            },
+            "UserBriefInfo": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "enum": [
+                            "Customer",
+                            "Seller",
+                            "Admin"
+                        ],
+                        "type": "string"
+                    },
+                    "verified": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "email",
+                    "role",
+                    "verified"
+                ]
+            },
+            "UserInfo": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "enum": [
+                            "Customer",
+                            "Seller",
+                            "Admin"
+                        ],
+                        "type": "string"
+                    },
+                    "profile": {
+                        "type": "object"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "email",
+                    "role",
+                    "profile"
+                ]
+            },
+            "Tokens": {
+                "properties": {
+                    "accessToken": {
+                        "type": "string"
+                    },
+                    "refreshToken": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "accessToken",
+                    "refreshToken"
+                ]
+            },
+            "WishlistItem": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "imageUrl": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "price",
+                    "imageUrl"
+                ]
+            },
+            "ItemSeller": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name"
+                ]
+            },
+            "CategoryInfo": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "description"
+                ]
+            },
+            "SellerInfo": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "logoUrl": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "logoUrl"
+                ]
+            },
+            "UserQuery": {
+                "properties": {
+                    "role": {
+                        "enum": [
+                            "Customer",
+                            "Seller",
+                            "Admin"
+                        ],
+                        "type": "string"
+                    },
+                    "verified": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "UserResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "enum": [
+                            "Customer",
+                            "Seller",
+                            "Admin"
+                        ],
+                        "type": "string"
+                    },
+                    "verified": {
+                        "type": "boolean"
+                    },
+                    "profile": {
+                        "type": "object"
+                    },
+                    "createdAt": {
+                        "type": "number"
+                    },
+                    "createdBy": {
+                        "type": "string"
+                    },
+                    "updatedAt": {
+                        "type": "number"
+                    },
+                    "updatedBy": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "email",
+                    "role",
+                    "verified",
+                    "profile",
+                    "createdAt",
+                    "createdBy",
+                    "updatedAt",
+                    "updatedBy"
+                ]
+            },
             "ProfileUpdateRequest": {
                 "properties": {
                     "name": {
@@ -45,6 +340,108 @@
                     }
                 },
                 "type": "object"
+            },
+            "SellerResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "phoneNumber": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "$ref": "#/components/schemas/CategoryInfo"
+                    },
+                    "logoUrl": {
+                        "type": "string"
+                    },
+                    "websiteUrl": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "phoneNumber",
+                    "address",
+                    "email",
+                    "category",
+                    "logoUrl",
+                    "websiteUrl"
+                ]
+            },
+            "SellerItemResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "category": {
+                        "$ref": "#/components/schemas/CategoryInfo"
+                    },
+                    "seller": {
+                        "$ref": "#/components/schemas/ItemSeller"
+                    },
+                    "isAvailable": {
+                        "type": "boolean"
+                    },
+                    "quantity": {
+                        "type": "number"
+                    },
+                    "imageUrl": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "number"
+                    },
+                    "createdBy": {
+                        "type": "string"
+                    },
+                    "updatedAt": {
+                        "type": "number"
+                    },
+                    "updatedBy": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "price",
+                    "category",
+                    "seller",
+                    "isAvailable",
+                    "quantity",
+                    "imageUrl",
+                    "createdAt",
+                    "createdBy",
+                    "updatedAt",
+                    "updatedBy"
+                ]
             },
             "SellerItemCreationRequest": {
                 "properties": {
@@ -144,6 +541,50 @@
                     }
                 },
                 "type": "object"
+            },
+            "CategoryResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "enum": [
+                            "Item",
+                            "Product",
+                            "Service"
+                        ],
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "number"
+                    },
+                    "createdBy": {
+                        "type": "string"
+                    },
+                    "updatedAt": {
+                        "type": "number"
+                    },
+                    "updatedBy": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "type",
+                    "createdAt",
+                    "createdBy",
+                    "updatedAt",
+                    "updatedBy"
+                ]
             },
             "CategoryCreationRequest": {
                 "properties": {
@@ -315,6 +756,21 @@
                     "accessToken",
                     "refreshToken"
                 ]
+            },
+            "AuthResponse": {
+                "properties": {
+                    "userInfo": {
+                        "$ref": "#/components/schemas/UserInfo"
+                    },
+                    "tokens": {
+                        "$ref": "#/components/schemas/Tokens"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "userInfo",
+                    "tokens"
+                ]
             }
         }
     },
@@ -325,9 +781,194 @@
     },
     "openapi": "3.0.0",
     "paths": {
+        "/users/{id}": {
+            "get": {
+                "operationId": "UserController.getOneUser",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "summary": "Get user by id",
+                "tags": [
+                    "User"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/users/": {
+            "get": {
+                "operationId": "UserController.getListOfUsers",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    },
+                    {
+                        "in": "query",
+                        "name": "role",
+                        "schema": {
+                            "enum": [
+                                "Customer",
+                                "Seller",
+                                "Admin"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "verified",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/UserBriefInfo"
+                                    },
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "summary": "Get list of users",
+                "tags": [
+                    "User"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/users/users/{id}/acknowledge": {
+            "put": {
+                "operationId": "UserController.acknowledgeUserAccount",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    }
+                },
+                "summary": "Acknowledge user account",
+                "tags": [
+                    "User"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/users/users/{id}/deny": {
+            "put": {
+                "operationId": "UserController.denyUserAccount",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    }
+                },
+                "summary": "Deny user account",
+                "tags": [
+                    "User"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/sellers/profile": {
             "put": {
                 "operationId": "SellerController.updateProfile",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    }
+                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -345,14 +986,16 @@
                             "application/json": {}
                         },
                         "description": "Successful response"
-                    },
-                    "400": {
-                        "description": "Failed to update seller profile"
                     }
                 },
                 "summary": "Update seller profile",
                 "tags": [
                     "Seller"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
                 ]
             }
         },
@@ -361,6 +1004,12 @@
                 "operationId": "SellerController.updateCategory",
                 "parameters": [
                     {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    },
+                    {
                         "in": "path",
                         "name": "id",
                         "required": true,
@@ -385,14 +1034,16 @@
                             "application/json": {}
                         },
                         "description": "Successful response"
-                    },
-                    "400": {
-                        "description": "Failed to update seller category"
                     }
                 },
                 "summary": "Update seller category",
                 "tags": [
                     "Seller"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
                 ]
             }
         },
@@ -401,6 +1052,12 @@
                 "operationId": "SellerController.assignItemCategory",
                 "parameters": [
                     {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    },
+                    {
                         "in": "path",
                         "name": "id",
                         "required": true,
@@ -425,20 +1082,28 @@
                             "application/json": {}
                         },
                         "description": "Successful response"
-                    },
-                    "400": {
-                        "description": "Failed to assign item category to seller"
                     }
                 },
                 "summary": "Assign item category to seller",
                 "tags": [
                     "Seller"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
                 ]
             },
             "delete": {
                 "operationId": "SellerController.removeItemCategory",
                 "parameters": [
                     {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    },
+                    {
                         "in": "path",
                         "name": "id",
                         "required": true,
@@ -463,14 +1128,16 @@
                             "application/json": {}
                         },
                         "description": "Successful response"
-                    },
-                    "400": {
-                        "description": "Failed to remove item category from seller"
                     }
                 },
                 "summary": "Remove item category from seller",
                 "tags": [
                     "Seller"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
                 ]
             }
         },
@@ -494,9 +1161,6 @@
                             "application/json": {}
                         },
                         "description": "Successful response"
-                    },
-                    "404": {
-                        "description": "Item categories not found"
                     }
                 },
                 "summary": "Get seller's item categories",
@@ -505,7 +1169,63 @@
                 ]
             }
         },
-        "/items": {
+        "/sellers/": {
+            "get": {
+                "operationId": "SellerController.getListOfSellers",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/SellerInfo"
+                                    },
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "summary": "Get list of sellers",
+                "tags": [
+                    "Seller"
+                ]
+            }
+        },
+        "/sellers/{id}": {
+            "get": {
+                "operationId": "SellerController.getSeller",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SellerResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "summary": "Get seller by id",
+                "tags": [
+                    "Seller"
+                ]
+            }
+        },
+        "/items/": {
             "get": {
                 "operationId": "SellerItemController.getListOfItems",
                 "parameters": [
@@ -536,12 +1256,16 @@
                 "responses": {
                     "200": {
                         "content": {
-                            "application/json": {}
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/SellerItemResponse"
+                                    },
+                                    "type": "array"
+                                }
+                            }
                         },
-                        "description": "Successful response"
-                    },
-                    "404": {
-                        "description": "Items not found"
+                        "description": ""
                     }
                 },
                 "summary": "Get list of items",
@@ -551,6 +1275,14 @@
             },
             "post": {
                 "operationId": "SellerItemController.createItem",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    }
+                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -565,17 +1297,23 @@
                 "responses": {
                     "200": {
                         "content": {
-                            "application/json": {}
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SellerItemResponse"
+                                }
+                            }
                         },
-                        "description": "Successful response"
-                    },
-                    "400": {
-                        "description": "Bad request"
+                        "description": ""
                     }
                 },
                 "summary": "Create an item",
                 "tags": [
                     "Seller Item"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
                 ]
             }
         },
@@ -596,12 +1334,13 @@
                 "responses": {
                     "200": {
                         "content": {
-                            "application/json": {}
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SellerItemResponse"
+                                }
+                            }
                         },
-                        "description": "Successful response"
-                    },
-                    "404": {
-                        "description": "Item not found"
+                        "description": ""
                     }
                 },
                 "summary": "Get item by id",
@@ -612,6 +1351,12 @@
             "put": {
                 "operationId": "SellerItemController.updateItem",
                 "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    },
                     {
                         "in": "path",
                         "name": "id",
@@ -636,22 +1381,34 @@
                 "responses": {
                     "200": {
                         "content": {
-                            "application/json": {}
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SellerItemResponse"
+                                }
+                            }
                         },
-                        "description": "Successful response"
-                    },
-                    "400": {
-                        "description": "Bad request"
+                        "description": ""
                     }
                 },
                 "summary": "Update an item",
                 "tags": [
                     "Seller Item"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
                 ]
             },
             "delete": {
                 "operationId": "SellerItemController.deleteItem",
                 "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    },
                     {
                         "in": "path",
                         "name": "id",
@@ -668,14 +1425,16 @@
                             "application/json": {}
                         },
                         "description": "Successful response"
-                    },
-                    "400": {
-                        "description": "Bad request"
                     }
                 },
                 "summary": "Delete an item",
                 "tags": [
                     "Seller Item"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
                 ]
             }
         },
@@ -684,34 +1443,11 @@
                 "operationId": "CustomerController.addItemToWishlist",
                 "parameters": [
                     {
-                        "in": "path",
-                        "name": "itemId",
+                        "in": "header",
+                        "name": "auth",
                         "required": true,
-                        "schema": {
-                            "pattern": "[^\\/#\\?]+?",
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {}
-                        },
-                        "description": "Successful response"
+                        "schema": {}
                     },
-                    "400": {
-                        "description": "Failed to add item to wishlist"
-                    }
-                },
-                "summary": "Add item to customer's wishlist",
-                "tags": [
-                    "Customer"
-                ]
-            },
-            "delete": {
-                "operationId": "CustomerController.removeItemFromWishlist",
-                "parameters": [
                     {
                         "in": "path",
                         "name": "itemId",
@@ -728,40 +1464,104 @@
                             "application/json": {}
                         },
                         "description": "Successful response"
-                    },
-                    "400": {
-                        "description": "Failed to remove item from wishlist"
                     }
                 },
-                "summary": "Remove item from customer's wishlist",
+                "summary": "Add item to customer's wishlist",
                 "tags": [
                     "Customer"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
                 ]
-            }
-        },
-        "/customers/wishlist/items": {
-            "get": {
-                "operationId": "CustomerController.getWishlistItems",
+            },
+            "delete": {
+                "operationId": "CustomerController.removeItemFromWishlist",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    },
+                    {
+                        "in": "path",
+                        "name": "itemId",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "content": {
                             "application/json": {}
                         },
                         "description": "Successful response"
-                    },
-                    "404": {
-                        "description": "Wishlist items not found"
+                    }
+                },
+                "summary": "Remove item from customer's wishlist",
+                "tags": [
+                    "Customer"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/customers/wishlist/items": {
+            "get": {
+                "operationId": "CustomerController.getWishlistItems",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/WishlistItem"
+                                    },
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 },
                 "summary": "Get customer's wishlist items",
                 "tags": [
                     "Customer"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
                 ]
             }
         },
         "/customers/profile": {
             "put": {
                 "operationId": "CustomerController.updateProfile",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    }
+                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -779,14 +1579,16 @@
                             "application/json": {}
                         },
                         "description": "Successful response"
-                    },
-                    "400": {
-                        "description": "Failed to update profile"
                     }
                 },
                 "summary": "Update customer's profile",
                 "tags": [
                     "Customer"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
                 ]
             }
         },
@@ -807,12 +1609,13 @@
                 "responses": {
                     "200": {
                         "content": {
-                            "application/json": {}
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CategoryResponse"
+                                }
+                            }
                         },
-                        "description": "Successful response"
-                    },
-                    "404": {
-                        "description": "Category not found"
+                        "description": ""
                     }
                 },
                 "summary": "Get category by id",
@@ -823,6 +1626,12 @@
             "put": {
                 "operationId": "CategoryController.updateCategory",
                 "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    },
                     {
                         "in": "path",
                         "name": "id",
@@ -847,22 +1656,34 @@
                 "responses": {
                     "200": {
                         "content": {
-                            "application/json": {}
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CategoryResponse"
+                                }
+                            }
                         },
-                        "description": "Successful response"
-                    },
-                    "400": {
-                        "description": "Bad request"
+                        "description": ""
                     }
                 },
                 "summary": "Update a category",
                 "tags": [
                     "Category"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
                 ]
             },
             "delete": {
                 "operationId": "CategoryController.deleteCategory",
                 "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    },
                     {
                         "in": "path",
                         "name": "id",
@@ -879,18 +1700,20 @@
                             "application/json": {}
                         },
                         "description": "Successful response"
-                    },
-                    "400": {
-                        "description": "Bad request"
                     }
                 },
                 "summary": "Delete a category",
                 "tags": [
                     "Category"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
                 ]
             }
         },
-        "/categories": {
+        "/categories/": {
             "get": {
                 "operationId": "CategoryController.getListOfCategories",
                 "parameters": [
@@ -911,12 +1734,16 @@
                 "responses": {
                     "200": {
                         "content": {
-                            "application/json": {}
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/CategoryResponse"
+                                    },
+                                    "type": "array"
+                                }
+                            }
                         },
-                        "description": "Successful response"
-                    },
-                    "404": {
-                        "description": "Categories not found"
+                        "description": ""
                     }
                 },
                 "summary": "Get list of categories",
@@ -926,6 +1753,14 @@
             },
             "post": {
                 "operationId": "CategoryController.createCategory",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    }
+                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -940,23 +1775,37 @@
                 "responses": {
                     "200": {
                         "content": {
-                            "application/json": {}
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CategoryResponse"
+                                }
+                            }
                         },
-                        "description": "Successful response"
-                    },
-                    "400": {
-                        "description": "Bad request"
+                        "description": ""
                     }
                 },
                 "summary": "Create a category",
                 "tags": [
                     "Category"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
                 ]
             }
         },
         "/auth/login": {
             "post": {
                 "operationId": "AuthController.login",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    }
+                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -973,14 +1822,11 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/AuthInfo"
+                                    "$ref": "#/components/schemas/AuthResponse"
                                 }
                             }
                         },
                         "description": ""
-                    },
-                    "401": {
-                        "description": "Authentication failed"
                     }
                 },
                 "summary": "Authenticate user",
@@ -1016,14 +1862,16 @@
                             "application/json": {}
                         },
                         "description": "Successful response"
-                    },
-                    "403": {
-                        "description": "Sign out failed"
                     }
                 },
                 "summary": "Sign out user",
                 "tags": [
                     "Auth"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
                 ]
             }
         },
@@ -1044,12 +1892,13 @@
                 "responses": {
                     "200": {
                         "content": {
-                            "application/json": {}
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthResponse"
+                                }
+                            }
                         },
-                        "description": "Successful response"
-                    },
-                    "400": {
-                        "description": "Signup failed"
+                        "description": ""
                     }
                 },
                 "summary": "Sign up user",
@@ -1077,9 +1926,6 @@
                             "application/json": {}
                         },
                         "description": "Successful response"
-                    },
-                    "400": {
-                        "description": "Email verification failed"
                     }
                 },
                 "summary": "Verify email address",
@@ -1107,9 +1953,6 @@
                             "application/json": {}
                         },
                         "description": "Successful response"
-                    },
-                    "403": {
-                        "description": "Requesting password reset failed"
                     }
                 },
                 "summary": "Send password reset link",
@@ -1136,9 +1979,6 @@
                             "application/json": {}
                         },
                         "description": "Successful response"
-                    },
-                    "403": {
-                        "description": "Password reset failed"
                     }
                 },
                 "summary": "Reset user's password",
@@ -1165,14 +2005,16 @@
                             "application/json": {}
                         },
                         "description": "Successful response"
-                    },
-                    "403": {
-                        "description": "Password update failed"
                     }
                 },
                 "summary": "Update user's password",
                 "tags": [
                     "Auth"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
                 ]
             }
         },
@@ -1193,77 +2035,16 @@
                 "responses": {
                     "200": {
                         "content": {
-                            "application/json": {}
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tokens"
+                                }
+                            }
                         },
-                        "description": "Successful response"
-                    },
-                    "403": {
-                        "description": "Unauthorized request"
+                        "description": ""
                     }
                 },
                 "summary": "Refresh access token",
-                "tags": [
-                    "Auth"
-                ]
-            }
-        },
-        "/auth/users/{id}/acknowledge": {
-            "put": {
-                "operationId": "AuthController.acknowledgeUserAccount",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "required": true,
-                        "schema": {
-                            "pattern": "[^\\/#\\?]+?",
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {}
-                        },
-                        "description": "Successful response"
-                    },
-                    "403": {
-                        "description": "Failed to acknowledge user account"
-                    }
-                },
-                "summary": "Acknowledge user account",
-                "tags": [
-                    "Auth"
-                ]
-            }
-        },
-        "/auth/users/{id}/deny": {
-            "put": {
-                "operationId": "AuthController.denyUserAccount",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "required": true,
-                        "schema": {
-                            "pattern": "[^\\/#\\?]+?",
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {}
-                        },
-                        "description": "Successful response"
-                    },
-                    "403": {
-                        "description": "Failed to deny user account"
-                    }
-                },
-                "summary": "Deny user account",
                 "tags": [
                     "Auth"
                 ]

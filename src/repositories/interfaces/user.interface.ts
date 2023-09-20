@@ -1,3 +1,5 @@
+import { UserQuery } from "../../controllers/request/user.request";
+import { MongooseQueryOptions } from "../../core";
 import { User } from "../../models";
 
 export interface IUserRepository {
@@ -16,8 +18,9 @@ export interface IUserRepository {
   /**
    * Gets user by id
    * @param id user's id
+   * @param projection optional fields to return
    */
-  getUserById(id: string): Promise<User>;
+  getUserById<U>(id: string, projection: string): Promise<User | U>;
 
   /**
    * Gets user by email
@@ -30,4 +33,12 @@ export interface IUserRepository {
     email: string,
     throwErrorIfUserNotFound?: boolean
   ): Promise<User>;
+
+  /**
+   * Gets a list of users
+   * @param options query options
+   */
+  getListOfUsers<U>(
+    options: MongooseQueryOptions<UserQuery, unknown>
+  ): Promise<User[] | U[]>;
 }

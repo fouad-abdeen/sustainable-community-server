@@ -1,5 +1,11 @@
 import { prop } from "@typegoose/typegoose";
-import { MongoDocument, UserRole } from ".";
+import {
+  CustomerProfile,
+  MongoDocument,
+  SellerProfile,
+  TokenObject,
+  UserRole,
+} from ".";
 
 export class User extends MongoDocument {
   @prop({ required: true, type: String })
@@ -22,29 +28,4 @@ export class User extends MongoDocument {
 
   @prop({ type: Number, default: +new Date() })
   public passwordUpdatedAt!: number;
-}
-
-export class CustomerProfile {
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-  address: string;
-  wishlist: string[];
-}
-
-export class SellerProfile {
-  name: string;
-  description: string;
-  phoneNumber: string;
-  address: string;
-  businessEmail: string;
-  categoryId: string;
-  itemCategories?: string[];
-  logoUrl?: string;
-  websiteUrl?: string;
-}
-
-export interface TokenObject {
-  token: string;
-  expiresIn: number;
 }

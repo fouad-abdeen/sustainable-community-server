@@ -3,6 +3,7 @@ import {
   Body,
   Delete,
   Get,
+  HeaderParam,
   JsonController,
   Param,
   Post,
@@ -10,12 +11,20 @@ import {
 } from "routing-controllers";
 import { BaseService, Context, throwError } from "../core";
 import { Service } from "typedi";
-import { OpenAPI } from "routing-controllers-openapi";
+import { OpenAPI, ResponseSchema } from "routing-controllers-openapi";
 import { isMongoId } from "class-validator";
 import { ProfileUpdateRequest } from "./request/seller.request";
 import { CategoryRepository, SellerRepository } from "../repositories";
-import { Category, CategoryType, SellerProfile, UserRole } from "../models";
-import { ItemCategory } from "../repositories/interfaces";
+import {
+  Category,
+  CategoryInfo,
+  CategoryType,
+  SellerInfo,
+  SellerProfile,
+  User,
+  UserRole,
+} from "../models";
+import { SellerResponse } from "./response/seller.response";
 
 @JsonController("/sellers")
 @Service()
@@ -32,14 +41,11 @@ export class SellerController extends BaseService {
     roles: [UserRole.SELLER],
     disclaimer: "User must be a seller to update their profile",
   })
+  @HeaderParam("auth", { required: true })
   @Put("/profile")
   @OpenAPI({
     summary: "Update seller profile",
-    responses: {
-      "400": {
-        description: "Failed to update seller profile",
-      },
-    },
+    security: [{ bearerAuth: [] }],
   })
   async updateProfile(@Body() profile: ProfileUpdateRequest): Promise<void> {
     const { _id, profile: currentProfile } = Context.getUser();
@@ -60,14 +66,11 @@ export class SellerController extends BaseService {
     roles: [UserRole.ADMIN],
     disclaimer: "Only admins can update a seller's category",
   })
+  @HeaderParam("auth", { required: true })
   @Put("/:id/categories/:categoryId")
   @OpenAPI({
     summary: "Update seller category",
-    responses: {
-      "400": {
-        description: "Failed to update seller category",
-      },
-    },
+    security: [{ bearerAuth: [] }],
   })
   async updateCategory(
     @Param("id") id: string,
@@ -81,7 +84,7 @@ export class SellerController extends BaseService {
     if (!isMongoId(categoryId))
       throwError("Invalid or missing category's id", 400);
 
-    const user = await this._sellerRepository.getUserById(id);
+    const user = await this._sellerRepository.getUserById<User>(id);
     if (user.role !== UserRole.SELLER)
       throwError(`User with id ${id} is not a seller`, 400);
 
@@ -103,14 +106,11 @@ export class SellerController extends BaseService {
     roles: [UserRole.ADMIN],
     disclaimer: "Only admins can assign an item category to a seller",
   })
+  @HeaderParam("auth", { required: true })
   @Post("/:id/item-categories/:categoryId")
   @OpenAPI({
     summary: "Assign item category to seller",
-    responses: {
-      "400": {
-        description: "Failed to assign item category to seller",
-      },
-    },
+    security: [{ bearerAuth: [] }],
   })
   async assignItemCategory(
     @Param("id") id: string,
@@ -124,7 +124,7 @@ export class SellerController extends BaseService {
     if (!isMongoId(categoryId))
       throwError("Invalid or missing category's id", 400);
 
-    const user = await this._sellerRepository.getUserById(id);
+    const user = await this._sellerRepository.getUserById<User>(id);
     if (user.role !== UserRole.SELLER)
       throwError(`User with id ${id} is not a seller`, 400);
 
@@ -147,14 +147,11 @@ export class SellerController extends BaseService {
     roles: [UserRole.ADMIN],
     disclaimer: "Only admins can remove an item category from a seller",
   })
+  @HeaderParam("auth", { required: true })
   @Delete("/:id/item-categories/:categoryId")
   @OpenAPI({
     summary: "Remove item category from seller",
-    responses: {
-      "400": {
-        description: "Failed to remove item category from seller",
-      },
-    },
+    security: [{ bearerAuth: [] }],
   })
   async removeItemCategory(
     @Param("id") id: string,
@@ -168,7 +165,7 @@ export class SellerController extends BaseService {
     if (!isMongoId(categoryId))
       throwError("Invalid or missing category's id", 400);
 
-    const user = await this._sellerRepository.getUserById(id);
+    const user = await this._sellerRepository.getUserById<User>(id);
     if (user.role !== UserRole.SELLER)
       throwError(`User with id ${id} is not a seller`, 400);
 
@@ -184,24 +181,50 @@ export class SellerController extends BaseService {
   @Get("/:id/item-categories")
   @OpenAPI({
     summary: "Get seller's item categories",
-    responses: {
-      "404": {
-        description: "Item categories not found",
-      },
-    },
   })
-  async getItemCategories(@Param("id") id: string): Promise<ItemCategory[]> {
+  async getItemCategories(@Param("id") id: string): Promise<CategoryInfo[]> {
     this._logger.info(
       `Received a request to get item categories of seller with id: ${id}`
     );
 
     if (!isMongoId(id)) throwError("Invalid or missing seller's id", 400);
 
-    const user = await this._sellerRepository.getUserById(id);
+    const user = await this._sellerRepository.getUserById<User>(id);
     if (user.role !== UserRole.SELLER)
       throwError(`User with id ${id} is not a seller`, 400);
 
     return await this._sellerRepository.getItemCategories(id);
+  }
+  // #endregion
+
+  // #region Get List Of Sellers
+  @Get("/")
+  @OpenAPI({
+    summary: "Get list of sellers",
+  })
+  @ResponseSchema(SellerInfo, { isArray: true })
+  async getListOfSellers(): Promise<SellerInfo[]> {
+    this._logger.info(`Received a request to get list of sellers`);
+
+    return await this._sellerRepository.getListOfSellers();
+  }
+  // #endregion
+
+  // #region Get Seller
+  @Get("/:id")
+  @OpenAPI({
+    summary: "Get seller by id",
+  })
+  @ResponseSchema(SellerResponse)
+  async getSeller(@Param("id") id: string): Promise<SellerResponse> {
+    this._logger.info(`Received a request to get seller with id: ${id}`);
+
+    const { profile } = await this._sellerRepository.getSeller(id);
+    const category = await this._categoryRepository.getOneCategory<Category>(
+      profile.categoryId
+    );
+
+    return SellerResponse.getSellerResponse({ ...profile, _id: id }, category);
   }
   // #endregion
 }

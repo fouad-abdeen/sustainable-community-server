@@ -2,16 +2,16 @@ import {
   Authorized,
   Body,
   Get,
+  HeaderParam,
   JsonController,
-  Param,
   Post,
   Put,
   QueryParam,
 } from "routing-controllers";
 import { OpenAPI, ResponseSchema } from "routing-controllers-openapi";
 import { Service } from "typedi";
-import { BaseService, throwError } from "../core";
-import { AuthInfo, AuthService, Tokens } from "../services";
+import { BaseService } from "../core";
+import { AuthService } from "../services";
 import {
   LoginRequest,
   PasswordResetRequest,
@@ -19,17 +19,19 @@ import {
   RefreshTokenRequest,
   SignupRequest,
 } from "./request/auth.request";
-import { CustomerProfile, UserRole, SellerProfile, User } from "../models";
-import { UserRepository } from "../repositories";
-import { isMongoId } from "class-validator";
+import {
+  CustomerProfile,
+  UserRole,
+  SellerProfile,
+  User,
+  Tokens,
+} from "../models";
+import { AuthResponse } from "./response/auth.response";
 
 @JsonController("/auth")
 @Service()
 export class AuthController extends BaseService {
-  constructor(
-    private _authService: AuthService,
-    private _userRepository: UserRepository
-  ) {
+  constructor(private _authService: AuthService) {
     super(__filename);
   }
 
@@ -37,19 +39,16 @@ export class AuthController extends BaseService {
   @Post("/login")
   @OpenAPI({
     summary: "Authenticate user",
-    responses: {
-      "401": {
-        description: "Authentication failed",
-      },
-    },
   })
-  @ResponseSchema(AuthInfo)
+  @HeaderParam("auth", { required: true })
+  @ResponseSchema(AuthResponse)
   async login(
     @Body({ required: true }) loginRequest: LoginRequest
-  ): Promise<AuthInfo> {
+  ): Promise<AuthResponse> {
     this._logger.info(
       `Requesting login for user with email ${loginRequest.email}`
     );
+
     return await this._authService.authenticateUser(loginRequest);
   }
   // #endregion
@@ -59,17 +58,14 @@ export class AuthController extends BaseService {
   @Get("/logout")
   @OpenAPI({
     summary: "Sign out user",
-    responses: {
-      "403": {
-        description: "Sign out failed",
-      },
-    },
+    security: [{ bearerAuth: [] }],
   })
   async logout(
     @QueryParam("accessToken", { required: true }) accessToken: string,
     @QueryParam("refreshToken", { required: true }) refreshToken: string
   ): Promise<void> {
     this._logger.info("Requesting user logout");
+
     await this._authService.signOutUser({ accessToken, refreshToken });
   }
   // #endregion
@@ -78,15 +74,11 @@ export class AuthController extends BaseService {
   @Post("/signup")
   @OpenAPI({
     summary: "Sign up user",
-    responses: {
-      "400": {
-        description: "Signup failed",
-      },
-    },
   })
+  @ResponseSchema(AuthResponse)
   async signup(
     @Body({ required: true }) signupRequest: SignupRequest
-  ): Promise<AuthInfo> {
+  ): Promise<AuthResponse> {
     const { email, password, role } = signupRequest;
 
     this._logger.info(`Requesting signup for user with email ${email}`);
@@ -113,14 +105,10 @@ export class AuthController extends BaseService {
   @Put("/email/verify")
   @OpenAPI({
     summary: "Verify email address",
-    responses: {
-      "400": {
-        description: "Email verification failed",
-      },
-    },
   })
   async verifyEmail(@QueryParam("token") token: string): Promise<void> {
     this._logger.info("Requesting email address verification");
+
     await this._authService.verifyEmailAddress(token);
   }
   // #endregion
@@ -129,11 +117,6 @@ export class AuthController extends BaseService {
   @Get("/password")
   @OpenAPI({
     summary: "Send password reset link",
-    responses: {
-      "403": {
-        description: "Requesting password reset failed",
-      },
-    },
   })
   async requestPasswordReset(
     @QueryParam("email") email: string
@@ -141,6 +124,7 @@ export class AuthController extends BaseService {
     this._logger.info(
       `Requesting password reset token for user with email ${email}`
     );
+
     await this._authService.sendPasswordResetLink(email);
   }
   // #endregion
@@ -149,16 +133,12 @@ export class AuthController extends BaseService {
   @Post("/password")
   @OpenAPI({
     summary: "Reset user's password",
-    responses: {
-      "403": {
-        description: "Password reset failed",
-      },
-    },
   })
   async resetPassword(
     @Body() { token, password }: PasswordResetRequest
   ): Promise<void> {
     this._logger.info("Requesting password reset");
+
     await this._authService.resetPassword(token, password);
   }
   // #endregion
@@ -168,16 +148,13 @@ export class AuthController extends BaseService {
   @Put("/password")
   @OpenAPI({
     summary: "Update user's password",
-    responses: {
-      "403": {
-        description: "Password update failed",
-      },
-    },
+    security: [{ bearerAuth: [] }],
   })
   async updatePassword(
     @Body() { currentPassword, newPassword }: PasswordUpdateRequest
   ): Promise<void> {
     this._logger.info("Requesting password update");
+
     await this._authService.updatePassword(currentPassword, newPassword);
   }
   // #endregion
@@ -186,63 +163,14 @@ export class AuthController extends BaseService {
   @Put("/token/refresh")
   @OpenAPI({
     summary: "Refresh access token",
-    responses: {
-      "403": {
-        description: "Unauthorized request",
-      },
-    },
   })
+  @ResponseSchema(Tokens)
   async refreshAccessToken(
     @Body() { refreshToken }: RefreshTokenRequest
   ): Promise<Tokens> {
     this._logger.info("Requesting access token refresh");
+
     return this._authService.refreshAccessToken(refreshToken);
-  }
-  // #endregion
-
-  // #region Acknowledge User Account
-  @Authorized({
-    roles: [UserRole.ADMIN],
-    disclaimer: "Only admins can acknowledge a user account",
-  })
-  @Put("/users/:id/acknowledge")
-  @OpenAPI({
-    summary: "Acknowledge user account",
-    responses: {
-      "403": {
-        description: "Failed to acknowledge user account",
-      },
-    },
-  })
-  async acknowledgeUserAccount(@Param("id") id: string): Promise<void> {
-    if (!isMongoId(id)) throwError("Invalid or missing user's id", 400);
-
-    this._logger.info(`Acknowledging user account with id: ${id}`);
-
-    await this._userRepository.updateUser({ _id: id, verified: true } as User);
-  }
-  // #endregion
-
-  // #region Deny User Account
-  @Authorized({
-    roles: [UserRole.ADMIN],
-    disclaimer: "Only admins can deny a user account",
-  })
-  @Put("/users/:id/deny")
-  @OpenAPI({
-    summary: "Deny user account",
-    responses: {
-      "403": {
-        description: "Failed to deny user account",
-      },
-    },
-  })
-  async denyUserAccount(@Param("id") id: string): Promise<void> {
-    if (!isMongoId(id)) throwError("Invalid or missing user's id", 400);
-
-    this._logger.info(`Denying user account with id: ${id}`);
-
-    await this._userRepository.updateUser({ _id: id, verified: false } as User);
   }
   // #endregion
 }

@@ -3,6 +3,7 @@ import {
   Body,
   Delete,
   Get,
+  HeaderParam,
   JsonController,
   Param,
   Post,
@@ -11,8 +12,7 @@ import {
 } from "routing-controllers";
 import { BaseService } from "../core";
 import { Service } from "typedi";
-import { SellerItemRepository } from "../repositories";
-import { OpenAPI } from "routing-controllers-openapi";
+import { OpenAPI, ResponseSchema } from "routing-controllers-openapi";
 import { SellerItemResponse } from "./response/seller-item.response";
 import {
   SellerItemCreationRequest,
@@ -25,23 +25,16 @@ import { SellerItemService } from "../services";
 @JsonController("/items")
 @Service()
 export class SellerItemController extends BaseService {
-  constructor(
-    private _sellerItemService: SellerItemService,
-    private _sellerItemRepository: SellerItemRepository
-  ) {
+  constructor(private _sellerItemService: SellerItemService) {
     super(__filename);
   }
 
   // #region Get List of Items
-  @Get("")
+  @Get("/")
   @OpenAPI({
     summary: "Get list of items",
-    responses: {
-      "404": {
-        description: "Items not found",
-      },
-    },
   })
+  @ResponseSchema(SellerItemResponse, { isArray: true })
   async getListOfItems(
     @QueryParams() conditions: SellerItemQuery
   ): Promise<SellerItemResponse[]> {
@@ -52,7 +45,9 @@ export class SellerItemController extends BaseService {
         2
       )}`
     );
-    const items = await this._sellerItemRepository.getListOfItems(conditions);
+
+    const items = await this._sellerItemService.getListOfItems(conditions);
+
     return SellerItemResponse.getListOfItemsResponse(items);
   }
   // #endregion
@@ -61,15 +56,13 @@ export class SellerItemController extends BaseService {
   @Get("/:id")
   @OpenAPI({
     summary: "Get item by id",
-    responses: {
-      "404": {
-        description: "Item not found",
-      },
-    },
   })
+  @ResponseSchema(SellerItemResponse)
   async getItem(@Param("id") id: string): Promise<SellerItemResponse> {
     this._logger.info(`Received a request to get item with id: ${id}`);
-    const item = await this._sellerItemRepository.getItem<SellerItem>(id);
+
+    const item = await this._sellerItemService.getItem(id);
+
     return SellerItemResponse.getItemResponse(item);
   }
   // #endregion
@@ -79,22 +72,22 @@ export class SellerItemController extends BaseService {
     roles: [UserRole.SELLER],
     disclaimer: "Only sellers can create an item",
   })
-  @Post("")
+  @HeaderParam("auth", { required: true })
+  @Post("/")
   @OpenAPI({
     summary: "Create an item",
-    responses: {
-      "400": {
-        description: "Bad request",
-      },
-    },
+    security: [{ bearerAuth: [] }],
   })
+  @ResponseSchema(SellerItemResponse)
   async createItem(
     @Body() item: SellerItemCreationRequest
   ): Promise<SellerItemResponse> {
     this._logger.info(`Received a request to create an item`);
+
     const createdItem = await this._sellerItemService.createItem(
       item as SellerItem
     );
+
     return SellerItemResponse.getItemResponse(createdItem);
   }
   // #endregion
@@ -104,24 +97,24 @@ export class SellerItemController extends BaseService {
     roles: [UserRole.SELLER, UserRole.ADMIN],
     disclaimer: "Only sellers and admins can update an item",
   })
+  @HeaderParam("auth", { required: true })
   @Put("/:id")
   @OpenAPI({
     summary: "Update an item",
-    responses: {
-      "400": {
-        description: "Bad request",
-      },
-    },
+    security: [{ bearerAuth: [] }],
   })
+  @ResponseSchema(SellerItemResponse)
   async updateItem(
     @Param("id") id: string,
     @Body() item: SellerItemUpdateRequest
   ): Promise<SellerItemResponse> {
     this._logger.info(`Received a request to update an item with id: ${id}`);
+
     const updatedItem = await this._sellerItemService.updateItem({
       _id: id,
       ...item,
     } as SellerItem);
+
     return SellerItemResponse.getItemResponse(updatedItem);
   }
   // #endregion
@@ -131,17 +124,15 @@ export class SellerItemController extends BaseService {
     roles: [UserRole.SELLER],
     disclaimer: "Only sellers can delete an item",
   })
+  @HeaderParam("auth", { required: true })
   @Delete("/:id")
   @OpenAPI({
     summary: "Delete an item",
-    responses: {
-      "400": {
-        description: "Bad request",
-      },
-    },
+    security: [{ bearerAuth: [] }],
   })
   async deleteItem(@Param("id") id: string): Promise<void> {
     this._logger.info(`Received a request to delete an item with id: ${id}`);
+
     await this._sellerItemService.deleteItem(id);
   }
   // #endregion

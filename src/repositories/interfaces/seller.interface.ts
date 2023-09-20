@@ -1,4 +1,4 @@
-import { SellerProfile } from "../../models";
+import { CategoryInfo, SellerInfo, SellerProfile } from "../../models";
 import { IUserRepository } from "./user.interface";
 
 export interface ISellerRepository extends IUserRepository {
@@ -44,11 +44,16 @@ export interface ISellerRepository extends IUserRepository {
    * Gets the item categories of a seller
    * @param userId id of the seller
    */
-  getItemCategories(userId: string): Promise<ItemCategory[]>;
-}
+  getItemCategories(userId: string): Promise<CategoryInfo[]>;
 
-export interface ItemCategory {
-  id: string;
-  name: string;
-  description: string;
+  /**
+   * Gets list of sellers
+   */
+  getListOfSellers(): Promise<SellerInfo[]>;
+
+  /**
+   * Gets a seller by id
+   * @param userId id of the seller
+   */
+  getSeller(userId: string): Promise<{ profile: SellerProfile }>;
 }

@@ -4,8 +4,9 @@ export interface ICategoryRepository {
   /**
    * Gets one category by id
    * @param id id of the category
+   * @param projection optional fields to return
    */
-  getOneCategory(id: string): Promise<Category>;
+  getOneCategory<C>(id: string, projection?: string): Promise<Category | C>;
 
   /**
    * Gets a list of categories by type

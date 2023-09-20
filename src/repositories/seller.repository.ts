@@ -1,7 +1,13 @@
 import { Service } from "typedi";
 import { UserRepository } from "./user.repository";
-import { ISellerRepository, ItemCategory } from "./interfaces";
-import { SellerProfile, User } from "../models";
+import { ISellerRepository } from "./interfaces";
+import {
+  CategoryInfo,
+  SellerInfo,
+  SellerProfile,
+  User,
+  UserRole,
+} from "../models";
 import { Context, throwError } from "../core";
 import { CategoryRepository } from "./category.repository";
 
@@ -92,17 +98,17 @@ export class SellerRepository
     } as User);
   }
 
-  async getItemCategories(userId: string): Promise<ItemCategory[]> {
+  async getItemCategories(userId: string): Promise<CategoryInfo[]> {
     this._logger.info(`Getting item categories of seller with id: ${userId}`);
 
-    const user = await this.getUserById(userId);
+    const user = await this.getUserById<User>(userId);
     const categories = (user.profile as SellerProfile).itemCategories ?? [];
 
     return await Promise.all(
       categories.map(async (categoryId) => {
         const category = {
           id: categoryId,
-          ...(await this._categoryRepository.getOneCategory<ItemCategory>(
+          ...(await this._categoryRepository.getOneCategory<CategoryInfo>(
             categoryId,
             "name description"
           )),
@@ -111,5 +117,32 @@ export class SellerRepository
         return category;
       })
     );
+  }
+
+  async getListOfSellers(): Promise<SellerInfo[]> {
+    this._logger.info(`Getting list of sellers`);
+
+    const sellers = await this.getListOfUsers<User>({
+      conditions: { role: UserRole.SELLER, verified: true },
+      projection: "profile.name profile.description profile.logoUrl",
+    });
+
+    return sellers.map((seller) => {
+      const profile = seller.profile as SellerProfile;
+      return {
+        id: (seller._id as string).toString(),
+        name: profile.name,
+        description: profile.description,
+        logoUrl: profile.logoUrl,
+      };
+    });
+  }
+
+  async getSeller(userId: string): Promise<{ profile: SellerProfile }> {
+    this._logger.info(`Getting profile of seller with id: ${userId}`);
+
+    return (await this.getUserById<User>(userId, "profile")) as {
+      profile: SellerProfile;
+    };
   }
 }

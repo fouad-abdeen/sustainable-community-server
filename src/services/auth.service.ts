@@ -1,4 +1,5 @@
 import Container, { Service } from "typedi";
+import { Action } from "routing-controllers";
 import {
   AuthHashProvider,
   AuthTokenProvider,
@@ -15,11 +16,13 @@ import {
   UserRole,
   SellerProfile,
   TokenObject,
+  AuthPayload,
+  Tokens,
+  RolesAndPermission,
 } from "../models";
-import { UserInfo } from "../models";
 import { UserRepository } from "../repositories";
 import { LoginRequest } from "../controllers/request/auth.request";
-import { Action } from "routing-controllers";
+import { AuthResponse } from "../controllers/response/auth.response";
 
 @Service()
 export class AuthService extends BaseService {
@@ -36,7 +39,7 @@ export class AuthService extends BaseService {
     if (!this._mailService) this._mailService = Container.get(MailProvider);
   }
 
-  async signUpUser(user: User): Promise<AuthInfo> {
+  async signUpUser(user: User): Promise<AuthResponse> {
     user.email = user.email.toLowerCase();
     this._logger.info(`Attempting to sign up user with email ${user.email}`);
 
@@ -162,7 +165,10 @@ export class AuthService extends BaseService {
     } as User);
   }
 
-  async authenticateUser({ email, password }: LoginRequest): Promise<AuthInfo> {
+  async authenticateUser({
+    email,
+    password,
+  }: LoginRequest): Promise<AuthResponse> {
     email = email.toLowerCase();
     this._logger.info(`Attempting to authenticate user with email ${email}`);
 
@@ -216,10 +222,12 @@ export class AuthService extends BaseService {
 
   async authorizeUser(
     action: Action,
-    rolesAndPermission: RolesAndPermission[]
+    rolesAndPermission?: RolesAndPermission[]
   ): Promise<void> {
     let user: User,
-      token = action.request.headers["authorization"];
+      token =
+        action.request.headers["authorization"] ??
+        action.request.headers["auth"];
 
     this._logger.info(`Attempting to authorize user with token ${token}`);
 
@@ -253,21 +261,20 @@ export class AuthService extends BaseService {
     )
       throwError(`User account with email ${user.email} is not verified`, 403);
 
-    // #region Verify Role and Permission
-    const { roles, disclaimer } = rolesAndPermission[0];
+    if (rolesAndPermission) {
+      const { roles, disclaimer } = rolesAndPermission[0];
 
-    this._logger.info("Verifying user's role");
+      this._logger.info("Verifying user's role");
 
-    /*** To Do: Implement Permission Verification ***/
+      /*** To Do: Implement Permission Verification ***/
 
-    if (!roles.includes(user.role))
-      throwError(
-        disclaimer ?? "Unauthorized, user does not have the required role",
-        403
-      );
-    // #endregion
+      if (!roles.includes(user.role))
+        throwError(
+          disclaimer ?? "Unauthorized, user does not have the required role",
+          403
+        );
+    }
 
-    // Set user in Context
     this._logger.info("Setting user in Context");
     Context.setUser(user);
   }
@@ -465,27 +472,4 @@ export class AuthService extends BaseService {
       refreshToken,
     };
   }
-}
-
-export class AuthInfo {
-  userInfo: UserInfo;
-  tokens: Tokens;
-}
-
-export interface Tokens {
-  accessToken: string;
-  refreshToken: string;
-}
-
-export interface AuthPayload {
-  requestId: string;
-  identityId: string;
-  email: string;
-  signedAt?: number;
-}
-
-export interface RolesAndPermission {
-  roles: UserRole[];
-  permission?: string;
-  disclaimer?: string;
 }

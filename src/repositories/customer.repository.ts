@@ -1,7 +1,7 @@
 import { Service } from "typedi";
-import { ICustomerRepository, WishlistItem } from "./interfaces";
+import { ICustomerRepository } from "./interfaces";
 import { UserRepository } from "./user.repository";
-import { CustomerProfile, User } from "../models";
+import { CustomerProfile, User, WishlistItem } from "../models";
 import { Context, throwError } from "../core";
 import { SellerItemRepository } from "./seller-item.repository";
 
@@ -39,7 +39,7 @@ export class CustomerRepository
       `Removing item with id: ${itemId} from wishlist of user with id: ${userId}`
     );
 
-    const user = await this.getUserById(userId);
+    const user = await this.getUserById<User>(userId);
     const wishlist = (user.profile as CustomerProfile).wishlist ?? [];
 
     if (!wishlist.includes(itemId)) {
@@ -78,10 +78,13 @@ export class CustomerRepository
 
   async updateProfile(userId: string, profile: CustomerProfile): Promise<void> {
     this._logger.info(`Updating profile of user with id: ${userId}`);
+
     const profileKeys = ["firstName", "lastName", "phoneNumber", "address"];
+
     Object.keys(profile).forEach((key) => {
       if (!profileKeys.includes(key)) delete profile[key];
     });
+
     await this.updateUser({ _id: userId, profile } as User);
   }
 }

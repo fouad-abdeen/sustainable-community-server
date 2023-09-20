@@ -1,4 +1,4 @@
-import { CustomerProfile } from "../../models";
+import { CustomerProfile, WishlistItem } from "../../models";
 import { IUserRepository } from "./user.interface";
 
 export interface ICustomerRepository extends IUserRepository {
@@ -28,12 +28,4 @@ export interface ICustomerRepository extends IUserRepository {
    * @param profile the new profile data
    */
   updateProfile(userId: string, profile: CustomerProfile): Promise<void>;
-}
-
-export interface WishlistItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl?: string;
 }

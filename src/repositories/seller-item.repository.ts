@@ -50,16 +50,20 @@ export class SellerItemRepository
 
   async getItem<S>(id: string, projection?: string): Promise<SellerItem | S> {
     this._logger.info(`Getting item with id: ${id}`);
+
     const item = await this._connection.queryOne<{ _id: string }, S>(
       { _id: id },
       projection
     );
+
     if (!item) throwError(`Item with id ${id} not found`, 404);
+
     return item;
   }
 
   async createItem(item: SellerItem): Promise<SellerItem> {
     this._logger.info(`Creating item with name: ${item.name}`);
+
     return await this._connection.insertOne({
       ...item,
       createdAt: +new Date(),
@@ -69,6 +73,7 @@ export class SellerItemRepository
 
   async updateItem(item: SellerItem): Promise<SellerItem> {
     this._logger.info(`Updating item with id: ${item._id}`);
+
     return await this._connection.updateOne(
       { _id: item._id },
       { ...item, updatedAt: +new Date(), updatedBy: Context.getUser()._id }
@@ -77,6 +82,7 @@ export class SellerItemRepository
 
   async deleteItem(id: string): Promise<void> {
     this._logger.info(`Deleting item with id: ${id}`);
+
     await this._connection.deleteOne({ _id: id });
   }
 }

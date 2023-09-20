@@ -27,11 +27,14 @@ export class CategoryRepository
     projection?: string
   ): Promise<Category | C> {
     this._logger.info(`Getting category with id: ${id}`);
+
     const category = await this._connection.queryOne<{ _id: string }, C>(
       { _id: id },
       projection
     );
+
     if (!category) throwError(`Category with id ${id} not found`, 404);
+
     return category;
   }
 
@@ -54,6 +57,7 @@ export class CategoryRepository
     this._logger.info(
       `Creating category of type ${category.type} with name: ${category.name}`
     );
+
     return await this._connection.insertOne({
       ...category,
       createdAt: +new Date(),
@@ -63,6 +67,7 @@ export class CategoryRepository
 
   async updateCategory(category: Category): Promise<Category> {
     this._logger.info(`Updating category with id: ${category._id}`);
+
     return await this._connection.updateOne(
       { _id: category._id },
       { ...category, updatedAt: +new Date(), updatedBy: Context.getUser()._id }
@@ -71,6 +76,7 @@ export class CategoryRepository
 
   async deleteCategory(id: string): Promise<void> {
     this._logger.info(`Deleting category with id: ${id}`);
+
     await this._connection.deleteOne({ _id: id });
   }
 }

@@ -37,7 +37,7 @@ export class Express {
       middlewares: [dirname + "/core/middlewares/*.ts"],
       interceptors: [dirname + "/core/interceptors/*.ts"],
 
-      authorizationChecker: async (action: Action, roles: any) => {
+      authorizationChecker: async (action: Action, roles?: any) => {
         if (!this._authService) this._authService = Container.get(AuthService);
         await this._authService.authorizeUser(action, roles);
         return true;
