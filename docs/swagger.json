@@ -232,6 +232,33 @@
                     "logoUrl"
                 ]
             },
+            "CartItem": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "quantity": {
+                        "type": "number"
+                    },
+                    "imageUrl": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "price",
+                    "quantity",
+                    "imageUrl"
+                ]
+            },
             "UserQuery": {
                 "properties": {
                     "role": {
@@ -294,6 +321,86 @@
                     "createdBy",
                     "updatedAt",
                     "updatedBy"
+                ]
+            },
+            "ShoppingCartResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "ownerId": {
+                        "type": "string"
+                    },
+                    "total": {
+                        "type": "number"
+                    },
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/Array"
+                        },
+                        "type": "array"
+                    },
+                    "updatedAt": {
+                        "type": "number"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "ownerId",
+                    "total",
+                    "items",
+                    "updatedAt"
+                ]
+            },
+            "CartItemRequest": {
+                "properties": {
+                    "id": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 75,
+                        "minLength": 5
+                    },
+                    "price": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "minimum": 1
+                    },
+                    "imageUrl": {
+                        "format": "url",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "price",
+                    "quantity",
+                    "imageUrl"
+                ]
+            },
+            "CartItemQueryParams": {
+                "properties": {
+                    "id": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
+                        "type": "string"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "minimum": 1
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "quantity"
                 ]
             },
             "ProfileUpdateRequest": {
@@ -950,6 +1057,194 @@
                 "summary": "Deny user account",
                 "tags": [
                     "User"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/": {
+            "get": {
+                "operationId": "ShoppingCartController.getCart",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShoppingCartResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "summary": "Get shopping cart",
+                "tags": [
+                    "Shopping Cart"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "operationId": "ShoppingCartController.clearCart",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    }
+                },
+                "summary": "Clear shopping cart",
+                "tags": [
+                    "Shopping Cart"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/items": {
+            "post": {
+                "operationId": "ShoppingCartController.addItem",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CartItemRequest"
+                            }
+                        }
+                    },
+                    "description": "CartItemRequest",
+                    "required": false
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    }
+                },
+                "summary": "Add item to shopping cart",
+                "tags": [
+                    "Shopping Cart"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "operationId": "ShoppingCartController.updateItem",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    },
+                    {
+                        "in": "query",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "^[0-9a-fA-F]{24}$",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "quantity",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    }
+                },
+                "summary": "Update item in shopping cart",
+                "tags": [
+                    "Shopping Cart"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/items/{itemId}": {
+            "delete": {
+                "operationId": "ShoppingCartController.removeItem",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    },
+                    {
+                        "in": "path",
+                        "name": "itemId",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    }
+                },
+                "summary": "Remove item from shopping cart",
+                "tags": [
+                    "Shopping Cart"
                 ],
                 "security": [
                     {
@@ -1798,14 +2093,6 @@
         "/auth/login": {
             "post": {
                 "operationId": "AuthController.login",
-                "parameters": [
-                    {
-                        "in": "header",
-                        "name": "auth",
-                        "required": true,
-                        "schema": {}
-                    }
-                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -1839,6 +2126,12 @@
             "get": {
                 "operationId": "AuthController.logout",
                 "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    },
                     {
                         "in": "query",
                         "name": "accessToken",

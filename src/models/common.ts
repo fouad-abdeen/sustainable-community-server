@@ -153,6 +153,23 @@ export class SellerInfo {
   @IsString()
   logoUrl?: string;
 }
+
+export class CartItem {
+  @IsString()
+  id: string;
+
+  @IsString()
+  name: string;
+
+  @IsNumber()
+  price: number;
+
+  @IsNumber()
+  quantity: number;
+
+  @IsString()
+  imageUrl?: string;
+}
 // #endregion
 
 // #region Interfaces

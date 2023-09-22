@@ -40,7 +40,6 @@ export class AuthController extends BaseService {
   @OpenAPI({
     summary: "Authenticate user",
   })
-  @HeaderParam("auth", { required: true })
   @ResponseSchema(AuthResponse)
   async login(
     @Body({ required: true }) loginRequest: LoginRequest
@@ -55,6 +54,7 @@ export class AuthController extends BaseService {
 
   // #region Logout
   @Authorized()
+  @HeaderParam("auth", { required: true })
   @Get("/logout")
   @OpenAPI({
     summary: "Sign out user",
