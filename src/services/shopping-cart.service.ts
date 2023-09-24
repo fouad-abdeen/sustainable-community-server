@@ -1,7 +1,8 @@
 import { Service } from "typedi";
 import { BaseService, throwError } from "../core";
-import { CartItem } from "../models";
+import { CartItem, SellerItem, ShoppingCart } from "../models";
 import { SellerItemRepository, ShoppingCartRepository } from "../repositories";
+import { CartItemRequest } from "../controllers/request/shopping-cart.request";
 
 @Service()
 export class ShoppingCartService extends BaseService {
@@ -12,44 +13,105 @@ export class ShoppingCartService extends BaseService {
     super(__filename);
   }
 
-  async addItem(ownerId: string, item: CartItem): Promise<void> {
+  async getCart(ownerId: string): Promise<ShoppingCart> {
+    const cart = await this._shoppingCartRepository.getCart(ownerId);
+
+    return await this.updateCart(cart);
+  }
+
+  async updateCart(cart: ShoppingCart): Promise<ShoppingCart> {
+    const updatedCart = { ...cart };
+
+    updatedCart.items = await (Promise.all(
+      cart.items.map(async (item) => {
+        const originItem = await this.getOriginItem(item.id);
+
+        if (originItem.quantity < 1) {
+          item.isAvailable = false;
+          item.availability = 0;
+        } else {
+          item.isAvailable = originItem.isAvailable;
+          item.availability = originItem.quantity;
+        }
+
+        item.price = originItem.price;
+        item.name = originItem.name;
+        item.imageUrl = originItem.imageUrl;
+
+        return item;
+      })
+    ) as Promise<CartItem[]>);
+
+    updatedCart.total = updatedCart.items.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
+
+    return await this._shoppingCartRepository.updateCart(updatedCart);
+  }
+
+  async addItem(ownerId: string, item: CartItemRequest): Promise<void> {
     const originItem = await this.getOriginItem(item.id);
 
+    if (originItem.quantity < 1)
+      throwError("Item is out of stock at the moment", 400);
+
     if (!originItem.isAvailable)
-      throwError("Item is not available for purchase", 400);
+      throwError("Item is not available now for purchase", 400);
 
-    if (originItem.price !== item.price)
-      throwError("Item price has changed", 400);
+    if (item.quantity > originItem.quantity)
+      throwError(
+        `Not enough in-stock items available, only ${originItem.quantity} left`,
+        400
+      );
 
-    await this._shoppingCartRepository.addItem(
-      ownerId,
-      item,
-      originItem.quantity
-    );
+    const cartItem = {
+      ...item,
+      price: originItem.price,
+      availability: originItem.quantity,
+      isAvailable: originItem.isAvailable,
+      name: originItem.name,
+      imageUrl: originItem.imageUrl,
+    };
+
+    await this._shoppingCartRepository.addItem(ownerId, cartItem);
   }
 
   async updateItem(ownerId: string, item: CartItem): Promise<void> {
-    const originItem = await this.getOriginItem(item.id);
+    const { id, quantity } = item;
 
-    if (!originItem.isAvailable)
-      throwError("Item is not available for purchase", 400);
+    const originItem = await this.getOriginItem(id);
 
-    if (item.quantity > originItem.quantity)
-      throwError(`Only ${originItem.quantity} items are available`, 400);
+    const {
+      price,
+      isAvailable,
+      quantity: availability,
+      name,
+      imageUrl,
+    } = originItem;
 
-    if (originItem.price !== item.price)
-      throwError("Item price has changed", 400);
+    if (availability < 1) throwError("Item is out of stock at the moment", 400);
 
-    await this._shoppingCartRepository.updateItem(ownerId, item);
+    if (!isAvailable) throwError("Item is not available now for purchase", 400);
+
+    if (quantity > availability)
+      throwError(
+        `Not enough in-stock items available, only ${availability} left`,
+        400
+      );
+
+    await this._shoppingCartRepository.updateItem(ownerId, {
+      id,
+      quantity,
+      price,
+      isAvailable,
+      availability,
+      name,
+      imageUrl,
+    });
   }
 
-  private getOriginItem(
-    id: string
-  ): Promise<{ isAvailable: Boolean; quantity: number; price: number }> {
-    return this._sellerItemRepository.getItem<{
-      isAvailable: Boolean;
-      quantity: number;
-      price: number;
-    }>(id, "isAvailable quantity price");
+  private getOriginItem(id: string): Promise<SellerItem> {
+    return this._sellerItemRepository.getItem<SellerItem>(id);
   }
 }

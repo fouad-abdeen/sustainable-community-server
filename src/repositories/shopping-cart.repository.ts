@@ -1,9 +1,8 @@
 import Container, { Service } from "typedi";
 import { BaseRepository, MongoConnectionProvider, throwError } from "../core";
-import { ShoppingCart } from "../models/shopping-cart.model";
 import { IShoppingCartRepository } from "./interfaces/shopping-cart.interface";
 import { MongoConnection } from "../core/providers/database/mongo/mongo.connection";
-import { CartItem } from "../models";
+import { CartItem, ShoppingCart } from "../models";
 
 @Service()
 export class ShoppingCartRepository
@@ -33,6 +32,14 @@ export class ShoppingCartRepository
     return cart;
   }
 
+  async updateCart(cart: ShoppingCart): Promise<ShoppingCart> {
+    this._logger.info(
+      `Updating shopping cart for customer with id: ${cart.ownerId}`
+    );
+
+    return await this._connection.updateOne({ ownerId: cart.ownerId }, cart);
+  }
+
   async clearCart(ownerId: string): Promise<void> {
     this._logger.info(
       `Clearing shopping cart for customer with id: ${ownerId}`
@@ -48,7 +55,7 @@ export class ShoppingCartRepository
     );
   }
 
-  async addItem(ownerId: string, item: CartItem, stock: number): Promise<void> {
+  async addItem(ownerId: string, item: CartItem): Promise<void> {
     this._logger.info(
       `Adding item with id: ${item.id} to shopping cart for customer with id: ${ownerId}`
     );
@@ -58,10 +65,20 @@ export class ShoppingCartRepository
     const itemIndex = cart.items.findIndex((item) => item.id === item.id);
 
     if (itemIndex === -1) cart.items.push(item);
-    else cart.items[itemIndex].quantity += item.quantity;
+    else {
+      const quantity = cart.items[itemIndex].quantity + item.quantity;
 
-    if (cart.items[itemIndex].quantity > stock)
-      throwError(`Only ${stock} items are available`, 400);
+      if (quantity > item.availability)
+        throwError(
+          `Not enough in-stock items available, only ${item.availability} left`,
+          400
+        );
+
+      cart.items[itemIndex] = {
+        ...item,
+        quantity,
+      };
+    }
 
     cart.total += item.price * item.quantity;
     cart.updatedAt = +new Date();
@@ -80,9 +97,11 @@ export class ShoppingCartRepository
 
     if (itemIndex === -1) return;
 
-    const item = cart.items[itemIndex];
-    cart.total -= item.price * item.quantity;
     cart.items.splice(itemIndex, 1);
+    cart.total = cart.items.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
     cart.updatedAt = +new Date();
 
     await this._connection.updateOne({ ownerId }, cart);
@@ -99,10 +118,11 @@ export class ShoppingCartRepository
 
     if (itemIndex === -1) return;
 
-    const oldItem = cart.items[itemIndex];
-    cart.total -= oldItem.price * oldItem.quantity;
-    cart.total += item.price * item.quantity;
     cart.items[itemIndex] = item;
+    cart.total = cart.items.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
     cart.updatedAt = +new Date();
 
     await this._connection.updateOne({ ownerId }, cart);

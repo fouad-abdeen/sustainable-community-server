@@ -1,5 +1,4 @@
-import { CartItem } from "../../models";
-import { ShoppingCart } from "../../models/shopping-cart.model";
+import { CartItem, ShoppingCart } from "../../models";
 
 export interface IShoppingCartRepository {
   /**
@@ -7,6 +6,12 @@ export interface IShoppingCartRepository {
    * @param ownerId id of the customer
    */
   getCart(ownerId: string): Promise<ShoppingCart>;
+
+  /**
+   * Updates the shopping cart for a customer
+   * @param cart shopping cart to update
+   */
+  updateCart(cart: ShoppingCart): Promise<ShoppingCart>;
 
   /**
    * Clears the shopping cart for a customer
@@ -18,9 +23,8 @@ export interface IShoppingCartRepository {
    * Adds an item to the shopping cart for a customer
    * @param ownerId id of the customer
    * @param item item to add
-   * @param stock available stock of the item
    */
-  addItem(ownerId: string, item: CartItem, stock: number): Promise<void>;
+  addItem(ownerId: string, item: CartItem): Promise<void>;
 
   /**
    * Removes an item from the shopping cart for a customer

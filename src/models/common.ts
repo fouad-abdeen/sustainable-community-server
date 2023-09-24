@@ -158,14 +158,20 @@ export class CartItem {
   @IsString()
   id: string;
 
-  @IsString()
-  name: string;
+  @IsNumber()
+  quantity: number;
 
   @IsNumber()
   price: number;
 
   @IsNumber()
-  quantity: number;
+  availability: number;
+
+  @IsBoolean()
+  isAvailable: boolean;
+
+  @IsString()
+  name: string;
 
   @IsString()
   imageUrl?: string;

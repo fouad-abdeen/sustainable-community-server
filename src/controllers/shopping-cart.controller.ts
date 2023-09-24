@@ -8,7 +8,6 @@ import {
   Param,
   Post,
   Put,
-  QueryParams,
 } from "routing-controllers";
 import { BaseService, Context } from "../core";
 import { CartItem, UserRole } from "../models";
@@ -16,10 +15,7 @@ import { OpenAPI, ResponseSchema } from "routing-controllers-openapi";
 import { ShoppingCartRepository } from "../repositories";
 import { ShoppingCartResponse } from "./response/shopping-cart.response";
 import { ShoppingCartService } from "../services";
-import {
-  CartItemQueryParams,
-  CartItemRequest,
-} from "./request/shopping-cart.request";
+import { CartItemRequest } from "./request/shopping-cart.request";
 import { isMongoId } from "class-validator";
 import { Service } from "typedi";
 
@@ -53,7 +49,7 @@ export class ShoppingCartController extends BaseService {
     );
 
     return ShoppingCartResponse.getCartResponse(
-      await this._shoppingCartRepository.getCart(owner._id as string)
+      await this._shoppingCartService.getCart(owner._id as string)
     );
   }
   // #endregion
@@ -137,19 +133,16 @@ export class ShoppingCartController extends BaseService {
     summary: "Update item in shopping cart",
     security: [{ bearerAuth: [] }],
   })
-  async updateItem(
-    @QueryParams() queryParams: CartItemQueryParams
-  ): Promise<void> {
+  async updateItem(@Body() item: CartItemRequest): Promise<void> {
     const owner = Context.getUser();
-    const { id, quantity } = queryParams;
 
     this._logger.info(
-      `Received a request to update item with id: ${id} from shopping cart for customer with id: ${owner._id}`
+      `Received a request to update item with id: ${item.id} from shopping cart for customer with id: ${owner._id}`
     );
 
     await this._shoppingCartService.updateItem(
       owner._id as string,
-      { id, quantity } as CartItem
+      item as CartItem
     );
   }
   // #endregion
