@@ -1,5 +1,4 @@
 import { Service } from "typedi";
-import { UserRepository } from "./user.repository";
 import { ISellerRepository } from "./interfaces";
 import {
   CategoryInfo,
@@ -9,7 +8,7 @@ import {
   UserRole,
 } from "../models";
 import { Context, throwError } from "../core";
-import { CategoryRepository } from "./category.repository";
+import { CategoryRepository, UserRepository } from ".";
 
 @Service()
 export class SellerRepository

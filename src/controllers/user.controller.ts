@@ -11,9 +11,9 @@ import { BaseService, throwError } from "../core";
 import { Service } from "typedi";
 import { OpenAPI, ResponseSchema } from "routing-controllers-openapi";
 import { UserRepository } from "../repositories";
-import { UserQuery } from "./request/user.request";
+import { UserQuery } from "./request";
 import { User, UserBriefInfo, UserRole } from "../models";
-import { UserResponse } from "./response/user.response";
+import { UserResponse } from "./response";
 import { isMongoId } from "class-validator";
 
 @JsonController("/users")

@@ -2,12 +2,12 @@ import Container, { Service } from "typedi";
 import {
   BaseRepository,
   Context,
+  MongoConnection,
   MongoConnectionProvider,
   throwError,
 } from "../core";
 import { Category, CategoryType } from "../models";
 import { ICategoryRepository } from "./interfaces";
-import { MongoConnection } from "../core/providers/database/mongo/mongo.connection";
 
 @Service()
 export class CategoryRepository

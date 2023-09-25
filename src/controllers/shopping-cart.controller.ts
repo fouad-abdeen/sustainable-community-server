@@ -10,12 +10,12 @@ import {
   Put,
 } from "routing-controllers";
 import { BaseService, Context } from "../core";
-import { CartItem, UserRole } from "../models";
+import { UserRole } from "../models";
 import { OpenAPI, ResponseSchema } from "routing-controllers-openapi";
 import { ShoppingCartRepository } from "../repositories";
-import { ShoppingCartResponse } from "./response/shopping-cart.response";
+import { ShoppingCartResponse } from "./response";
 import { ShoppingCartService } from "../services";
-import { CartItemRequest } from "./request/shopping-cart.request";
+import { CartItemRequest } from "./request";
 import { isMongoId } from "class-validator";
 import { Service } from "typedi";
 
@@ -140,10 +140,7 @@ export class ShoppingCartController extends BaseService {
       `Received a request to update item with id: ${item.id} from shopping cart for customer with id: ${owner._id}`
     );
 
-    await this._shoppingCartService.updateItem(
-      owner._id as string,
-      item as CartItem
-    );
+    await this._shoppingCartService.updateItem(owner._id as string, item);
   }
   // #endregion
 }

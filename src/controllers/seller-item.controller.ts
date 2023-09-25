@@ -13,12 +13,12 @@ import {
 import { BaseService } from "../core";
 import { Service } from "typedi";
 import { OpenAPI, ResponseSchema } from "routing-controllers-openapi";
-import { SellerItemResponse } from "./response/seller-item.response";
+import { SellerItemResponse } from "./response";
 import {
   SellerItemCreationRequest,
   SellerItemQuery,
   SellerItemUpdateRequest,
-} from "./request/seller-item.request";
+} from "./request";
 import { SellerItem, UserRole } from "../models";
 import { SellerItemService } from "../services";
 

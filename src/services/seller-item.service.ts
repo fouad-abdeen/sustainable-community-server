@@ -14,7 +14,7 @@ import {
   SellerItemRepository,
   UserRepository,
 } from "../repositories";
-import { SellerItemQuery } from "../controllers/request/seller-item.request";
+import { SellerItemQuery } from "../controllers/request";
 
 @Service()
 export class SellerItemService extends BaseService {

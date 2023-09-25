@@ -21,8 +21,8 @@ import {
   RolesAndPermission,
 } from "../models";
 import { UserRepository } from "../repositories";
-import { LoginRequest } from "../controllers/request/auth.request";
-import { AuthResponse } from "../controllers/response/auth.response";
+import { LoginRequest } from "../controllers/request";
+import { AuthResponse } from "../controllers/response";
 
 @Service()
 export class AuthService extends BaseService {
@@ -42,6 +42,17 @@ export class AuthService extends BaseService {
   async signUpUser(user: User): Promise<AuthResponse> {
     user.email = user.email.toLowerCase();
     this._logger.info(`Attempting to sign up user with email ${user.email}`);
+
+    if (user.role === UserRole.SELLER && !(user.profile as SellerProfile).name)
+      throwError("Seller's business name is required", 400);
+
+    if (user.role === UserRole.CUSTOMER) {
+      const { firstName, lastName } = user.profile as CustomerProfile;
+
+      if (!firstName) throwError("Customer's first name is required", 400);
+
+      if (!lastName) throwError("Customer's last name is required", 400);
+    }
 
     this._logger.info(`Verifying user's email ${user.email}`);
     const alreadySignedUp = await this._userRepository.getUserByEmail(
@@ -380,7 +391,7 @@ export class AuthService extends BaseService {
     }
     // #endregion
 
-    if (verified) throwError(`${email} is not verified`, 403);
+    if (!verified) throwError(`${email} is not verified`, 403);
 
     this._logger.info("Adding password reset token to the user's blocklist");
     const updatedTokensBlocklist = [

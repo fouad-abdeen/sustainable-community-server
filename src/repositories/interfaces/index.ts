@@ -4,3 +4,4 @@ export * from "./seller.interface";
 export * from "./category.interface";
 export * from "./seller-item.interface";
 export * from "./shopping-cart.interface";
+export * from "./order.interface";

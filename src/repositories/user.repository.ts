@@ -1,18 +1,18 @@
 import Container, { Service } from "typedi";
 import {
   BaseRepository,
-  IMongoConnection,
+  MongoConnection,
   MongoConnectionProvider,
   MongooseQueryOptions,
   throwError,
 } from "../core";
 import { IUserRepository } from "./interfaces";
 import { User } from "../models";
-import { UserQuery } from "../controllers/request/user.request";
+import { UserQuery } from "../controllers/request";
 
 @Service()
 export class UserRepository extends BaseRepository implements IUserRepository {
-  private readonly _connection: IMongoConnection<User>;
+  private readonly _connection: MongoConnection<User, typeof User>;
 
   constructor(private mongoService?: MongoConnectionProvider) {
     if (!mongoService) mongoService = Container.get(MongoConnectionProvider);

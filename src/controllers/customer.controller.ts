@@ -14,7 +14,7 @@ import { Service } from "typedi";
 import { OpenAPI, ResponseSchema } from "routing-controllers-openapi";
 import { isMongoId } from "class-validator";
 import { CustomerRepository, SellerItemRepository } from "../repositories";
-import { ProfileUpdateRequest } from "./request/customer.request";
+import { ProfileUpdateRequest } from "./request";
 import { CustomerProfile, UserRole, WishlistItem } from "../models";
 
 @JsonController("/customers")

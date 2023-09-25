@@ -1,7 +1,11 @@
 import Container, { Service } from "typedi";
-import { BaseRepository, MongoConnectionProvider, throwError } from "../core";
-import { IShoppingCartRepository } from "./interfaces/shopping-cart.interface";
-import { MongoConnection } from "../core/providers/database/mongo/mongo.connection";
+import {
+  BaseRepository,
+  MongoConnection,
+  MongoConnectionProvider,
+  throwError,
+} from "../core";
+import { IShoppingCartRepository } from "./interfaces";
 import { CartItem, ShoppingCart } from "../models";
 
 @Service()
@@ -62,10 +66,19 @@ export class ShoppingCartRepository
 
     const cart = await this.getCart(ownerId);
 
-    const itemIndex = cart.items.findIndex((item) => item.id === item.id);
+    const itemIndex = cart.items.findIndex(
+      (cartItem) => cartItem.id === item.id
+    );
 
-    if (itemIndex === -1) cart.items.push(item);
-    else {
+    if (itemIndex === -1) {
+      if (cart.items.length >= 1)
+        if (cart.items[0].sellerId !== item.sellerId)
+          throwError(
+            `Cannot add items from different sellers to the same cart`,
+            400
+          );
+      cart.items.push(item);
+    } else {
       const quantity = cart.items[itemIndex].quantity + item.quantity;
 
       if (quantity > item.availability)
@@ -93,7 +106,9 @@ export class ShoppingCartRepository
 
     const cart = await this.getCart(ownerId);
 
-    const itemIndex = cart.items.findIndex((item) => item.id === itemId);
+    const itemIndex = cart.items.findIndex(
+      (cartItem) => cartItem.id === itemId
+    );
 
     if (itemIndex === -1) return;
 
@@ -114,7 +129,9 @@ export class ShoppingCartRepository
 
     const cart = await this.getCart(ownerId);
 
-    const itemIndex = cart.items.findIndex((item) => item.id === item.id);
+    const itemIndex = cart.items.findIndex(
+      (cartItem) => cartItem.id === item.id
+    );
 
     if (itemIndex === -1) return;
 

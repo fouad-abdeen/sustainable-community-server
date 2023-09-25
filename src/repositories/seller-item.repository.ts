@@ -2,13 +2,13 @@ import Container, { Service } from "typedi";
 import {
   BaseRepository,
   Context,
+  MongoConnection,
   MongoConnectionProvider,
   throwError,
 } from "../core";
 import { SellerItem } from "../models";
 import { ISellerItemRepository } from "./interfaces";
-import { MongoConnection } from "../core/providers/database/mongo/mongo.connection";
-import { SellerItemQuery } from "../controllers/request/seller-item.request";
+import { SellerItemQuery } from "../controllers/request";
 
 @Service()
 export class SellerItemRepository

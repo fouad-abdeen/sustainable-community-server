@@ -237,14 +237,23 @@
                     "id": {
                         "type": "string"
                     },
-                    "name": {
+                    "quantity": {
+                        "type": "number"
+                    },
+                    "sellerId": {
                         "type": "string"
                     },
                     "price": {
                         "type": "number"
                     },
-                    "quantity": {
+                    "availability": {
                         "type": "number"
+                    },
+                    "isAvailable": {
+                        "type": "boolean"
+                    },
+                    "name": {
+                        "type": "string"
                     },
                     "imageUrl": {
                         "type": "string"
@@ -253,210 +262,24 @@
                 "type": "object",
                 "required": [
                     "id",
-                    "name",
-                    "price",
                     "quantity",
+                    "sellerId",
+                    "price",
+                    "availability",
+                    "isAvailable",
+                    "name",
                     "imageUrl"
                 ]
             },
-            "UserQuery": {
+            "CustomerCheckoutInfo": {
                 "properties": {
-                    "role": {
-                        "enum": [
-                            "Customer",
-                            "Seller",
-                            "Admin"
-                        ],
-                        "type": "string"
-                    },
-                    "verified": {
-                        "type": "boolean"
-                    }
-                },
-                "type": "object"
-            },
-            "UserResponse": {
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
                     "email": {
-                        "type": "string"
-                    },
-                    "role": {
-                        "enum": [
-                            "Customer",
-                            "Seller",
-                            "Admin"
-                        ],
-                        "type": "string"
-                    },
-                    "verified": {
-                        "type": "boolean"
-                    },
-                    "profile": {
-                        "type": "object"
-                    },
-                    "createdAt": {
-                        "type": "number"
-                    },
-                    "createdBy": {
-                        "type": "string"
-                    },
-                    "updatedAt": {
-                        "type": "number"
-                    },
-                    "updatedBy": {
-                        "type": "string"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "email",
-                    "role",
-                    "verified",
-                    "profile",
-                    "createdAt",
-                    "createdBy",
-                    "updatedAt",
-                    "updatedBy"
-                ]
-            },
-            "ShoppingCartResponse": {
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "ownerId": {
-                        "type": "string"
-                    },
-                    "total": {
-                        "type": "number"
-                    },
-                    "items": {
-                        "items": {
-                            "$ref": "#/components/schemas/Array"
-                        },
-                        "type": "array"
-                    },
-                    "updatedAt": {
-                        "type": "number"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "ownerId",
-                    "total",
-                    "items",
-                    "updatedAt"
-                ]
-            },
-            "CartItemRequest": {
-                "properties": {
-                    "id": {
-                        "pattern": "^[0-9a-fA-F]{24}$",
-                        "type": "string"
-                    },
-                    "name": {
-                        "type": "string",
-                        "maxLength": 75,
-                        "minLength": 5
-                    },
-                    "price": {
-                        "type": "number",
-                        "minimum": 0
-                    },
-                    "quantity": {
-                        "type": "number",
-                        "minimum": 1
-                    },
-                    "imageUrl": {
-                        "format": "url",
-                        "type": "string"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "name",
-                    "price",
-                    "quantity",
-                    "imageUrl"
-                ]
-            },
-            "CartItemQueryParams": {
-                "properties": {
-                    "id": {
-                        "pattern": "^[0-9a-fA-F]{24}$",
-                        "type": "string"
-                    },
-                    "quantity": {
-                        "type": "number",
-                        "minimum": 1
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "quantity"
-                ]
-            },
-            "ProfileUpdateRequest": {
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "maxLength": 50,
-                        "minLength": 2
-                    },
-                    "description": {
-                        "type": "string",
-                        "maxLength": 500,
-                        "minLength": 100
-                    },
-                    "phoneNumber": {
-                        "type": "string"
-                    },
-                    "address": {
-                        "type": "string",
-                        "maxLength": 300,
-                        "minLength": 30
-                    },
-                    "businessEmail": {
-                        "format": "email",
-                        "type": "string"
-                    },
-                    "logoUrl": {
-                        "format": "url",
-                        "type": "string"
-                    },
-                    "websiteUrl": {
-                        "format": "url",
                         "type": "string"
                     },
                     "firstName": {
-                        "type": "string",
-                        "maxLength": 50,
-                        "minLength": 2
+                        "type": "string"
                     },
                     "lastName": {
-                        "type": "string",
-                        "maxLength": 50,
-                        "minLength": 2
-                    }
-                },
-                "type": "object"
-            },
-            "SellerResponse": {
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "description": {
                         "type": "string"
                     },
                     "phoneNumber": {
@@ -464,300 +287,15 @@
                     },
                     "address": {
                         "type": "string"
-                    },
-                    "email": {
-                        "type": "string"
-                    },
-                    "category": {
-                        "$ref": "#/components/schemas/CategoryInfo"
-                    },
-                    "logoUrl": {
-                        "type": "string"
-                    },
-                    "websiteUrl": {
-                        "type": "string"
                     }
                 },
                 "type": "object",
                 "required": [
-                    "id",
-                    "name",
-                    "description",
-                    "phoneNumber",
-                    "address",
                     "email",
-                    "category",
-                    "logoUrl",
-                    "websiteUrl"
-                ]
-            },
-            "SellerItemResponse": {
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "price": {
-                        "type": "number"
-                    },
-                    "category": {
-                        "$ref": "#/components/schemas/CategoryInfo"
-                    },
-                    "seller": {
-                        "$ref": "#/components/schemas/ItemSeller"
-                    },
-                    "isAvailable": {
-                        "type": "boolean"
-                    },
-                    "quantity": {
-                        "type": "number"
-                    },
-                    "imageUrl": {
-                        "type": "string"
-                    },
-                    "createdAt": {
-                        "type": "number"
-                    },
-                    "createdBy": {
-                        "type": "string"
-                    },
-                    "updatedAt": {
-                        "type": "number"
-                    },
-                    "updatedBy": {
-                        "type": "string"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "name",
-                    "description",
-                    "price",
-                    "category",
-                    "seller",
-                    "isAvailable",
-                    "quantity",
-                    "imageUrl",
-                    "createdAt",
-                    "createdBy",
-                    "updatedAt",
-                    "updatedBy"
-                ]
-            },
-            "SellerItemCreationRequest": {
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "maxLength": 75,
-                        "minLength": 1
-                    },
-                    "description": {
-                        "type": "string",
-                        "maxLength": 1000,
-                        "minLength": 1
-                    },
-                    "price": {
-                        "type": "number",
-                        "minimum": 0
-                    },
-                    "categoryId": {
-                        "pattern": "^[0-9a-fA-F]{24}$",
-                        "type": "string"
-                    },
-                    "sellerId": {
-                        "pattern": "^[0-9a-fA-F]{24}$",
-                        "type": "string"
-                    },
-                    "isAvailable": {
-                        "type": "boolean"
-                    },
-                    "quantity": {
-                        "type": "number",
-                        "minimum": 0
-                    },
-                    "imageUrl": {
-                        "format": "url",
-                        "type": "string"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "name",
-                    "description",
-                    "price",
-                    "categoryId",
-                    "sellerId"
-                ]
-            },
-            "SellerItemUpdateRequest": {
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "maxLength": 75,
-                        "minLength": 5
-                    },
-                    "descripsction": {
-                        "type": "string",
-                        "maxLength": 1000,
-                        "minLength": 100
-                    },
-                    "price": {
-                        "type": "number",
-                        "minimum": 0
-                    },
-                    "categoryId": {
-                        "pattern": "^[0-9a-fA-F]{24}$",
-                        "type": "string"
-                    },
-                    "sellerId": {
-                        "pattern": "^[0-9a-fA-F]{24}$",
-                        "type": "string"
-                    },
-                    "isAvailable": {
-                        "type": "boolean"
-                    },
-                    "quantity": {
-                        "type": "number",
-                        "minimum": 0
-                    },
-                    "imageUrl": {
-                        "format": "url",
-                        "type": "string"
-                    }
-                },
-                "type": "object"
-            },
-            "SellerItemQuery": {
-                "properties": {
-                    "sellerId": {
-                        "pattern": "^[0-9a-fA-F]{24}$",
-                        "type": "string"
-                    },
-                    "categoryId": {
-                        "pattern": "^[0-9a-fA-F]{24}$",
-                        "type": "string"
-                    },
-                    "isAvailable": {
-                        "type": "boolean"
-                    }
-                },
-                "type": "object"
-            },
-            "CategoryResponse": {
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "type": {
-                        "enum": [
-                            "Item",
-                            "Product",
-                            "Service"
-                        ],
-                        "type": "string"
-                    },
-                    "createdAt": {
-                        "type": "number"
-                    },
-                    "createdBy": {
-                        "type": "string"
-                    },
-                    "updatedAt": {
-                        "type": "number"
-                    },
-                    "updatedBy": {
-                        "type": "string"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "name",
-                    "description",
-                    "type",
-                    "createdAt",
-                    "createdBy",
-                    "updatedAt",
-                    "updatedBy"
-                ]
-            },
-            "CategoryCreationRequest": {
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "maxLength": 50,
-                        "minLength": 5
-                    },
-                    "description": {
-                        "type": "string",
-                        "maxLength": 250,
-                        "minLength": 25
-                    },
-                    "type": {
-                        "enum": [
-                            "Item",
-                            "Product",
-                            "Service"
-                        ],
-                        "type": "string"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "name",
-                    "description",
-                    "type"
-                ]
-            },
-            "CategoryUpdateRequest": {
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "maxLength": 50,
-                        "minLength": 5
-                    },
-                    "description": {
-                        "type": "string",
-                        "maxLength": 250,
-                        "minLength": 25
-                    },
-                    "type": {
-                        "enum": [
-                            "Item",
-                            "Product",
-                            "Service"
-                        ],
-                        "type": "string"
-                    }
-                },
-                "type": "object"
-            },
-            "CategoryQuery": {
-                "properties": {
-                    "type": {
-                        "enum": [
-                            "Item",
-                            "Product",
-                            "Service"
-                        ],
-                        "type": "string"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "type"
+                    "firstName",
+                    "lastName",
+                    "phoneNumber",
+                    "address"
                 ]
             },
             "LoginRequest": {
@@ -864,6 +402,272 @@
                     "refreshToken"
                 ]
             },
+            "CategoryCreationRequest": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "minLength": 5
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 250,
+                        "minLength": 25
+                    },
+                    "type": {
+                        "enum": [
+                            "Item",
+                            "Product",
+                            "Service"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "description",
+                    "type"
+                ]
+            },
+            "CategoryUpdateRequest": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "minLength": 5
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 250,
+                        "minLength": 25
+                    },
+                    "type": {
+                        "enum": [
+                            "Item",
+                            "Product",
+                            "Service"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "CategoryQuery": {
+                "properties": {
+                    "type": {
+                        "enum": [
+                            "Item",
+                            "Product",
+                            "Service"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "type"
+                ]
+            },
+            "ProfileUpdateRequest": {
+                "properties": {
+                    "firstName": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "minLength": 2
+                    },
+                    "lastName": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "minLength": 2
+                    },
+                    "phoneNumber": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "type": "string",
+                        "maxLength": 300,
+                        "minLength": 30
+                    }
+                },
+                "type": "object"
+            },
+            "OrderUpdateRequest": {
+                "properties": {
+                    "id": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
+                        "type": "string"
+                    },
+                    "status": {
+                        "enum": [
+                            "Pending",
+                            "Processing",
+                            "Cancelled",
+                            "Completed"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "status"
+                ]
+            },
+            "OrderQuery": {
+                "properties": {
+                    "sellerId": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
+                        "type": "string"
+                    },
+                    "customerId": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
+                        "type": "string"
+                    },
+                    "status": {
+                        "enum": [
+                            "Pending",
+                            "Processing",
+                            "Cancelled",
+                            "Completed"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "SellerItemCreationRequest": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 75,
+                        "minLength": 1
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 1
+                    },
+                    "price": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "categoryId": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
+                        "type": "string"
+                    },
+                    "sellerId": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
+                        "type": "string"
+                    },
+                    "isAvailable": {
+                        "type": "boolean"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "imageUrl": {
+                        "format": "url",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "description",
+                    "price",
+                    "categoryId",
+                    "sellerId"
+                ]
+            },
+            "SellerItemUpdateRequest": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 75,
+                        "minLength": 5
+                    },
+                    "descripsction": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 100
+                    },
+                    "price": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "categoryId": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
+                        "type": "string"
+                    },
+                    "sellerId": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
+                        "type": "string"
+                    },
+                    "isAvailable": {
+                        "type": "boolean"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "imageUrl": {
+                        "format": "url",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "SellerItemQuery": {
+                "properties": {
+                    "sellerId": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
+                        "type": "string"
+                    },
+                    "categoryId": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
+                        "type": "string"
+                    },
+                    "isAvailable": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "CartItemRequest": {
+                "properties": {
+                    "id": {
+                        "pattern": "^[0-9a-fA-F]{24}$",
+                        "type": "string"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "minimum": 1
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "quantity"
+                ]
+            },
+            "UserQuery": {
+                "properties": {
+                    "role": {
+                        "enum": [
+                            "Customer",
+                            "Seller",
+                            "Admin"
+                        ],
+                        "type": "string"
+                    },
+                    "verified": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
             "AuthResponse": {
                 "properties": {
                     "userInfo": {
@@ -877,6 +681,278 @@
                 "required": [
                     "userInfo",
                     "tokens"
+                ]
+            },
+            "CategoryResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "enum": [
+                            "Item",
+                            "Product",
+                            "Service"
+                        ],
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "number"
+                    },
+                    "createdBy": {
+                        "type": "string"
+                    },
+                    "updatedAt": {
+                        "type": "number"
+                    },
+                    "updatedBy": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "type",
+                    "createdAt",
+                    "createdBy",
+                    "updatedAt",
+                    "updatedBy"
+                ]
+            },
+            "OrderResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "totalAmount": {
+                        "type": "number"
+                    },
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/Array"
+                        },
+                        "type": "array"
+                    },
+                    "customerCheckoutInfo": {
+                        "$ref": "#/components/schemas/CustomerCheckoutInfo"
+                    },
+                    "customerId": {
+                        "type": "string"
+                    },
+                    "sellerId": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "enum": [
+                            "Pending",
+                            "Processing",
+                            "Cancelled",
+                            "Completed"
+                        ],
+                        "type": "string"
+                    },
+                    "updatedAt": {
+                        "type": "number"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "totalAmount",
+                    "items",
+                    "customerCheckoutInfo",
+                    "customerId",
+                    "sellerId",
+                    "status",
+                    "updatedAt"
+                ]
+            },
+            "SellerItemResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "category": {
+                        "$ref": "#/components/schemas/CategoryInfo"
+                    },
+                    "seller": {
+                        "$ref": "#/components/schemas/ItemSeller"
+                    },
+                    "isAvailable": {
+                        "type": "boolean"
+                    },
+                    "quantity": {
+                        "type": "number"
+                    },
+                    "imageUrl": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "number"
+                    },
+                    "createdBy": {
+                        "type": "string"
+                    },
+                    "updatedAt": {
+                        "type": "number"
+                    },
+                    "updatedBy": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "price",
+                    "category",
+                    "seller",
+                    "isAvailable",
+                    "quantity",
+                    "imageUrl",
+                    "createdAt",
+                    "createdBy",
+                    "updatedAt",
+                    "updatedBy"
+                ]
+            },
+            "SellerResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "phoneNumber": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "$ref": "#/components/schemas/CategoryInfo"
+                    },
+                    "logoUrl": {
+                        "type": "string"
+                    },
+                    "websiteUrl": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "phoneNumber",
+                    "address",
+                    "email",
+                    "category",
+                    "logoUrl",
+                    "websiteUrl"
+                ]
+            },
+            "ShoppingCartResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "ownerId": {
+                        "type": "string"
+                    },
+                    "total": {
+                        "type": "number"
+                    },
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/Array"
+                        },
+                        "type": "array"
+                    },
+                    "updatedAt": {
+                        "type": "number"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "ownerId",
+                    "total",
+                    "items",
+                    "updatedAt"
+                ]
+            },
+            "UserResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "enum": [
+                            "Customer",
+                            "Seller",
+                            "Admin"
+                        ],
+                        "type": "string"
+                    },
+                    "verified": {
+                        "type": "boolean"
+                    },
+                    "profile": {
+                        "type": "object"
+                    },
+                    "createdAt": {
+                        "type": "number"
+                    },
+                    "createdBy": {
+                        "type": "string"
+                    },
+                    "updatedAt": {
+                        "type": "number"
+                    },
+                    "updatedBy": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "email",
+                    "role",
+                    "verified",
+                    "profile",
+                    "createdAt",
+                    "createdBy",
+                    "updatedAt",
+                    "updatedBy"
                 ]
             }
         }
@@ -1175,26 +1251,19 @@
                         "name": "auth",
                         "required": true,
                         "schema": {}
-                    },
-                    {
-                        "in": "query",
-                        "name": "id",
-                        "required": true,
-                        "schema": {
-                            "pattern": "^[0-9a-fA-F]{24}$",
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "in": "query",
-                        "name": "quantity",
-                        "required": true,
-                        "schema": {
-                            "type": "number",
-                            "minimum": 1
-                        }
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CartItemRequest"
+                            }
+                        }
+                    },
+                    "description": "CartItemRequest",
+                    "required": false
+                },
                 "responses": {
                     "200": {
                         "content": {
@@ -1725,6 +1794,231 @@
                 "summary": "Delete an item",
                 "tags": [
                     "Seller Item"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/orders/": {
+            "get": {
+                "operationId": "OrderController.getListOfOrders",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    },
+                    {
+                        "in": "query",
+                        "name": "sellerId",
+                        "schema": {
+                            "pattern": "^[0-9a-fA-F]{24}$",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "customerId",
+                        "schema": {
+                            "pattern": "^[0-9a-fA-F]{24}$",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "enum": [
+                                "Pending",
+                                "Processing",
+                                "Cancelled",
+                                "Completed"
+                            ],
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/OrderResponse"
+                                    },
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "summary": "Get list of orders",
+                "tags": [
+                    "Order"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "operationId": "OrderController.placeOrder",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "summary": "Place an order",
+                "tags": [
+                    "Order"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "operationId": "OrderController.updateOrder",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OrderUpdateRequest"
+                            }
+                        }
+                    },
+                    "description": "OrderUpdateRequest",
+                    "required": false
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "summary": "Update an order",
+                "tags": [
+                    "Order"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/orders/{id}": {
+            "get": {
+                "operationId": "OrderController.getOrder",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "summary": "Get order by id",
+                "tags": [
+                    "Order"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "operationId": "OrderController.cancelOrder",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": true,
+                        "schema": {}
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "summary": "Cancel an order",
+                "tags": [
+                    "Order"
                 ],
                 "security": [
                     {

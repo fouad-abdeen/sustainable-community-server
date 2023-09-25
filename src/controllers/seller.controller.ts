@@ -13,7 +13,7 @@ import { BaseService, Context, throwError } from "../core";
 import { Service } from "typedi";
 import { OpenAPI, ResponseSchema } from "routing-controllers-openapi";
 import { isMongoId } from "class-validator";
-import { ProfileUpdateRequest } from "./request/seller.request";
+import { ProfileUpdateRequest } from "./request";
 import { CategoryRepository, SellerRepository } from "../repositories";
 import {
   Category,
@@ -24,7 +24,7 @@ import {
   User,
   UserRole,
 } from "../models";
-import { SellerResponse } from "./response/seller.response";
+import { SellerResponse } from "./response";
 
 @JsonController("/sellers")
 @Service()

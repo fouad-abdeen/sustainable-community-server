@@ -13,13 +13,13 @@ import {
 import { BaseService } from "../core";
 import { CategoryRepository } from "../repositories";
 import { Service } from "typedi";
-import { CategoryResponse } from "./response/category.response";
+import { CategoryResponse } from "./response";
 import { OpenAPI, ResponseSchema } from "routing-controllers-openapi";
 import {
   CategoryCreationRequest,
   CategoryQuery,
   CategoryUpdateRequest,
-} from "./request/category.request";
+} from "./request";
 import { Category, UserRole } from "../models";
 
 @JsonController("/categories")

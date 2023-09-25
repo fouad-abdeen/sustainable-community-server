@@ -1,9 +1,8 @@
 import { Service } from "typedi";
 import { ICustomerRepository } from "./interfaces";
-import { UserRepository } from "./user.repository";
 import { CustomerProfile, User, WishlistItem } from "../models";
 import { Context, throwError } from "../core";
-import { SellerItemRepository } from "./seller-item.repository";
+import { SellerItemRepository, UserRepository } from ".";
 
 @Service()
 export class CustomerRepository

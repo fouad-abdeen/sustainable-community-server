@@ -19,6 +19,17 @@ export enum CategoryType {
   PRODUCT = "Product",
   SERVICE = "Service",
 }
+
+export enum OrderStatus {
+  PENDING = "Pending",
+  PROCESSING = "Processing",
+  CANCELLED = "Cancelled",
+  COMPLETED = "Completed",
+}
+
+export enum ShippingRate {
+  TRIPOLI = 1,
+}
 // #endregion
 
 // #region Classes
@@ -161,6 +172,9 @@ export class CartItem {
   @IsNumber()
   quantity: number;
 
+  @IsString()
+  sellerId: string;
+
   @IsNumber()
   price: number;
 
@@ -175,6 +189,23 @@ export class CartItem {
 
   @IsString()
   imageUrl?: string;
+}
+
+export class CustomerCheckoutInfo {
+  @IsString()
+  email: string;
+
+  @IsString()
+  firstName: string;
+
+  @IsString()
+  lastName: string;
+
+  @IsString()
+  phoneNumber: string;
+
+  @IsString()
+  address: string;
 }
 // #endregion
 

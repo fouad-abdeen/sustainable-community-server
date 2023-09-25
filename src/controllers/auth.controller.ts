@@ -18,7 +18,7 @@ import {
   PasswordUpdateRequest,
   RefreshTokenRequest,
   SignupRequest,
-} from "./request/auth.request";
+} from "./request";
 import {
   CustomerProfile,
   UserRole,
@@ -26,7 +26,7 @@ import {
   User,
   Tokens,
 } from "../models";
-import { AuthResponse } from "./response/auth.response";
+import { AuthResponse } from "./response";
 
 @JsonController("/auth")
 @Service()

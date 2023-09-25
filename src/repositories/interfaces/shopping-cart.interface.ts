@@ -10,8 +10,12 @@ export interface IShoppingCartRepository {
   /**
    * Updates the shopping cart for a customer
    * @param cart shopping cart to update
+   * @param validateItems whether to validate items in the cart
    */
-  updateCart(cart: ShoppingCart): Promise<ShoppingCart>;
+  updateCart(
+    cart: ShoppingCart,
+    validateItems?: boolean
+  ): Promise<ShoppingCart>;
 
   /**
    * Clears the shopping cart for a customer

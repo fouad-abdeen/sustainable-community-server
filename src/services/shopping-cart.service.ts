@@ -2,7 +2,7 @@ import { Service } from "typedi";
 import { BaseService, throwError } from "../core";
 import { CartItem, SellerItem, ShoppingCart } from "../models";
 import { SellerItemRepository, ShoppingCartRepository } from "../repositories";
-import { CartItemRequest } from "../controllers/request/shopping-cart.request";
+import { CartItemRequest } from "../controllers/request";
 
 @Service()
 export class ShoppingCartService extends BaseService {
@@ -19,12 +19,29 @@ export class ShoppingCartService extends BaseService {
     return await this.updateCart(cart);
   }
 
-  async updateCart(cart: ShoppingCart): Promise<ShoppingCart> {
+  async updateCart(
+    cart: ShoppingCart,
+    checkout?: boolean
+  ): Promise<ShoppingCart> {
     const updatedCart = { ...cart };
 
     updatedCart.items = await (Promise.all(
       cart.items.map(async (item) => {
         const originItem = await this.getOriginItem(item.id);
+
+        if (checkout) {
+          if (originItem.quantity < 1)
+            throwError(`The item ${originItem.name} is out of stock`, 400);
+
+          if (!originItem.isAvailable)
+            throwError(`The item ${originItem.name} is not available`, 400);
+
+          if (item.quantity > originItem.quantity)
+            throwError(
+              `The item ${originItem.name} has only ${originItem.quantity} left in stock`,
+              400
+            );
+        }
 
         if (originItem.quantity < 1) {
           item.isAvailable = false;
@@ -67,6 +84,7 @@ export class ShoppingCartService extends BaseService {
 
     const cartItem = {
       ...item,
+      sellerId: originItem.sellerId,
       price: originItem.price,
       availability: originItem.quantity,
       isAvailable: originItem.isAvailable,
@@ -77,12 +95,13 @@ export class ShoppingCartService extends BaseService {
     await this._shoppingCartRepository.addItem(ownerId, cartItem);
   }
 
-  async updateItem(ownerId: string, item: CartItem): Promise<void> {
+  async updateItem(ownerId: string, item: CartItemRequest): Promise<void> {
     const { id, quantity } = item;
 
     const originItem = await this.getOriginItem(id);
 
     const {
+      sellerId,
       price,
       isAvailable,
       quantity: availability,
@@ -103,6 +122,7 @@ export class ShoppingCartService extends BaseService {
     await this._shoppingCartRepository.updateItem(ownerId, {
       id,
       quantity,
+      sellerId,
       price,
       isAvailable,
       availability,
