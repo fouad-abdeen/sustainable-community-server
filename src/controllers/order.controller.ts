@@ -3,7 +3,6 @@ import {
   Body,
   Delete,
   Get,
-  HeaderParam,
   JsonController,
   Param,
   Post,
@@ -13,12 +12,15 @@ import {
 import { Service } from "typedi";
 import { BaseService, Context, throwError } from "../core";
 import { OrderResponse } from "./response";
-import { OpenAPI, ResponseSchema } from "routing-controllers-openapi";
 import { OrderRepository } from "../repositories";
 import { UserRole } from "../models";
 import { isMongoId } from "class-validator";
 import { OrderService } from "../services";
-import { OrderQuery, OrderUpdateRequest } from "./request";
+import {
+  OrderPlacementRequest,
+  OrderQuery,
+  OrderUpdateRequest,
+} from "./request";
 
 @JsonController("/orders")
 @Service()
@@ -30,18 +32,11 @@ export class OrderController extends BaseService {
     super(__filename);
   }
 
-  // #region Get List of Orders
   @Authorized({
     roles: [UserRole.CUSTOMER, UserRole.SELLER],
     disclaimer: "Only customers and sellers can get a list of orders",
   })
-  @HeaderParam("auth", { required: true })
   @Get("/")
-  @OpenAPI({
-    summary: "Get list of orders",
-    security: [{ bearerAuth: [] }],
-  })
-  @ResponseSchema(OrderResponse, { isArray: true })
   async getListOfOrders(
     @QueryParams() queryParams: OrderQuery
   ): Promise<OrderResponse[]> {
@@ -61,20 +56,12 @@ export class OrderController extends BaseService {
       await this._orderRepository.getOrders(queryParams, isCustomer)
     );
   }
-  // #endregion
 
-  // #region Get Order
   @Authorized({
     roles: [UserRole.CUSTOMER, UserRole.SELLER],
     disclaimer: "Only customers and sellers can get an order",
   })
-  @HeaderParam("auth", { required: true })
   @Get("/:id")
-  @OpenAPI({
-    summary: "Get order by id",
-    security: [{ bearerAuth: [] }],
-  })
-  @ResponseSchema(OrderResponse)
   async getOrder(@Param("id") id: string): Promise<OrderResponse> {
     const user = Context.getUser();
     const isCustomer = user.role === UserRole.CUSTOMER;
@@ -94,45 +81,34 @@ export class OrderController extends BaseService {
 
     return OrderResponse.getOrderResponse(order);
   }
-  // #endregion
 
-  // #region Place Order
   @Authorized({
     roles: [UserRole.CUSTOMER],
     disclaimer: "Only customers can place an order",
   })
-  @HeaderParam("auth", { required: true })
   @Post("/")
-  @OpenAPI({
-    summary: "Place an order",
-    security: [{ bearerAuth: [] }],
-  })
-  @ResponseSchema(OrderResponse)
-  async placeOrder(): Promise<OrderResponse> {
+  async placeOrder(
+    @Body() checkoutInformation: OrderPlacementRequest
+  ): Promise<OrderResponse> {
     const user = Context.getUser();
 
     this._logger.info(
       `Received a request to place an order for the customer with id: ${user._id}`
     );
 
-    const placedOrder = await this._orderService.placeOrder(user._id as string);
+    const placedOrder = await this._orderService.placeOrder(
+      user._id as string,
+      checkoutInformation
+    );
 
     return OrderResponse.getOrderResponse(placedOrder);
   }
-  // #endregion
 
-  // #region Update Order
   @Authorized({
     roles: [UserRole.SELLER],
     disclaimer: "Only sellers can update an order",
   })
-  @HeaderParam("auth", { required: true })
   @Put("/")
-  @OpenAPI({
-    summary: "Update an order",
-    security: [{ bearerAuth: [] }],
-  })
-  @ResponseSchema(OrderResponse)
   async updateOrder(
     @Body() request: OrderUpdateRequest
   ): Promise<OrderResponse> {
@@ -148,20 +124,11 @@ export class OrderController extends BaseService {
     return OrderResponse.getOrderResponse(updatedOrder);
   }
 
-  // #endregion
-
-  // #region Cancel Order
   @Authorized({
     roles: [UserRole.CUSTOMER],
     disclaimer: "Only customers can directly cancel an order",
   })
-  @HeaderParam("auth", { required: true })
   @Delete("/:id")
-  @OpenAPI({
-    summary: "Cancel an order",
-    security: [{ bearerAuth: [] }],
-  })
-  @ResponseSchema(OrderResponse)
   async cancelOrder(@Param("id") id: string): Promise<OrderResponse> {
     const user = Context.getUser();
 
@@ -175,5 +142,4 @@ export class OrderController extends BaseService {
 
     return OrderResponse.getOrderResponse(cancelledOrder);
   }
-  // #endregion
 }

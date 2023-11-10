@@ -9,6 +9,7 @@ import {
 import { SellerItem } from "../models";
 import { ISellerItemRepository } from "./interfaces";
 import { SellerItemQuery } from "../controllers/request";
+import { SellerRepository } from "./seller.repository";
 
 @Service()
 export class SellerItemRepository
@@ -17,13 +18,22 @@ export class SellerItemRepository
 {
   private readonly _connection: MongoConnection<SellerItem, typeof SellerItem>;
 
-  constructor(private mongoService: MongoConnectionProvider) {
+  constructor(
+    private mongoService: MongoConnectionProvider,
+    private _sellerRepository: SellerRepository
+  ) {
     if (!mongoService) mongoService = Container.get(MongoConnectionProvider);
     super(__filename, mongoService);
     this._connection = mongoService.getConnection(SellerItem, this._logger);
+    if (!this._sellerRepository)
+      this._sellerRepository = Container.get(SellerRepository);
   }
 
-  async getListOfItems(conditions: SellerItemQuery): Promise<SellerItem[]> {
+  async getListOfItems<I>(
+    conditions: SellerItemQuery,
+    projection?: string,
+    skipThrowingError?: boolean
+  ): Promise<SellerItem[] | I[]> {
     this._logger.info(
       `Getting list of items with the properties: ${JSON.stringify(
         conditions,
@@ -36,9 +46,9 @@ export class SellerItemRepository
       SellerItemQuery,
       unknown,
       SellerItem[]
-    >({ conditions });
+    >({ conditions, projection });
 
-    if (!items || items.length === 0)
+    if (!skipThrowingError && (items ?? []).length === 0)
       throwError(
         `No items found with the properties: ` +
           `seller id: ${conditions.sellerId}, category id: ${conditions.categoryId}, is available: ${conditions.isAvailable}`,
@@ -48,7 +58,11 @@ export class SellerItemRepository
     return items;
   }
 
-  async getItem<S>(id: string, projection?: string): Promise<SellerItem | S> {
+  async getItem<S>(
+    id: string,
+    projection?: string,
+    skipThrowingError?: boolean
+  ): Promise<SellerItem | S> {
     this._logger.info(`Getting item with id: ${id}`);
 
     const item = await this._connection.queryOne<{ _id: string }, S>(
@@ -56,7 +70,8 @@ export class SellerItemRepository
       projection
     );
 
-    if (!item) throwError(`Item with id ${id} not found`, 404);
+    if (!item && !skipThrowingError)
+      throwError(`Item with id ${id} not found`, 404);
 
     return item;
   }

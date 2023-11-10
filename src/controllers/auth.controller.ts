@@ -7,10 +7,11 @@ import {
   Post,
   Put,
   QueryParam,
+  QueryParams,
 } from "routing-controllers";
 import { OpenAPI, ResponseSchema } from "routing-controllers-openapi";
 import { Service } from "typedi";
-import { BaseService } from "../core";
+import { BaseService, Context } from "../core";
 import { AuthService } from "../services";
 import {
   LoginRequest,
@@ -26,7 +27,7 @@ import {
   User,
   Tokens,
 } from "../models";
-import { AuthResponse } from "./response";
+import { AuthResponse, UserResponse } from "./response";
 
 @JsonController("/auth")
 @Service()
@@ -54,7 +55,7 @@ export class AuthController extends BaseService {
 
   // #region Logout
   @Authorized()
-  @HeaderParam("auth", { required: true })
+  @HeaderParam("auth")
   @Get("/logout")
   @OpenAPI({
     summary: "Sign out user",
@@ -151,26 +152,47 @@ export class AuthController extends BaseService {
     security: [{ bearerAuth: [] }],
   })
   async updatePassword(
-    @Body() { currentPassword, newPassword }: PasswordUpdateRequest
+    @Body() passwordUpdateRequest: PasswordUpdateRequest
   ): Promise<void> {
     this._logger.info("Requesting password update");
 
-    await this._authService.updatePassword(currentPassword, newPassword);
+    await this._authService.updatePassword(passwordUpdateRequest);
+  }
+  // #endregion
+
+  // #region Get Authenticated User
+  @Authorized()
+  @HeaderParam("auth")
+  @Get("/user")
+  @OpenAPI({
+    summary: "Get authenticated user's info",
+  })
+  @ResponseSchema(UserResponse)
+  async getAuthenticatedUser(): Promise<UserResponse> {
+    const user = Context.getUser();
+
+    this._logger.info(
+      `Received a request to get info of the user with id: ${user._id}`
+    );
+
+    return UserResponse.getUserResponse(user);
   }
   // #endregion
 
   // #region Refresh Access Token
-  @Put("/token/refresh")
+  @Authorized()
+  @HeaderParam("auth")
+  @Get("/token/refresh")
   @OpenAPI({
     summary: "Refresh access token",
   })
   @ResponseSchema(Tokens)
   async refreshAccessToken(
-    @Body() { refreshToken }: RefreshTokenRequest
+    @QueryParams() params: RefreshTokenRequest
   ): Promise<Tokens> {
     this._logger.info("Requesting access token refresh");
 
-    return this._authService.refreshAccessToken(refreshToken);
+    return this._authService.refreshAccessToken(params);
   }
   // #endregion
 }

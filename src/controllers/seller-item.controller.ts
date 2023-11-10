@@ -21,11 +21,15 @@ import {
 } from "./request";
 import { SellerItem, UserRole } from "../models";
 import { SellerItemService } from "../services";
+import { SellerItemRepository } from "../repositories";
 
 @JsonController("/items")
 @Service()
 export class SellerItemController extends BaseService {
-  constructor(private _sellerItemService: SellerItemService) {
+  constructor(
+    private _sellerItemService: SellerItemService,
+    private _sellerItemRepository: SellerItemRepository
+  ) {
     super(__filename);
   }
 
@@ -46,7 +50,9 @@ export class SellerItemController extends BaseService {
       )}`
     );
 
-    const items = await this._sellerItemService.getListOfItems(conditions);
+    const items = await this._sellerItemRepository.getListOfItems<SellerItem>(
+      conditions
+    );
 
     return SellerItemResponse.getListOfItemsResponse(items);
   }
@@ -61,7 +67,7 @@ export class SellerItemController extends BaseService {
   async getItem(@Param("id") id: string): Promise<SellerItemResponse> {
     this._logger.info(`Received a request to get item with id: ${id}`);
 
-    const item = await this._sellerItemService.getItem(id);
+    const item = await this._sellerItemRepository.getItem<SellerItem>(id);
 
     return SellerItemResponse.getItemResponse(item);
   }
@@ -72,7 +78,7 @@ export class SellerItemController extends BaseService {
     roles: [UserRole.SELLER],
     disclaimer: "Only sellers can create an item",
   })
-  @HeaderParam("auth", { required: true })
+  @HeaderParam("auth")
   @Post("/")
   @OpenAPI({
     summary: "Create an item",
@@ -97,7 +103,7 @@ export class SellerItemController extends BaseService {
     roles: [UserRole.SELLER, UserRole.ADMIN],
     disclaimer: "Only sellers and admins can update an item",
   })
-  @HeaderParam("auth", { required: true })
+  @HeaderParam("auth")
   @Put("/:id")
   @OpenAPI({
     summary: "Update an item",
@@ -124,7 +130,7 @@ export class SellerItemController extends BaseService {
     roles: [UserRole.SELLER],
     disclaimer: "Only sellers can delete an item",
   })
-  @HeaderParam("auth", { required: true })
+  @HeaderParam("auth")
   @Delete("/:id")
   @OpenAPI({
     summary: "Delete an item",

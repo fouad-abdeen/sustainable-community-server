@@ -104,4 +104,7 @@ export interface MongooseQueryOptions<U, V> {
   // Retrieve only certain fields
   // Fields' names separated with spaces
   projection?: string;
+
+  // The sorting conditions
+  sort?: { [key: string]: any };
 }

@@ -1,4 +1,4 @@
-import { CategoryInfo, SellerInfo, SellerProfile } from "../../models";
+import { CategoryInfo, SellerInfo, SellerProfile, User } from "../../models";
 import { IUserRepository } from "./user.interface";
 
 export interface ISellerRepository extends IUserRepository {
@@ -13,8 +13,13 @@ export interface ISellerRepository extends IUserRepository {
    * Updates the category of a seller
    * @param userId id of the seller
    * @param categoryId id of the category
+   * @param profile the profile of the seller
    */
-  updateCategory(userId: string, categoryId: string): Promise<void>;
+  updateCategory(
+    userId: string,
+    categoryId: string,
+    profile: SellerProfile
+  ): Promise<void>;
 
   /**
    * Assigns an item category to a seller
@@ -43,17 +48,26 @@ export interface ISellerRepository extends IUserRepository {
   /**
    * Gets the item categories of a seller
    * @param userId id of the seller
+   * @param categories ids list of the seller's categories
    */
-  getItemCategories(userId: string): Promise<CategoryInfo[]>;
+  getItemCategories(
+    user: string,
+    categories: string[]
+  ): Promise<CategoryInfo[]>;
 
   /**
    * Gets list of sellers
+   * @param projection the projection of the query
+   * @param activeSellers if true, returns only active sellers
    */
-  getListOfSellers(): Promise<SellerInfo[]>;
+  getListOfSellers(
+    projection: string,
+    activeSellers: boolean
+  ): Promise<SellerInfo[]>;
 
   /**
    * Gets a seller by id
    * @param userId id of the seller
    */
-  getSeller(userId: string): Promise<{ profile: SellerProfile }>;
+  getSeller(userId: string): Promise<SellerInfo>;
 }

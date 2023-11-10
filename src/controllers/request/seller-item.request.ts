@@ -1,7 +1,6 @@
 import {
   IsBoolean,
   IsMongoId,
-  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -12,15 +11,13 @@ import {
 } from "class-validator";
 
 export class SellerItemCreationRequest {
-  @IsNotEmpty({ message: "Name cannot be empty" })
   @MinLength(5, { message: "Name cannot be shorter than 5 characters" })
   @MaxLength(75, { message: "Name cannot be longer than 75 characters" })
   @IsString({ message: "Invalid or missing name's value" })
   name: string;
 
-  @IsNotEmpty({ message: "Description cannot be empty" })
-  @MinLength(100, {
-    message: "Description cannot be shorter than 100 characters",
+  @MinLength(25, {
+    message: "Description cannot be shorter than 25 characters",
   })
   @MaxLength(1000, {
     message: "Description cannot be longer than 1000 characters",
@@ -60,14 +57,14 @@ export class SellerItemUpdateRequest {
   name?: string;
 
   @IsOptional()
-  @MinLength(100, {
-    message: "Description cannot be shorter than 100 characters",
+  @MinLength(25, {
+    message: "Description cannot be shorter than 25 characters",
   })
   @MaxLength(1000, {
     message: "Description cannot be longer than 1000 characters",
   })
   @IsString({ message: "Invalid description's value" })
-  descripsction?: string;
+  description?: string;
 
   @IsOptional()
   @Min(0, { message: "Price cannot be negative" })
@@ -77,10 +74,6 @@ export class SellerItemUpdateRequest {
   @IsOptional()
   @IsMongoId({ message: "Invalid category's id" })
   categoryId?: string;
-
-  @IsOptional()
-  @IsMongoId({ message: "Invalid seller's id" })
-  sellerId?: string;
 
   @IsOptional()
   @IsBoolean({ message: "Invalid availability's value" })

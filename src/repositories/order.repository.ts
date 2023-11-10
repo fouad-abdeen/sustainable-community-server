@@ -85,7 +85,10 @@ export class OrderRepository
       `Submitting a new order request to the seller with id: ${order.sellerId}`
     );
 
-    return await this._connection.insertOne(order);
+    return await this._connection.insertOne({
+      ...order,
+      createdAt: +new Date(),
+    });
   }
 
   async cancelOrder(id: string): Promise<Order> {

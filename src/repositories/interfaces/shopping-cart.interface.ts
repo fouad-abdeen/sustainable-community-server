@@ -8,6 +8,12 @@ export interface IShoppingCartRepository {
   getCart(ownerId: string): Promise<ShoppingCart>;
 
   /**
+   * Creates a shopping cart for a customer
+   * @param ownerId id of the customer
+   */
+  createCart(ownerId: string): Promise<ShoppingCart>;
+
+  /**
    * Updates the shopping cart for a customer
    * @param cart shopping cart to update
    * @param validateItems whether to validate items in the cart

@@ -13,17 +13,18 @@ export class CategoryCreationRequest {
   @IsString({ message: "Invalid or missing name's value" })
   name: string;
 
-  @MinLength(25, {
-    message: "Description cannot be shorter than 25 characters",
+  @IsEnum(CategoryType, { message: "Invalid category type" })
+  type: CategoryType;
+
+  @IsOptional()
+  @MinLength(10, {
+    message: "Description cannot be shorter than 10 characters",
   })
   @MaxLength(250, {
     message: "Description cannot be longer than 250 characters",
   })
   @IsString({ message: "Invalid or missing description's value" })
   description: string;
-
-  @IsEnum(CategoryType, { message: "Invalid category type" })
-  type: CategoryType;
 }
 
 export class CategoryUpdateRequest {
@@ -34,21 +35,22 @@ export class CategoryUpdateRequest {
   name?: string;
 
   @IsOptional()
-  @MinLength(25, {
-    message: "Description cannot be shorter than 25 characters",
+  @IsEnum(CategoryType, { message: "Invalid category type" })
+  type?: CategoryType;
+
+  @IsOptional()
+  @MinLength(10, {
+    message: "Description cannot be shorter than 10 characters",
   })
   @MaxLength(250, {
     message: "Description cannot be longer than 250 characters",
   })
   @IsString({ message: "Invalid description's value" })
   description?: string;
-
-  @IsOptional()
-  @IsEnum(CategoryType, { message: "Invalid category type" })
-  type?: CategoryType;
 }
 
 export class CategoryQuery {
+  @IsOptional()
   @IsEnum(CategoryType, { message: "Invalid category type" })
-  type: CategoryType;
+  type?: CategoryType;
 }

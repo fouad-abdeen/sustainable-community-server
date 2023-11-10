@@ -13,16 +13,12 @@ import {
 import {
   CustomerProfile,
   User,
-  UserRole,
   SellerProfile,
-  TokenObject,
-  AuthPayload,
-  Tokens,
-  RolesAndPermission,
+  UserRole,
+  UserInfo,
 } from "../models";
 import { UserRepository } from "../repositories";
-import { LoginRequest } from "../controllers/request";
-import { AuthResponse } from "../controllers/response";
+import { LoginRequest, PasswordUpdateRequest } from "../controllers/request";
 
 @Service()
 export class AuthService extends BaseService {
@@ -43,8 +39,16 @@ export class AuthService extends BaseService {
     user.email = user.email.toLowerCase();
     this._logger.info(`Attempting to sign up user with email ${user.email}`);
 
-    if (user.role === UserRole.SELLER && !(user.profile as SellerProfile).name)
-      throwError("Seller's business name is required", 400);
+    if (user.role !== UserRole.CUSTOMER && user.role !== UserRole.SELLER)
+      throwError("Invalid user role", 400);
+
+    if (user.role === UserRole.SELLER) {
+      const { name, categoryId } = user.profile as SellerProfile;
+
+      if (!name) throwError("Seller's business name is required", 400);
+
+      if (!categoryId) throwError("Seller's category is required", 400);
+    }
 
     if (user.role === UserRole.CUSTOMER) {
       const { firstName, lastName } = user.profile as CustomerProfile;
@@ -71,16 +75,15 @@ export class AuthService extends BaseService {
     const { _id, email, role, profile } = createdUser;
     const id = (_id as string).toString();
     const name =
-      user.role === UserRole.SELLER
+      user.role === UserRole.ADMIN
+        ? "Admin"
+        : user.role === UserRole.SELLER
         ? (user.profile as SellerProfile).name
         : (user.profile as CustomerProfile).firstName;
-
-    const requestId = Context.getRequestId();
 
     const emailVerificationToken =
       this._tokenService.generateToken<AuthPayload>(
         {
-          requestId,
           identityId: id,
           email,
         },
@@ -103,7 +106,6 @@ export class AuthService extends BaseService {
     // #endregion
 
     const tokens = this.getTokens({
-      requestId,
       identityId: id,
       email: email,
       signedAt: +new Date(),
@@ -114,6 +116,7 @@ export class AuthService extends BaseService {
         id,
         email,
         role,
+        verified: false,
         profile,
       },
       tokens,
@@ -214,7 +217,6 @@ export class AuthService extends BaseService {
     const id = (user._id as string).toString();
 
     const tokens = this.getTokens({
-      requestId: Context.getRequestId(),
       identityId: id,
       email: user.email,
       signedAt: +new Date(),
@@ -225,6 +227,7 @@ export class AuthService extends BaseService {
         id,
         email,
         role: user.role,
+        verified: user.verified,
         profile: user.profile,
       },
       tokens,
@@ -235,10 +238,8 @@ export class AuthService extends BaseService {
     action: Action,
     rolesAndPermission?: RolesAndPermission[]
   ): Promise<void> {
-    let user: User,
-      token =
-        action.request.headers["authorization"] ??
-        action.request.headers["auth"];
+    let user: User;
+    let token = action.request.headers["authorization"];
 
     this._logger.info(`Attempting to authorize user with token ${token}`);
 
@@ -250,11 +251,23 @@ export class AuthService extends BaseService {
 
     let payload = {} as AuthPayload;
 
+    const requestUrl = action.request.originalUrl;
+    const atTokenRefreshRoute =
+      requestUrl.split("auth/token/refresh").length > 1;
+
     try {
-      payload = this._tokenService.verifyToken<AuthPayload>(token);
+      payload = this._tokenService.verifyToken<AuthPayload>(
+        token,
+        {},
+        // Skip token expiry verification for the token refresh route
+        atTokenRefreshRoute
+      );
     } catch (error: any) {
       throwError(`Failed to verify authorization token, ${error.message}`, 401);
     }
+
+    // Skip authorization for the token refresh route if the token is expired
+    if (atTokenRefreshRoute && (payload as any).exp === 1) return;
 
     user = await this._userRepository.getUserByEmail(payload.email);
     user._id = (user._id as string).toString();
@@ -266,24 +279,36 @@ export class AuthService extends BaseService {
       throwError("Authorization token is not valid anymore", 401);
     // #endregion
 
+    const atLogoutRoute = requestUrl.split("auth/logout").length > 1;
+    const atUserQueryRoute = requestUrl.split("auth/user").length > 1;
+
+    // If the user is not verified, allow them to access only the following routes:
+    // GET /auth/logout
+    // GET /auth/user
+    // GET /auth/token/refresh
     if (
       !user.verified &&
-      action.request.originalUrl.split("logout").length === 1
+      !atLogoutRoute &&
+      !atUserQueryRoute &&
+      !atTokenRefreshRoute
     )
-      throwError(`User account with email ${user.email} is not verified`, 403);
+      throwError(
+        "Your account is inactive. Please verify your email address or contact us to activate your account.",
+        403
+      );
 
     if (rolesAndPermission) {
-      const { roles, disclaimer } = rolesAndPermission[0];
+      if (rolesAndPermission.length > 0) {
+        const { roles, disclaimer } = rolesAndPermission[0];
 
-      this._logger.info("Verifying user's role");
+        this._logger.info("Verifying user's role");
 
-      /*** To Do: Implement Permission Verification ***/
-
-      if (!roles.includes(user.role))
-        throwError(
-          disclaimer ?? "Unauthorized, user does not have the required role",
-          403
-        );
+        if (!roles.includes(user.role))
+          throwError(
+            disclaimer ?? "Unauthorized, user does not have the required role",
+            403
+          );
+      }
     }
 
     this._logger.info("Setting user in Context");
@@ -292,12 +317,18 @@ export class AuthService extends BaseService {
 
   async verifyEmailAddress(token: string): Promise<void> {
     let id = "",
-      email = "";
+      email = "",
+      tokenExpiry = 0,
+      tokensBlocklist: TokenObject[] = [];
 
+    // #region Verify Token
     try {
-      const authPayload = this._tokenService.verifyToken<AuthPayload>(token);
+      const authPayload = this._tokenService.verifyToken<
+        AuthPayload & { exp: number }
+      >(token);
       id = authPayload.identityId;
       email = authPayload.email;
+      tokenExpiry = authPayload.exp;
     } catch (error) {
       throwError(
         "Failed to verify email address, invalid verification token",
@@ -307,16 +338,28 @@ export class AuthService extends BaseService {
 
     try {
       const user = await this._userRepository.getUserByEmail(email);
-      if (user.verified) throwError(`${email} is already verified`, 400);
+      tokensBlocklist = user.tokensBlocklist;
+
+      if (tokensBlocklist.find((object) => object.token === token))
+        throwError(`token is already used`, 401);
     } catch (error: any) {
-      throwError(`Failed to verify email address, ${error.message}`, 400);
+      throwError(`Failed to verify email address, ${error.message}`, 401);
     }
+    // #endregion
+
+    this._logger.info(
+      "Adding email verification token to the user's blocklist"
+    );
+    const updatedTokensBlocklist = [
+      ...tokensBlocklist,
+      { token, expiresIn: tokenExpiry },
+    ];
 
     this._logger.info(`Verifying email address for user with email ${email}`);
-
     await this._userRepository.updateUser({
       _id: id,
       verified: true,
+      tokensBlocklist: updatedTokensBlocklist,
     } as User);
   }
 
@@ -330,13 +373,14 @@ export class AuthService extends BaseService {
 
     const id = (user._id as string).toString();
     const name =
-      user.role === UserRole.SELLER
+      user.role === UserRole.ADMIN
+        ? "Admin"
+        : user.role === UserRole.SELLER
         ? (user.profile as SellerProfile).name
         : (user.profile as CustomerProfile).firstName;
 
     const passwordResetToken = this._tokenService.generateToken<AuthPayload>(
       {
-        requestId: Context.getRequestId(),
         identityId: id,
         email,
       },
@@ -410,30 +454,44 @@ export class AuthService extends BaseService {
     } as User);
   }
 
-  async updatePassword(
-    currentPassword: string,
-    newPassword: string
-  ): Promise<void> {
+  async updatePassword(request: PasswordUpdateRequest): Promise<void> {
     const user = Context.getUser();
 
     const passwordMatch = await this._hashService.verifyPassword(
-      currentPassword,
+      request.currentPassword,
       user.password
     );
     if (!passwordMatch) throwError("Current password is incorrect", 401);
 
-    const hashedPassword = await this._hashService.hashPassword(newPassword);
+    const hashedPassword = await this._hashService.hashPassword(
+      request.newPassword
+    );
 
     this._logger.info(`Updating password for user with id ${user._id}`);
 
     await this._userRepository.updateUser({
       _id: user._id,
       password: hashedPassword,
-      passwordUpdatedAt: +new Date(),
+      ...(request.terminateAllSessions
+        ? { passwordUpdatedAt: +new Date() }
+        : {}),
     } as User);
   }
 
-  refreshAccessToken(refreshToken: string): Tokens {
+  refreshAccessToken(tokens: Tokens): Tokens {
+    const { accessToken, refreshToken } = tokens;
+
+    this._logger.info("Verifying access token");
+
+    const payload = this._tokenService.verifyToken<AuthPayload>(
+      accessToken,
+      undefined,
+      true
+    ) as AuthPayload & { exp: number };
+
+    // If the access token is not expired, return it as it is
+    if (payload.exp !== 1) return { accessToken, refreshToken };
+
     this._logger.info("Verifying refresh token");
 
     const { identityId, email } =
@@ -443,22 +501,21 @@ export class AuthService extends BaseService {
       `Generating new access token for user with email ${email}`
     );
 
-    const accessToken = this._tokenService.generateToken<AuthPayload>(
+    const newAccessToken = this._tokenService.generateToken<AuthPayload>(
       { identityId, email } as AuthPayload,
       { expiresIn: env.auth.accessTokenExpiresIn }
     );
 
-    return { accessToken, refreshToken };
+    return { accessToken: newAccessToken, refreshToken };
   }
 
   private getTokens(
-    { requestId, identityId, email, signedAt }: AuthPayload,
+    { identityId, email, signedAt }: AuthPayload,
     refreshToken?: string
   ): Tokens {
     const generateToken = (expiry) =>
       this._tokenService.generateToken<AuthPayload>(
         {
-          requestId,
           identityId,
           email,
           signedAt,
@@ -483,4 +540,31 @@ export class AuthService extends BaseService {
       refreshToken,
     };
   }
+}
+
+export interface AuthPayload {
+  identityId: string;
+  email: string;
+  signedAt?: number;
+}
+
+export interface AuthResponse {
+  userInfo: UserInfo;
+  tokens: Tokens;
+}
+
+export interface Tokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface TokenObject {
+  token: string;
+  expiresIn: number;
+}
+
+export interface RolesAndPermission {
+  roles: UserRole[];
+  permission?: string;
+  disclaimer?: string;
 }

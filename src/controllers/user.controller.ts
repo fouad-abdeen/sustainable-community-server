@@ -5,13 +5,11 @@ import {
   JsonController,
   Param,
   Put,
-  QueryParams,
 } from "routing-controllers";
 import { BaseService, throwError } from "../core";
 import { Service } from "typedi";
 import { OpenAPI, ResponseSchema } from "routing-controllers-openapi";
 import { UserRepository } from "../repositories";
-import { UserQuery } from "./request";
 import { User, UserBriefInfo, UserRole } from "../models";
 import { UserResponse } from "./response";
 import { isMongoId } from "class-validator";
@@ -25,10 +23,10 @@ export class UserController extends BaseService {
 
   // #region Get User
   @Authorized({
-    roles: ["admin"],
+    roles: [UserRole.ADMIN],
     disclaimer: "Only admins can get user's info",
   })
-  @HeaderParam("auth", { required: true })
+  @HeaderParam("auth")
   @Get("/:id")
   @OpenAPI({
     summary: "Get user by id",
@@ -41,38 +39,30 @@ export class UserController extends BaseService {
     if (!isMongoId(id)) throwError("Invalid or missing user's id", 400);
 
     return UserResponse.getUserResponse(
-      await this._userRepository.getUserById<User>(id)
+      await this._userRepository.getUserById<User>(id),
+      true
     );
   }
   // #endregion
 
   // #region Get List of Users
   @Authorized({
-    roles: ["admin"],
+    roles: [UserRole.ADMIN],
     disclaimer: "Only admins can get list of users",
   })
-  @HeaderParam("auth", { required: true })
+  @HeaderParam("auth")
   @Get("/")
   @OpenAPI({
     summary: "Get list of users",
     security: [{ bearerAuth: [] }],
   })
   @ResponseSchema(UserBriefInfo, { isArray: true })
-  async getListOfUsers(
-    @QueryParams() conditions: UserQuery
-  ): Promise<UserBriefInfo[]> {
-    this._logger.info(
-      `Received a request to get list of users with the properties: ${JSON.stringify(
-        conditions,
-        null,
-        2
-      )}`
-    );
+  async getListOfUsers(): Promise<UserBriefInfo[]> {
+    this._logger.info(`Received a request to get list of users`);
 
-    return (await this._userRepository.getListOfUsers<UserBriefInfo>({
-      conditions,
-      projection: "id email role verified",
-    })) as UserBriefInfo[];
+    return UserResponse.getListOfUsersResponse(
+      await this._userRepository.getListOfUsers({})
+    );
   }
   // #endregion
 
@@ -81,8 +71,8 @@ export class UserController extends BaseService {
     roles: [UserRole.ADMIN],
     disclaimer: "Only admins can acknowledge a user account",
   })
-  @HeaderParam("auth", { required: true })
-  @Put("/users/:id/acknowledge")
+  @HeaderParam("auth")
+  @Put("/:id/acknowledge")
   @OpenAPI({
     summary: "Acknowledge user account",
     security: [{ bearerAuth: [] }],
@@ -101,8 +91,8 @@ export class UserController extends BaseService {
     roles: [UserRole.ADMIN],
     disclaimer: "Only admins can deny a user account",
   })
-  @HeaderParam("auth", { required: true })
-  @Put("/users/:id/deny")
+  @HeaderParam("auth")
+  @Put("/:id/deny")
   @OpenAPI({
     summary: "Deny user account",
     security: [{ bearerAuth: [] }],

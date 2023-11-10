@@ -1,15 +1,9 @@
 import * as dotenv from "dotenv";
-import * as path from "path";
 
 /**
  * Load .env.local for local development otherwise use .env (or OS env. variables)
  */
-dotenv.config({
-  // path: path.join(
-  //   process.cwd(),
-  //   `.env${process.env.NODE_ENV === "development" ? ".local" : ""}`
-  // ),
-});
+dotenv.config({});
 
 function getEnvVariable(name: string, fallback?: string): string {
   const envVariable = process.env[name];
@@ -69,7 +63,7 @@ export const env = {
 
   mongoDB: {
     host: getEnvVariable("MONGODB_HOST", "mongodb://127.0.0.1:27017/"),
-    database: getEnvVariable("MONGODB_DATABASE", "sustainable-community"),
+    database: getEnvVariable("MONGODB_DATABASE", "sustainable-market"),
   },
 
   mail: {
@@ -89,14 +83,14 @@ export const env = {
   },
 
   frontend: {
-    url: getEnvVariable("FRONTEND_URL", "http://localhost:4200"),
+    url: getEnvVariable("FRONTEND_URL", "http://localhost:5173"),
     emailVerificationUrl: getEnvVariable(
       "FRONTEND_EMAIL_VERIFICATION_URL",
-      "http://localhost:4200/email-verification"
+      "http://localhost:5173/email-verification"
     ),
     passwordResetUrl: getEnvVariable(
       "FRONTEND_PASSWORD_RESET_URL",
-      "http://localhost:4200/reset-password"
+      "http://localhost:5173/reset-password"
     ),
   },
 };

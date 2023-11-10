@@ -1,4 +1,11 @@
-import { sign, SignOptions, verify, VerifyOptions } from "jsonwebtoken";
+import {
+  JwtPayload,
+  sign,
+  SignOptions,
+  TokenExpiredError,
+  verify,
+  VerifyOptions,
+} from "jsonwebtoken";
 import { IAuthTokenProvider, TokenSignOptions } from "./auth.interface";
 
 export class AuthTokenProvider implements IAuthTokenProvider {
@@ -54,13 +61,19 @@ export class AuthTokenProvider implements IAuthTokenProvider {
     return token;
   }
 
-  verifyToken<T>(token: string, options?: VerifyOptions): T {
+  verifyToken<T>(
+    token: string,
+    options?: VerifyOptions,
+    skipExpiredError = false
+  ): T {
     // Generic type T should extend or implement JwtPayload if it's an interface or a class.
     let payload: T;
 
     try {
       payload = verify(token, this.secret, options) as T;
     } catch (error: any) {
+      if (skipExpiredError && error instanceof TokenExpiredError)
+        return { exp: 1 } as T;
       throw new Error(error.message);
     }
 

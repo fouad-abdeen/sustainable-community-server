@@ -2,7 +2,6 @@ import axios, { AxiosError, AxiosResponse } from "axios";
 import Service from "../../service.abstract";
 import { ContactInfo, IMailProvider } from "./mail.interface";
 import fs from "fs";
-import path from "path";
 
 export class MailProvider extends Service implements IMailProvider {
   private readonly brevoApiUrl: string;
@@ -49,7 +48,7 @@ export class MailProvider extends Service implements IMailProvider {
     data: MailTemplateData
   ): string {
     let template = fs.readFileSync(
-      path.resolve(__dirname + "/templates", `${templateType}.html`),
+      __dirname + "/templates" + `/${templateType}.html`,
       "utf8"
     );
 

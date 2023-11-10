@@ -16,7 +16,7 @@ export enum UserRole {
 
 export enum CategoryType {
   ITEM = "Item",
-  PRODUCT = "Product",
+  // PRODUCT = "Product",
   SERVICE = "Service",
 }
 
@@ -77,6 +77,17 @@ export class SellerProfile {
 
   @IsString()
   websiteUrl?: string;
+
+  @IsNumber()
+  itemsCount?: number;
+}
+
+export class SellerInfo extends SellerProfile {
+  @IsString()
+  id: string;
+
+  @IsString()
+  categoryName: string;
 }
 
 export class UserBriefInfo {
@@ -93,16 +104,7 @@ export class UserBriefInfo {
   verified: boolean;
 }
 
-export class UserInfo {
-  @IsString()
-  id: string;
-
-  @IsString()
-  email: string;
-
-  @IsEnum(UserRole)
-  role: UserRole;
-
+export class UserInfo extends UserBriefInfo {
   @IsObject()
   profile: CustomerProfile | SellerProfile;
 }
@@ -130,6 +132,9 @@ export class WishlistItem {
 
   @IsString()
   imageUrl?: string;
+
+  @IsString()
+  sellerId?: string;
 }
 
 export class ItemSeller {
@@ -148,21 +153,7 @@ export class CategoryInfo {
   name: string;
 
   @IsString()
-  description: string;
-}
-
-export class SellerInfo {
-  @IsString()
-  id: string;
-
-  @IsString()
-  name: string;
-
-  @IsString()
-  description: string;
-
-  @IsString()
-  logoUrl?: string;
+  description?: string;
 }
 
 export class CartItem {
@@ -177,12 +168,6 @@ export class CartItem {
 
   @IsNumber()
   price: number;
-
-  @IsNumber()
-  availability: number;
-
-  @IsBoolean()
-  isAvailable: boolean;
 
   @IsString()
   name: string;

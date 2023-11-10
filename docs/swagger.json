@@ -62,6 +62,9 @@
                     },
                     "websiteUrl": {
                         "type": "string"
+                    },
+                    "itemsCount": {
+                        "type": "number"
                     }
                 },
                 "type": "object",
@@ -74,7 +77,66 @@
                     "categoryId",
                     "itemCategories",
                     "logoUrl",
-                    "websiteUrl"
+                    "websiteUrl",
+                    "itemsCount"
+                ]
+            },
+            "SellerInfo": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "categoryName": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "phoneNumber": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "type": "string"
+                    },
+                    "businessEmail": {
+                        "type": "string"
+                    },
+                    "categoryId": {
+                        "type": "string"
+                    },
+                    "itemCategories": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "logoUrl": {
+                        "type": "string"
+                    },
+                    "websiteUrl": {
+                        "type": "string"
+                    },
+                    "itemsCount": {
+                        "type": "number"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "categoryName",
+                    "name",
+                    "description",
+                    "phoneNumber",
+                    "address",
+                    "businessEmail",
+                    "categoryId",
+                    "itemCategories",
+                    "logoUrl",
+                    "websiteUrl",
+                    "itemsCount"
                 ]
             },
             "UserBriefInfo": {
@@ -107,6 +169,9 @@
             },
             "UserInfo": {
                 "properties": {
+                    "profile": {
+                        "type": "object"
+                    },
                     "id": {
                         "type": "string"
                     },
@@ -121,16 +186,17 @@
                         ],
                         "type": "string"
                     },
-                    "profile": {
-                        "type": "object"
+                    "verified": {
+                        "type": "boolean"
                     }
                 },
                 "type": "object",
                 "required": [
+                    "profile",
                     "id",
                     "email",
                     "role",
-                    "profile"
+                    "verified"
                 ]
             },
             "Tokens": {
@@ -164,6 +230,9 @@
                     },
                     "imageUrl": {
                         "type": "string"
+                    },
+                    "sellerId": {
+                        "type": "string"
                     }
                 },
                 "type": "object",
@@ -172,7 +241,8 @@
                     "name",
                     "description",
                     "price",
-                    "imageUrl"
+                    "imageUrl",
+                    "sellerId"
                 ]
             },
             "ItemSeller": {
@@ -209,29 +279,6 @@
                     "description"
                 ]
             },
-            "SellerInfo": {
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "logoUrl": {
-                        "type": "string"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "name",
-                    "description",
-                    "logoUrl"
-                ]
-            },
             "CartItem": {
                 "properties": {
                     "id": {
@@ -246,12 +293,6 @@
                     "price": {
                         "type": "number"
                     },
-                    "availability": {
-                        "type": "number"
-                    },
-                    "isAvailable": {
-                        "type": "boolean"
-                    },
                     "name": {
                         "type": "string"
                     },
@@ -265,8 +306,6 @@
                     "quantity",
                     "sellerId",
                     "price",
-                    "availability",
-                    "isAvailable",
                     "name",
                     "imageUrl"
                 ]
@@ -296,6 +335,78 @@
                     "lastName",
                     "phoneNumber",
                     "address"
+                ]
+            },
+            "AuthResponse": {
+                "properties": {
+                    "userInfo": {
+                        "$ref": "#/components/schemas/UserInfo"
+                    },
+                    "tokens": {
+                        "$ref": "#/components/schemas/Tokens"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "userInfo",
+                    "tokens"
+                ]
+            },
+            "ShoppingCartResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "ownerId": {
+                        "type": "string"
+                    },
+                    "total": {
+                        "type": "number"
+                    },
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/Array"
+                        },
+                        "type": "array"
+                    },
+                    "updatedAt": {
+                        "type": "number"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "ownerId",
+                    "total",
+                    "items",
+                    "updatedAt"
+                ]
+            },
+            "AdminMessageResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "number"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "email",
+                    "message",
+                    "createdAt"
                 ]
             },
             "LoginRequest": {
@@ -334,15 +445,18 @@
                     },
                     "firstName": {
                         "type": "string",
-                        "minLength": 1
+                        "maxLength": 50,
+                        "minLength": 2
                     },
                     "lastName": {
                         "type": "string",
-                        "minLength": 1
+                        "maxLength": 50,
+                        "minLength": 2
                     },
                     "sellerName": {
                         "type": "string",
-                        "minLength": 1
+                        "maxLength": 50,
+                        "minLength": 2
                     },
                     "categoryId": {
                         "pattern": "^[0-9a-fA-F]{24}$",
@@ -379,6 +493,9 @@
                     },
                     "newPassword": {
                         "type": "string"
+                    },
+                    "terminateAllSessions": {
+                        "type": "boolean"
                     }
                 },
                 "type": "object",
@@ -409,24 +526,22 @@
                         "maxLength": 50,
                         "minLength": 5
                     },
-                    "description": {
-                        "type": "string",
-                        "maxLength": 250,
-                        "minLength": 25
-                    },
                     "type": {
                         "enum": [
                             "Item",
-                            "Product",
                             "Service"
                         ],
                         "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 250,
+                        "minLength": 10
                     }
                 },
                 "type": "object",
                 "required": [
                     "name",
-                    "description",
                     "type"
                 ]
             },
@@ -437,18 +552,17 @@
                         "maxLength": 50,
                         "minLength": 5
                     },
-                    "description": {
-                        "type": "string",
-                        "maxLength": 250,
-                        "minLength": 25
-                    },
                     "type": {
                         "enum": [
                             "Item",
-                            "Product",
                             "Service"
                         ],
                         "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 250,
+                        "minLength": 10
                     }
                 },
                 "type": "object"
@@ -458,16 +572,12 @@
                     "type": {
                         "enum": [
                             "Item",
-                            "Product",
                             "Service"
                         ],
                         "type": "string"
                     }
                 },
-                "type": "object",
-                "required": [
-                    "type"
-                ]
+                "type": "object"
             },
             "ProfileUpdateRequest": {
                 "properties": {
@@ -486,8 +596,30 @@
                     },
                     "address": {
                         "type": "string",
-                        "maxLength": 300,
-                        "minLength": 30
+                        "maxLength": 150,
+                        "minLength": 15
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "minLength": 2
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 500,
+                        "minLength": 50
+                    },
+                    "businessEmail": {
+                        "format": "email",
+                        "type": "string"
+                    },
+                    "logoUrl": {
+                        "format": "url",
+                        "type": "string"
+                    },
+                    "websiteUrl": {
+                        "format": "url",
+                        "type": "string"
                     }
                 },
                 "type": "object"
@@ -536,17 +668,40 @@
                 },
                 "type": "object"
             },
+            "OrderPlacementRequest": {
+                "properties": {
+                    "firstName": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "minLength": 2
+                    },
+                    "lastName": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "minLength": 2
+                    },
+                    "phoneNumber": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "type": "string",
+                        "maxLength": 150,
+                        "minLength": 15
+                    }
+                },
+                "type": "object"
+            },
             "SellerItemCreationRequest": {
                 "properties": {
                     "name": {
                         "type": "string",
                         "maxLength": 75,
-                        "minLength": 1
+                        "minLength": 5
                     },
                     "description": {
                         "type": "string",
                         "maxLength": 1000,
-                        "minLength": 1
+                        "minLength": 25
                     },
                     "price": {
                         "type": "number",
@@ -588,20 +743,16 @@
                         "maxLength": 75,
                         "minLength": 5
                     },
-                    "descripsction": {
+                    "description": {
                         "type": "string",
                         "maxLength": 1000,
-                        "minLength": 100
+                        "minLength": 25
                     },
                     "price": {
                         "type": "number",
                         "minimum": 0
                     },
                     "categoryId": {
-                        "pattern": "^[0-9a-fA-F]{24}$",
-                        "type": "string"
-                    },
-                    "sellerId": {
                         "pattern": "^[0-9a-fA-F]{24}$",
                         "type": "string"
                     },
@@ -652,308 +803,36 @@
                     "quantity"
                 ]
             },
-            "UserQuery": {
+            "AdminMessageCreateRequest": {
                 "properties": {
-                    "role": {
-                        "enum": [
-                            "Customer",
-                            "Seller",
-                            "Admin"
-                        ],
+                    "name": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "minLength": 2
+                    },
+                    "email": {
                         "type": "string"
                     },
-                    "verified": {
+                    "message": {
+                        "type": "string",
+                        "maxLength": 1250,
+                        "minLength": 50
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "email",
+                    "message"
+                ]
+            },
+            "SellersQueryParams": {
+                "properties": {
+                    "activeSellers": {
                         "type": "boolean"
                     }
                 },
                 "type": "object"
-            },
-            "AuthResponse": {
-                "properties": {
-                    "userInfo": {
-                        "$ref": "#/components/schemas/UserInfo"
-                    },
-                    "tokens": {
-                        "$ref": "#/components/schemas/Tokens"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "userInfo",
-                    "tokens"
-                ]
-            },
-            "CategoryResponse": {
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "type": {
-                        "enum": [
-                            "Item",
-                            "Product",
-                            "Service"
-                        ],
-                        "type": "string"
-                    },
-                    "createdAt": {
-                        "type": "number"
-                    },
-                    "createdBy": {
-                        "type": "string"
-                    },
-                    "updatedAt": {
-                        "type": "number"
-                    },
-                    "updatedBy": {
-                        "type": "string"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "name",
-                    "description",
-                    "type",
-                    "createdAt",
-                    "createdBy",
-                    "updatedAt",
-                    "updatedBy"
-                ]
-            },
-            "OrderResponse": {
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "totalAmount": {
-                        "type": "number"
-                    },
-                    "items": {
-                        "items": {
-                            "$ref": "#/components/schemas/Array"
-                        },
-                        "type": "array"
-                    },
-                    "customerCheckoutInfo": {
-                        "$ref": "#/components/schemas/CustomerCheckoutInfo"
-                    },
-                    "customerId": {
-                        "type": "string"
-                    },
-                    "sellerId": {
-                        "type": "string"
-                    },
-                    "status": {
-                        "enum": [
-                            "Pending",
-                            "Processing",
-                            "Cancelled",
-                            "Completed"
-                        ],
-                        "type": "string"
-                    },
-                    "updatedAt": {
-                        "type": "number"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "totalAmount",
-                    "items",
-                    "customerCheckoutInfo",
-                    "customerId",
-                    "sellerId",
-                    "status",
-                    "updatedAt"
-                ]
-            },
-            "SellerItemResponse": {
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "price": {
-                        "type": "number"
-                    },
-                    "category": {
-                        "$ref": "#/components/schemas/CategoryInfo"
-                    },
-                    "seller": {
-                        "$ref": "#/components/schemas/ItemSeller"
-                    },
-                    "isAvailable": {
-                        "type": "boolean"
-                    },
-                    "quantity": {
-                        "type": "number"
-                    },
-                    "imageUrl": {
-                        "type": "string"
-                    },
-                    "createdAt": {
-                        "type": "number"
-                    },
-                    "createdBy": {
-                        "type": "string"
-                    },
-                    "updatedAt": {
-                        "type": "number"
-                    },
-                    "updatedBy": {
-                        "type": "string"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "name",
-                    "description",
-                    "price",
-                    "category",
-                    "seller",
-                    "isAvailable",
-                    "quantity",
-                    "imageUrl",
-                    "createdAt",
-                    "createdBy",
-                    "updatedAt",
-                    "updatedBy"
-                ]
-            },
-            "SellerResponse": {
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "phoneNumber": {
-                        "type": "string"
-                    },
-                    "address": {
-                        "type": "string"
-                    },
-                    "email": {
-                        "type": "string"
-                    },
-                    "category": {
-                        "$ref": "#/components/schemas/CategoryInfo"
-                    },
-                    "logoUrl": {
-                        "type": "string"
-                    },
-                    "websiteUrl": {
-                        "type": "string"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "name",
-                    "description",
-                    "phoneNumber",
-                    "address",
-                    "email",
-                    "category",
-                    "logoUrl",
-                    "websiteUrl"
-                ]
-            },
-            "ShoppingCartResponse": {
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "ownerId": {
-                        "type": "string"
-                    },
-                    "total": {
-                        "type": "number"
-                    },
-                    "items": {
-                        "items": {
-                            "$ref": "#/components/schemas/Array"
-                        },
-                        "type": "array"
-                    },
-                    "updatedAt": {
-                        "type": "number"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "ownerId",
-                    "total",
-                    "items",
-                    "updatedAt"
-                ]
-            },
-            "UserResponse": {
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "email": {
-                        "type": "string"
-                    },
-                    "role": {
-                        "enum": [
-                            "Customer",
-                            "Seller",
-                            "Admin"
-                        ],
-                        "type": "string"
-                    },
-                    "verified": {
-                        "type": "boolean"
-                    },
-                    "profile": {
-                        "type": "object"
-                    },
-                    "createdAt": {
-                        "type": "number"
-                    },
-                    "createdBy": {
-                        "type": "string"
-                    },
-                    "updatedAt": {
-                        "type": "number"
-                    },
-                    "updatedBy": {
-                        "type": "string"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "email",
-                    "role",
-                    "verified",
-                    "profile",
-                    "createdAt",
-                    "createdBy",
-                    "updatedAt",
-                    "updatedBy"
-                ]
             }
         }
     },
@@ -971,7 +850,7 @@
                     {
                         "in": "header",
                         "name": "auth",
-                        "required": true,
+                        "required": false,
                         "schema": {}
                     },
                     {
@@ -1014,27 +893,8 @@
                     {
                         "in": "header",
                         "name": "auth",
-                        "required": true,
+                        "required": false,
                         "schema": {}
-                    },
-                    {
-                        "in": "query",
-                        "name": "role",
-                        "schema": {
-                            "enum": [
-                                "Customer",
-                                "Seller",
-                                "Admin"
-                            ],
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "in": "query",
-                        "name": "verified",
-                        "schema": {
-                            "type": "boolean"
-                        }
                     }
                 ],
                 "responses": {
@@ -1063,14 +923,14 @@
                 ]
             }
         },
-        "/users/users/{id}/acknowledge": {
+        "/users/{id}/acknowledge": {
             "put": {
                 "operationId": "UserController.acknowledgeUserAccount",
                 "parameters": [
                     {
                         "in": "header",
                         "name": "auth",
-                        "required": true,
+                        "required": false,
                         "schema": {}
                     },
                     {
@@ -1102,14 +962,14 @@
                 ]
             }
         },
-        "/users/users/{id}/deny": {
+        "/users/{id}/deny": {
             "put": {
                 "operationId": "UserController.denyUserAccount",
                 "parameters": [
                     {
                         "in": "header",
                         "name": "auth",
-                        "required": true,
+                        "required": false,
                         "schema": {}
                     },
                     {
@@ -1141,14 +1001,14 @@
                 ]
             }
         },
-        "/": {
+        "/cart/": {
             "get": {
                 "operationId": "ShoppingCartController.getCart",
                 "parameters": [
                     {
                         "in": "header",
                         "name": "auth",
-                        "required": true,
+                        "required": false,
                         "schema": {}
                     }
                 ],
@@ -1180,7 +1040,7 @@
                     {
                         "in": "header",
                         "name": "auth",
-                        "required": true,
+                        "required": false,
                         "schema": {}
                     }
                 ],
@@ -1203,14 +1063,14 @@
                 ]
             }
         },
-        "/items": {
+        "/cart/items": {
             "post": {
                 "operationId": "ShoppingCartController.addItem",
                 "parameters": [
                     {
                         "in": "header",
                         "name": "auth",
-                        "required": true,
+                        "required": false,
                         "schema": {}
                     }
                 ],
@@ -1249,7 +1109,7 @@
                     {
                         "in": "header",
                         "name": "auth",
-                        "required": true,
+                        "required": false,
                         "schema": {}
                     }
                 ],
@@ -1283,14 +1143,14 @@
                 ]
             }
         },
-        "/items/{itemId}": {
+        "/cart/items/{itemId}": {
             "delete": {
                 "operationId": "ShoppingCartController.removeItem",
                 "parameters": [
                     {
                         "in": "header",
                         "name": "auth",
-                        "required": true,
+                        "required": false,
                         "schema": {}
                     },
                     {
@@ -1329,7 +1189,7 @@
                     {
                         "in": "header",
                         "name": "auth",
-                        "required": true,
+                        "required": false,
                         "schema": {}
                     }
                 ],
@@ -1370,7 +1230,7 @@
                     {
                         "in": "header",
                         "name": "auth",
-                        "required": true,
+                        "required": false,
                         "schema": {}
                     },
                     {
@@ -1418,7 +1278,7 @@
                     {
                         "in": "header",
                         "name": "auth",
-                        "required": true,
+                        "required": false,
                         "schema": {}
                     },
                     {
@@ -1464,7 +1324,7 @@
                     {
                         "in": "header",
                         "name": "auth",
-                        "required": true,
+                        "required": false,
                         "schema": {}
                     },
                     {
@@ -1536,6 +1396,15 @@
         "/sellers/": {
             "get": {
                 "operationId": "SellerController.getListOfSellers",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "activeSellers",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "content": {
@@ -1576,7 +1445,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/SellerResponse"
+                                    "$ref": "#/components/schemas/SellerInfo"
                                 }
                             }
                         },
@@ -1643,7 +1512,7 @@
                     {
                         "in": "header",
                         "name": "auth",
-                        "required": true,
+                        "required": false,
                         "schema": {}
                     }
                 ],
@@ -1718,7 +1587,7 @@
                     {
                         "in": "header",
                         "name": "auth",
-                        "required": true,
+                        "required": false,
                         "schema": {}
                     },
                     {
@@ -1770,7 +1639,7 @@
                     {
                         "in": "header",
                         "name": "auth",
-                        "required": true,
+                        "required": false,
                         "schema": {}
                     },
                     {
@@ -1807,12 +1676,6 @@
                 "operationId": "OrderController.getListOfOrders",
                 "parameters": [
                     {
-                        "in": "header",
-                        "name": "auth",
-                        "required": true,
-                        "schema": {}
-                    },
-                    {
                         "in": "query",
                         "name": "sellerId",
                         "schema": {
@@ -1845,70 +1708,44 @@
                 "responses": {
                     "200": {
                         "content": {
-                            "application/json": {
-                                "schema": {
-                                    "items": {
-                                        "$ref": "#/components/schemas/OrderResponse"
-                                    },
-                                    "type": "array"
-                                }
-                            }
+                            "application/json": {}
                         },
-                        "description": ""
+                        "description": "Successful response"
                     }
                 },
                 "summary": "Get list of orders",
                 "tags": [
                     "Order"
-                ],
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
                 ]
             },
             "post": {
                 "operationId": "OrderController.placeOrder",
-                "parameters": [
-                    {
-                        "in": "header",
-                        "name": "auth",
-                        "required": true,
-                        "schema": {}
-                    }
-                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OrderPlacementRequest"
+                            }
+                        }
+                    },
+                    "description": "OrderPlacementRequest",
+                    "required": false
+                },
                 "responses": {
                     "200": {
                         "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/OrderResponse"
-                                }
-                            }
+                            "application/json": {}
                         },
-                        "description": ""
+                        "description": "Successful response"
                     }
                 },
-                "summary": "Place an order",
+                "summary": "Place order",
                 "tags": [
                     "Order"
-                ],
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
                 ]
             },
             "put": {
                 "operationId": "OrderController.updateOrder",
-                "parameters": [
-                    {
-                        "in": "header",
-                        "name": "auth",
-                        "required": true,
-                        "schema": {}
-                    }
-                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -1923,23 +1760,14 @@
                 "responses": {
                     "200": {
                         "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/OrderResponse"
-                                }
-                            }
+                            "application/json": {}
                         },
-                        "description": ""
+                        "description": "Successful response"
                     }
                 },
-                "summary": "Update an order",
+                "summary": "Update order",
                 "tags": [
                     "Order"
-                ],
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
                 ]
             }
         },
@@ -1948,12 +1776,6 @@
                 "operationId": "OrderController.getOrder",
                 "parameters": [
                     {
-                        "in": "header",
-                        "name": "auth",
-                        "required": true,
-                        "schema": {}
-                    },
-                    {
                         "in": "path",
                         "name": "id",
                         "required": true,
@@ -1966,35 +1788,20 @@
                 "responses": {
                     "200": {
                         "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/OrderResponse"
-                                }
-                            }
+                            "application/json": {}
                         },
-                        "description": ""
+                        "description": "Successful response"
                     }
                 },
-                "summary": "Get order by id",
+                "summary": "Get order",
                 "tags": [
                     "Order"
-                ],
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
                 ]
             },
             "delete": {
                 "operationId": "OrderController.cancelOrder",
                 "parameters": [
                     {
-                        "in": "header",
-                        "name": "auth",
-                        "required": true,
-                        "schema": {}
-                    },
-                    {
                         "in": "path",
                         "name": "id",
                         "required": true,
@@ -2007,23 +1814,14 @@
                 "responses": {
                     "200": {
                         "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/OrderResponse"
-                                }
-                            }
+                            "application/json": {}
                         },
-                        "description": ""
+                        "description": "Successful response"
                     }
                 },
-                "summary": "Cancel an order",
+                "summary": "Cancel order",
                 "tags": [
                     "Order"
-                ],
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
                 ]
             }
         },
@@ -2032,12 +1830,6 @@
                 "operationId": "CustomerController.addItemToWishlist",
                 "parameters": [
                     {
-                        "in": "header",
-                        "name": "auth",
-                        "required": true,
-                        "schema": {}
-                    },
-                    {
                         "in": "path",
                         "name": "itemId",
                         "required": true,
@@ -2055,26 +1847,15 @@
                         "description": "Successful response"
                     }
                 },
-                "summary": "Add item to customer's wishlist",
+                "summary": "Add item to wishlist",
                 "tags": [
                     "Customer"
-                ],
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
                 ]
             },
             "delete": {
                 "operationId": "CustomerController.removeItemFromWishlist",
                 "parameters": [
                     {
-                        "in": "header",
-                        "name": "auth",
-                        "required": true,
-                        "schema": {}
-                    },
-                    {
                         "in": "path",
                         "name": "itemId",
                         "required": true,
@@ -2092,65 +1873,32 @@
                         "description": "Successful response"
                     }
                 },
-                "summary": "Remove item from customer's wishlist",
+                "summary": "Remove item from wishlist",
                 "tags": [
                     "Customer"
-                ],
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
                 ]
             }
         },
         "/customers/wishlist/items": {
             "get": {
                 "operationId": "CustomerController.getWishlistItems",
-                "parameters": [
-                    {
-                        "in": "header",
-                        "name": "auth",
-                        "required": true,
-                        "schema": {}
-                    }
-                ],
                 "responses": {
                     "200": {
                         "content": {
-                            "application/json": {
-                                "schema": {
-                                    "items": {
-                                        "$ref": "#/components/schemas/WishlistItem"
-                                    },
-                                    "type": "array"
-                                }
-                            }
+                            "application/json": {}
                         },
-                        "description": ""
+                        "description": "Successful response"
                     }
                 },
-                "summary": "Get customer's wishlist items",
+                "summary": "Get wishlist items",
                 "tags": [
                     "Customer"
-                ],
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
                 ]
             }
         },
         "/customers/profile": {
             "put": {
                 "operationId": "CustomerController.updateProfile",
-                "parameters": [
-                    {
-                        "in": "header",
-                        "name": "auth",
-                        "required": true,
-                        "schema": {}
-                    }
-                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -2170,14 +1918,9 @@
                         "description": "Successful response"
                     }
                 },
-                "summary": "Update customer's profile",
+                "summary": "Update profile",
                 "tags": [
                     "Customer"
-                ],
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
                 ]
             }
         },
@@ -2216,12 +1959,6 @@
                 "operationId": "CategoryController.updateCategory",
                 "parameters": [
                     {
-                        "in": "header",
-                        "name": "auth",
-                        "required": true,
-                        "schema": {}
-                    },
-                    {
                         "in": "path",
                         "name": "id",
                         "required": true,
@@ -2257,22 +1994,11 @@
                 "summary": "Update a category",
                 "tags": [
                     "Category"
-                ],
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
                 ]
             },
             "delete": {
                 "operationId": "CategoryController.deleteCategory",
                 "parameters": [
-                    {
-                        "in": "header",
-                        "name": "auth",
-                        "required": true,
-                        "schema": {}
-                    },
                     {
                         "in": "path",
                         "name": "id",
@@ -2294,11 +2020,27 @@
                 "summary": "Delete a category",
                 "tags": [
                     "Category"
-                ],
-                "security": [
-                    {
-                        "bearerAuth": []
+                ]
+            }
+        },
+        "/categories/item-category/default": {
+            "get": {
+                "operationId": "CategoryController.getDefaultItemCategory",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CategoryResponse"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
+                },
+                "summary": "Get default item category",
+                "tags": [
+                    "Category"
                 ]
             }
         },
@@ -2309,11 +2051,9 @@
                     {
                         "in": "query",
                         "name": "type",
-                        "required": true,
                         "schema": {
                             "enum": [
                                 "Item",
-                                "Product",
                                 "Service"
                             ],
                             "type": "string"
@@ -2342,14 +2082,6 @@
             },
             "post": {
                 "operationId": "CategoryController.createCategory",
-                "parameters": [
-                    {
-                        "in": "header",
-                        "name": "auth",
-                        "required": true,
-                        "schema": {}
-                    }
-                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -2373,14 +2105,9 @@
                         "description": ""
                     }
                 },
-                "summary": "Create a category",
+                "summary": "Create a new category",
                 "tags": [
                     "Category"
-                ],
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
                 ]
             }
         },
@@ -2423,7 +2150,7 @@
                     {
                         "in": "header",
                         "name": "auth",
-                        "required": true,
+                        "required": false,
                         "schema": {}
                     },
                     {
@@ -2605,20 +2332,62 @@
                 ]
             }
         },
-        "/auth/token/refresh": {
-            "put": {
-                "operationId": "AuthController.refreshAccessToken",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/RefreshTokenRequest"
+        "/auth/user": {
+            "get": {
+                "operationId": "AuthController.getAuthenticatedUser",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": false,
+                        "schema": {}
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResponse"
+                                }
                             }
+                        },
+                        "description": ""
+                    }
+                },
+                "summary": "Get authenticated user's info",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/auth/token/refresh": {
+            "get": {
+                "operationId": "AuthController.refreshAccessToken",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": false,
+                        "schema": {}
+                    },
+                    {
+                        "in": "query",
+                        "name": "accessToken",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
                     },
-                    "description": "RefreshTokenRequest",
-                    "required": false
-                },
+                    {
+                        "in": "query",
+                        "name": "refreshToken",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "content": {
@@ -2632,6 +2401,92 @@
                     }
                 },
                 "summary": "Refresh access token",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/messages/": {
+            "post": {
+                "operationId": "AuthController.createMessage",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminMessageCreateRequest"
+                            }
+                        }
+                    },
+                    "description": "AdminMessageCreateRequest",
+                    "required": false
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    }
+                },
+                "summary": "Create a new message",
+                "tags": [
+                    "Auth"
+                ]
+            },
+            "get": {
+                "operationId": "AuthController.getMessages",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "auth",
+                        "required": false,
+                        "schema": {}
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/AdminMessageResponse"
+                                    },
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "summary": "Get all messages",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/messages/{id}": {
+            "delete": {
+                "operationId": "AuthController.deleteMessage",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "pattern": "[^\\/#\\?]+?",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {}
+                        },
+                        "description": "Successful response"
+                    }
+                },
+                "summary": "Delete message",
                 "tags": [
                     "Auth"
                 ]

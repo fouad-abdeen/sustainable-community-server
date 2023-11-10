@@ -38,14 +38,35 @@ export class CategoryRepository
     return category;
   }
 
-  async getListOfCategories(type: CategoryType): Promise<Category[]> {
+  async getDefaultItemCategory(): Promise<Category> {
+    this._logger.info(`Getting default item category`);
+
+    const category = await this._connection.queryOne<
+      { type: CategoryType; name: string },
+      Category
+    >({ type: CategoryType.ITEM, name: "All" });
+
+    if (!category)
+      return await this._connection.insertOne({
+        name: "All",
+        description: "Default Item Category",
+        type: CategoryType.ITEM,
+        createdAt: +new Date(),
+      });
+
+    return category;
+  }
+
+  async getListOfCategories(type?: CategoryType): Promise<Category[]> {
     this._logger.info(`Getting list of categories with type: ${type}`);
+
+    const conditions = type ? { type } : {};
 
     const categories = await this._connection.query<
       { type: CategoryType },
       unknown,
       Category[]
-    >({ conditions: { type } });
+    >({ conditions, sort: { updatedAt: -1 } });
 
     if (!categories || categories.length === 0)
       throwError(`No categories found with the properties: ${type}`, 404);

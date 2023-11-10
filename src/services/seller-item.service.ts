@@ -1,52 +1,23 @@
 import { Service } from "typedi";
 import { BaseService, Context, throwError } from "../core";
-import {
-  CategoryInfo,
-  ExtendedSellerItemData,
-  ItemSeller,
-  SellerItem,
-  SellerProfile,
-  User,
-  UserRole,
-} from "../models";
+import { SellerItem, SellerProfile, User, UserRole } from "../models";
 import {
   CategoryRepository,
   SellerItemRepository,
   UserRepository,
 } from "../repositories";
-import { SellerItemQuery } from "../controllers/request";
 
 @Service()
 export class SellerItemService extends BaseService {
   constructor(
-    private _sellerItemRepository: SellerItemRepository,
+    private _SellerItemRepository: SellerItemRepository,
     private _userRepository: UserRepository,
     private _categoryRepository: CategoryRepository
   ) {
     super(__filename);
   }
 
-  async getListOfItems(
-    conditions: SellerItemQuery
-  ): Promise<ExtendedSellerItemData[]> {
-    const items = await this._sellerItemRepository.getListOfItems(conditions),
-      sellers: ItemSeller[] = [],
-      categories: CategoryInfo[] = [];
-
-    return await Promise.all(
-      await items.map(async (item) => {
-        return await this.getExtendedData(item, sellers, categories);
-      })
-    );
-  }
-
-  async getItem(id: string): Promise<ExtendedSellerItemData> {
-    const item = await this._sellerItemRepository.getItem<SellerItem>(id);
-
-    return await this.getExtendedData(item);
-  }
-
-  async createItem(item: SellerItem): Promise<ExtendedSellerItemData> {
+  async createItem(item: SellerItem): Promise<SellerItem> {
     this._logger.info(`Attempting to create item with name: ${item.name}`);
 
     const user = Context.getUser();
@@ -54,11 +25,13 @@ export class SellerItemService extends BaseService {
     if (item.sellerId !== user._id)
       throwError("Cannot create an item for another seller", 403);
 
-    const { profile } = user;
-    const itemCategories = (profile as SellerProfile).itemCategories ?? [];
+    const defaultItemCategory =
+      await this._categoryRepository.getDefaultItemCategory();
 
-    if (itemCategories.length === 0)
-      throwError("Cannot create an item without any assigned category", 403);
+    const { profile } = user;
+    const itemCategories = (profile as SellerProfile).itemCategories ?? [
+      (defaultItemCategory._id ?? "").toString(),
+    ];
 
     if (!itemCategories.includes(item.categoryId))
       throwError(
@@ -68,32 +41,44 @@ export class SellerItemService extends BaseService {
 
     if (item.isAvailable) this.validateAvailability(item);
 
-    return this.getExtendedData(
-      await this._sellerItemRepository.createItem(item)
-    );
+    const createdItem = await this._SellerItemRepository.createItem(item);
+
+    await this._userRepository.updateUser({
+      _id: user._id,
+      profile: {
+        ...profile,
+        itemsCount: ((profile as SellerProfile).itemsCount ?? 0) + 1,
+      },
+    } as User);
+
+    return createdItem;
   }
 
-  async updateItem(item: SellerItem): Promise<ExtendedSellerItemData> {
+  async updateItem(item: SellerItem): Promise<SellerItem> {
     this._logger.info(`Attempting to update item with id: ${item._id}`);
 
     const user = Context.getUser();
+    const seller =
+      user.role === UserRole.ADMIN
+        ? await this._userRepository.getUserById<User>(item.sellerId)
+        : ({} as User);
 
     if (item.sellerId) {
       if (user.role === UserRole.SELLER) {
         if (item.sellerId !== user._id)
           throwError(`Cannot assign an item to another seller`, 403);
-      } else {
-        const seller = await this._userRepository.getUserById<User>(
-          item.sellerId
-        );
-        if (seller.role !== UserRole.SELLER)
-          throwError("Assigned seller is not a seller", 400);
-      }
+      } else if (seller.role !== UserRole.SELLER)
+        throwError("Assigned seller is not a seller", 400);
     }
 
     if (item.categoryId) {
-      const { profile } = user;
-      const itemCategories = (profile as SellerProfile).itemCategories ?? [];
+      const defaultItemCategory =
+        await this._categoryRepository.getDefaultItemCategory();
+
+      const { profile } = user.role === UserRole.ADMIN ? seller : user;
+      const itemCategories = (profile as SellerProfile).itemCategories ?? [
+        (defaultItemCategory._id ?? "").toString(),
+      ];
 
       if (!itemCategories.includes(item.categoryId))
         throwError(
@@ -103,15 +88,13 @@ export class SellerItemService extends BaseService {
     }
 
     if (item.isAvailable) {
-      const currentItem = await this._sellerItemRepository.getItem<SellerItem>(
+      const currentItem = await this._SellerItemRepository.getItem<SellerItem>(
         item._id as string
       );
       this.validateAvailability(item, currentItem.quantity);
     }
 
-    return await this.getExtendedData(
-      await this._sellerItemRepository.updateItem(item)
-    );
+    return await this._SellerItemRepository.updateItem(item);
   }
 
   async deleteItem(id: string): Promise<void> {
@@ -119,12 +102,20 @@ export class SellerItemService extends BaseService {
 
     const user = Context.getUser();
 
-    const item = await this._sellerItemRepository.getItem<SellerItem>(id);
+    const item = await this._SellerItemRepository.getItem<SellerItem>(id);
 
     if (item.sellerId !== user._id)
       throwError("Cannot delete an item for another seller", 403);
 
-    await this._sellerItemRepository.deleteItem(id);
+    await this._SellerItemRepository.deleteItem(id);
+
+    await this._userRepository.updateUser({
+      _id: user._id,
+      profile: {
+        ...user.profile,
+        itemsCount: ((user.profile as SellerProfile).itemsCount as number) - 1,
+      },
+    } as User);
   }
 
   private validateAvailability(
@@ -139,54 +130,5 @@ export class SellerItemService extends BaseService {
         "Item cannot be available while the current quantity is 0",
         400
       );
-  }
-
-  private async getExtendedData(
-    item: SellerItem,
-    sellersList: ItemSeller[] = [],
-    categoriesList: CategoryInfo[] = []
-  ): Promise<ExtendedSellerItemData> {
-    const updatedItem = item as ExtendedSellerItemData;
-
-    let seller = sellersList.find((seller) => seller.id === item.sellerId);
-    let category = categoriesList.find(
-      (category) => category.id === item.categoryId
-    );
-
-    if (seller) updatedItem.seller = seller;
-    else {
-      seller = await this.getItemSeller(item.sellerId);
-      sellersList.push(seller);
-      updatedItem.seller = seller;
-    }
-
-    if (category) updatedItem.category = category;
-    else {
-      category = await this.getItemCategory(item.categoryId);
-      categoriesList.push(category);
-      updatedItem.category = category;
-    }
-
-    return updatedItem;
-  }
-
-  private async getItemSeller(sellerId: string): Promise<ItemSeller> {
-    this._logger.info(`Getting seller data for seller with id: ${sellerId}`);
-
-    return (await this._userRepository.getUserById<ItemSeller>(
-      sellerId,
-      "id name"
-    )) as ItemSeller;
-  }
-
-  private async getItemCategory(categoryId: string): Promise<CategoryInfo> {
-    this._logger.info(
-      `Getting item category data for category with id: ${categoryId}`
-    );
-
-    return (await this._categoryRepository.getOneCategory<CategoryInfo>(
-      categoryId,
-      "id name description"
-    )) as CategoryInfo;
   }
 }

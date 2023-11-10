@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsEmail,
   IsOptional,
   IsPhoneNumber,
@@ -16,8 +17,8 @@ export class ProfileUpdateRequest {
   name?: string;
 
   @IsOptional()
-  @MinLength(100, {
-    message: "Description cannot be shorter than 100 characters",
+  @MinLength(50, {
+    message: "Description cannot be shorter than 50 characters",
   })
   @MaxLength(500, {
     message: "Description cannot be longer than 500 characters",
@@ -30,8 +31,8 @@ export class ProfileUpdateRequest {
   phoneNumber?: string;
 
   @IsOptional()
-  @MinLength(30, { message: "Address cannot be shorter than 30 characters" })
-  @MaxLength(300, { message: "Address cannot be longer than 300 characters" })
+  @MinLength(15, { message: "Address cannot be shorter than 15 characters" })
+  @MaxLength(150, { message: "Address cannot be longer than 150 characters" })
   @IsString({ message: "Invalid address" })
   address?: string;
 
@@ -46,4 +47,10 @@ export class ProfileUpdateRequest {
   @IsOptional()
   @IsUrl({}, { message: "Invalid website url" })
   websiteUrl?: string;
+}
+
+export class SellersQueryParams {
+  @IsOptional()
+  @IsBoolean()
+  activeSellers?: boolean;
 }

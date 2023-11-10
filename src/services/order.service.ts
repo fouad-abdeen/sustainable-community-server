@@ -7,36 +7,41 @@ import {
 } from "../repositories";
 import { BaseService, Context, throwError } from "../core";
 import {
-  CustomerProfile,
   Order,
   OrderStatus,
   SellerItem,
-  ShippingRate,
   User,
   UserRole,
+  CustomerCheckoutInfo,
 } from "../models";
 import { ShoppingCartService } from ".";
+import { OrderPlacementRequest } from "../controllers/request";
 
 @Service()
 export class OrderService extends BaseService {
   constructor(
     private _orderRepository: OrderRepository,
     private _userRepository: UserRepository,
-    private _sellerItemRepository: SellerItemRepository,
-    private _shoppingCartRepository: ShoppingCartRepository,
-    private _shoppingCartService: ShoppingCartService
+    private _SellerItemRepository: SellerItemRepository,
+    private _ShoppingCartRepository: ShoppingCartRepository,
+    private _ShoppingCartService: ShoppingCartService
   ) {
     super(__filename);
   }
 
-  async placeOrder(customerId: string): Promise<Order> {
+  async placeOrder(
+    customerId: string,
+    checkoutInformation: OrderPlacementRequest
+  ): Promise<Order> {
+    const shippingRate = 1;
+
     this._logger.info(
       `Attempting to place a new order for the customer with id: ${customerId}`
     );
 
     // Update the shopping cart and validate the included items
-    const cart = await this._shoppingCartService.updateCart(
-      await this._shoppingCartRepository.getCart(customerId),
+    const cart = await this._ShoppingCartService.updateCart(
+      await this._ShoppingCartRepository.getCart(customerId),
       true
     );
 
@@ -49,14 +54,18 @@ export class OrderService extends BaseService {
     if (cart.items.length < 1)
       throwError("Cannot place an order with an empty cart", 400);
 
-    const totalAmount = cart.total + ShippingRate.TRIPOLI;
+    const totalAmount = cart.total + shippingRate;
 
     const customer = await this._userRepository.getUserById<User>(
       customerId,
       "email profile"
     );
-    const { firstName, lastName, phoneNumber, address } =
-      customer.profile as CustomerProfile;
+
+    const { email, firstName, lastName, phoneNumber, address } = {
+      ...customer.profile,
+      ...checkoutInformation,
+      email: customer.email,
+    } as CustomerCheckoutInfo;
 
     if (!firstName || !lastName)
       throwError("Cannot place an order without first and last name", 400);
@@ -70,13 +79,13 @@ export class OrderService extends BaseService {
       totalAmount,
       items: cart.items,
       customerCheckoutInfo: {
-        email: customer.email,
+        email,
         firstName,
         lastName,
         phoneNumber,
         address,
       },
-      customerId: customerId,
+      customerId,
       sellerId: cart.items[0].sellerId,
       status: OrderStatus.PENDING,
     });
@@ -84,13 +93,13 @@ export class OrderService extends BaseService {
     // Update the quantity of the items in the seller's inventory
     await Promise.all(
       cart.items.map(async (item) => {
-        const { quantity } = await this._sellerItemRepository.getItem<{
+        const { quantity } = await this._SellerItemRepository.getItem<{
           quantity: number;
         }>(item.id, "quantity");
 
         const updatedQuantity = quantity - item.quantity;
 
-        return await this._sellerItemRepository.updateItem({
+        return await this._SellerItemRepository.updateItem({
           _id: item.id,
           quantity: updatedQuantity,
         } as SellerItem);
@@ -98,9 +107,7 @@ export class OrderService extends BaseService {
     );
 
     // Clear the shopping cart
-    await this._shoppingCartRepository.clearCart(customerId);
-
-    // TODO: Send an email to the customer
+    await this._ShoppingCartRepository.clearCart(customerId);
 
     return placedOrder;
   }
@@ -144,20 +151,20 @@ export class OrderService extends BaseService {
     // Update the quantity of the items in the seller's inventory
     await Promise.all(
       order.items.map(async (item) => {
-        const { quantity } = await this._sellerItemRepository.getItem<{
+        const sellerItem = await this._SellerItemRepository.getItem<{
           quantity: number;
-        }>(item.id, "quantity");
+        }>(item.id, "quantity", true);
 
-        const updatedQuantity = quantity + item.quantity;
+        if (sellerItem) {
+          const updatedQuantity = sellerItem.quantity + item.quantity;
 
-        await this._sellerItemRepository.updateItem({
-          _id: item.id,
-          quantity: updatedQuantity,
-        } as SellerItem);
+          await this._SellerItemRepository.updateItem({
+            _id: item.id,
+            quantity: updatedQuantity,
+          } as SellerItem);
+        }
       })
     );
-
-    // TODO: Send an email to the customer
 
     return cancelledOrder;
   }
@@ -195,8 +202,6 @@ export class OrderService extends BaseService {
       _id: id,
       status,
     } as Order);
-
-    // TODO: Send an email to the customer
 
     return updatedOrder;
   }

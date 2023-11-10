@@ -12,7 +12,7 @@ export interface ICategoryRepository {
    * Gets a list of categories by type
    * @param type type of category
    */
-  getListOfCategories(type: CategoryType): Promise<Category[]>;
+  getListOfCategories(type?: CategoryType): Promise<Category[]>;
 
   /**
    * Creates a new category

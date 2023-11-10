@@ -6,9 +6,8 @@ import {
   MongooseQueryOptions,
   throwError,
 } from "../core";
-import { IUserRepository } from "./interfaces";
+import { IUserRepository, UserQuery } from "./interfaces";
 import { User } from "../models";
-import { UserQuery } from "../controllers/request";
 
 @Service()
 export class UserRepository extends BaseRepository implements IUserRepository {
@@ -88,6 +87,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     const users = await this._connection.query<UserQuery, unknown, User[]>({
       conditions,
       projection: options.projection,
+      sort: { createdAt: -1 },
     });
 
     if (!users || users.length === 0)

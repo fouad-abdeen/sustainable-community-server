@@ -1,4 +1,4 @@
-import { Service } from "typedi";
+import Container, { Service } from "typedi";
 import { ISellerRepository } from "./interfaces";
 import {
   CategoryInfo,
@@ -17,6 +17,8 @@ export class SellerRepository
 {
   constructor(private _categoryRepository: CategoryRepository) {
     super();
+    if (!this._categoryRepository)
+      this._categoryRepository = Container.get(CategoryRepository);
   }
 
   async updateProfile(userId: string, profile: SellerProfile): Promise<void> {
@@ -31,16 +33,23 @@ export class SellerRepository
       if (!profileKeys.includes(key)) delete profile[key];
     });
 
+    const { profile: currentProfile } = Context.getUser();
+
     await this.updateUser({
       _id: userId,
-      profile,
+      profile: {
+        ...currentProfile,
+        ...profile,
+      },
     } as User);
   }
 
-  async updateCategory(userId: string, categoryId: string): Promise<void> {
+  async updateCategory(
+    userId: string,
+    categoryId: string,
+    profile: SellerProfile
+  ): Promise<void> {
     this._logger.info(`Updating category of seller with id: ${userId}`);
-
-    const { profile } = Context.getUser();
 
     await this.updateUser({
       _id: userId,
@@ -79,29 +88,36 @@ export class SellerRepository
   ): Promise<void> {
     this._logger.info(`Removing item category from seller with id: ${userId}`);
 
-    const categories = (profile as SellerProfile).itemCategories ?? [];
+    let { itemCategories, ...sellerProfile } = profile as SellerProfile;
 
-    if (!categories.includes(categoryId)) {
+    if (!itemCategories) itemCategories = [];
+
+    if (!itemCategories.includes(categoryId)) {
       throwError(
         `Category with id ${categoryId} does not exist in the item categories`,
         400
       );
     }
 
-    const categoryIndex = categories.indexOf(categoryId);
-    categories.splice(categoryIndex, 1);
+    const categoryIndex = itemCategories.indexOf(categoryId);
+    itemCategories.splice(categoryIndex, 1);
+
+    const updatedProfile =
+      itemCategories.length > 0
+        ? { ...sellerProfile, itemCategories }
+        : sellerProfile;
 
     await this.updateUser({
       _id: userId,
-      profile: { ...profile, itemCategories: categories },
+      profile: updatedProfile,
     } as User);
   }
 
-  async getItemCategories(userId: string): Promise<CategoryInfo[]> {
+  async getItemCategories(
+    userId: string,
+    categories: string[]
+  ): Promise<CategoryInfo[]> {
     this._logger.info(`Getting item categories of seller with id: ${userId}`);
-
-    const user = await this.getUserById<User>(userId);
-    const categories = (user.profile as SellerProfile).itemCategories ?? [];
 
     return await Promise.all(
       categories.map(async (categoryId) => {
@@ -118,30 +134,47 @@ export class SellerRepository
     );
   }
 
-  async getListOfSellers(): Promise<SellerInfo[]> {
-    this._logger.info(`Getting list of sellers`);
+  async getListOfSellers(
+    projection: string,
+    activeSellers = false
+  ): Promise<SellerInfo[]> {
+    this._logger.info(`Getting list sellers`);
 
-    const sellers = await this.getListOfUsers<User>({
-      conditions: { role: UserRole.SELLER, verified: true },
-      projection: "profile.name profile.description profile.logoUrl",
+    const conditions = { role: UserRole.SELLER };
+
+    const sellers = await this.getListOfUsers({
+      conditions: activeSellers
+        ? { ...conditions, verified: true }
+        : conditions,
+      projection,
     });
 
     return sellers.map((seller) => {
-      const profile = seller.profile as SellerProfile;
+      const { profile, _id } = seller;
       return {
-        id: (seller._id as string).toString(),
-        name: profile.name,
-        description: profile.description,
-        logoUrl: profile.logoUrl,
+        id: (_id as string).toString(),
+        ...(profile ?? {}),
       };
     });
   }
 
-  async getSeller(userId: string): Promise<{ profile: SellerProfile }> {
+  async getSeller(userId: string): Promise<SellerInfo> {
     this._logger.info(`Getting profile of seller with id: ${userId}`);
 
-    return (await this.getUserById<User>(userId, "profile")) as {
+    const seller = (await this.getUserById<User>(userId, "profile")) as {
       profile: SellerProfile;
+    };
+
+    const category =
+      await this._categoryRepository.getOneCategory<CategoryInfo>(
+        seller.profile.categoryId,
+        "name"
+      );
+
+    return {
+      id: userId,
+      ...seller.profile,
+      categoryName: category.name,
     };
   }
 }

@@ -1,4 +1,3 @@
-import { IsEnum, IsInstance, IsNumber, IsString } from "class-validator";
 import {
   CartItem,
   CustomerCheckoutInfo,
@@ -7,28 +6,14 @@ import {
 } from "../../models";
 
 export class OrderResponse {
-  @IsString()
   id: string;
-
-  @IsNumber()
   totalAmount: number;
-
-  @IsInstance(CartItem, { each: true })
   items: CartItem[];
-
-  @IsInstance(CustomerCheckoutInfo)
   customerCheckoutInfo: CustomerCheckoutInfo;
-
-  @IsString()
   customerId: string;
-
-  @IsString()
   sellerId: string;
-
-  @IsEnum(OrderStatus)
   status: OrderStatus;
-
-  @IsNumber()
+  createdAt?: number;
   updatedAt?: number;
 
   public static getOrderResponse(order: Order): OrderResponse {
@@ -40,6 +25,7 @@ export class OrderResponse {
       customerId: order.customerId,
       sellerId: order.sellerId,
       status: order.status,
+      createdAt: order.createdAt,
       updatedAt: order.updatedAt,
     };
   }

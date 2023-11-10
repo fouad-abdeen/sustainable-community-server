@@ -27,13 +27,22 @@ export class ShoppingCartRepository
   async getCart(ownerId: string): Promise<ShoppingCart> {
     this._logger.info(`Getting shopping cart for customer with id: ${ownerId}`);
 
-    const cart = await this._connection.queryOne<unknown, ShoppingCart>({
+    return await this._connection.queryOne<unknown, ShoppingCart>({
       ownerId,
     });
+  }
 
-    if (!cart) return await this.createCart(ownerId);
+  async createCart(ownerId: string): Promise<ShoppingCart> {
+    this._logger.info(
+      `Creating a shopping cart for customer with id: ${ownerId}`
+    );
 
-    return cart;
+    return await this._connection.insertOne({
+      ownerId,
+      total: 0,
+      items: [],
+      updatedAt: +new Date(),
+    });
   }
 
   async updateCart(cart: ShoppingCart): Promise<ShoppingCart> {
@@ -64,35 +73,17 @@ export class ShoppingCartRepository
       `Adding item with id: ${item.id} to shopping cart for customer with id: ${ownerId}`
     );
 
-    const cart = await this.getCart(ownerId);
+    const cart =
+      (await this.getCart(ownerId)) ?? (await this.createCart(ownerId));
 
-    const itemIndex = cart.items.findIndex(
-      (cartItem) => cartItem.id === item.id
-    );
-
-    if (itemIndex === -1) {
-      if (cart.items.length >= 1)
-        if (cart.items[0].sellerId !== item.sellerId)
-          throwError(
-            `Cannot add items from different sellers to the same cart`,
-            400
-          );
-      cart.items.push(item);
-    } else {
-      const quantity = cart.items[itemIndex].quantity + item.quantity;
-
-      if (quantity > item.availability)
+    if (cart.items.length >= 1)
+      if (cart.items[0].sellerId !== item.sellerId)
         throwError(
-          `Not enough in-stock items available, only ${item.availability} left`,
+          `Cannot add items from different sellers to the same cart`,
           400
         );
 
-      cart.items[itemIndex] = {
-        ...item,
-        quantity,
-      };
-    }
-
+    cart.items.push(item);
     cart.total += item.price * item.quantity;
     cart.updatedAt = +new Date();
 
@@ -104,7 +95,8 @@ export class ShoppingCartRepository
       `Removing item with id: ${itemId} from shopping cart for customer with id: ${ownerId}`
     );
 
-    const cart = await this.getCart(ownerId);
+    const cart =
+      (await this.getCart(ownerId)) ?? (await this.createCart(ownerId));
 
     const itemIndex = cart.items.findIndex(
       (cartItem) => cartItem.id === itemId
@@ -127,7 +119,8 @@ export class ShoppingCartRepository
       `Updating item with id: ${item.id} from shopping cart for customer with id: ${ownerId}`
     );
 
-    const cart = await this.getCart(ownerId);
+    const cart =
+      (await this.getCart(ownerId)) ?? (await this.createCart(ownerId));
 
     const itemIndex = cart.items.findIndex(
       (cartItem) => cartItem.id === item.id
@@ -143,18 +136,5 @@ export class ShoppingCartRepository
     cart.updatedAt = +new Date();
 
     await this._connection.updateOne({ ownerId }, cart);
-  }
-
-  private async createCart(ownerId: string): Promise<ShoppingCart> {
-    this._logger.info(
-      `Creating a shopping cart for customer with id: ${ownerId}`
-    );
-
-    return await this._connection.insertOne({
-      ownerId,
-      total: 0,
-      items: [],
-      updatedAt: +new Date(),
-    });
   }
 }

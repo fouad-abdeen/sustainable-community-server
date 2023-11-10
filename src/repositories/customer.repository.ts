@@ -1,6 +1,6 @@
-import { Service } from "typedi";
+import Container, { Service } from "typedi";
 import { ICustomerRepository } from "./interfaces";
-import { CustomerProfile, User, WishlistItem } from "../models";
+import { CustomerProfile, SellerItem, User, WishlistItem } from "../models";
 import { Context, throwError } from "../core";
 import { SellerItemRepository, UserRepository } from ".";
 
@@ -9,8 +9,10 @@ export class CustomerRepository
   extends UserRepository
   implements ICustomerRepository
 {
-  constructor(private _sellerItemRepository: SellerItemRepository) {
+  constructor(private _menuItemRepository: SellerItemRepository) {
     super();
+    if (!this._menuItemRepository)
+      this._menuItemRepository = Container.get(SellerItemRepository);
   }
 
   async addItemToWishlist(userId: string, itemId: string): Promise<void> {
@@ -62,15 +64,23 @@ export class CustomerRepository
 
     return await Promise.all(
       wishlist.map(async (itemId) => {
-        const wishlistItem = {
+        const item = await this._menuItemRepository.getItem<WishlistItem>(
+          itemId,
+          "name description price imageUrl sellerId",
+          true
+        );
+
+        delete item["_id"];
+
+        if (!item)
+          this.updateProfile(userId, {
+            wishlist: wishlist.filter((id) => id !== itemId),
+          } as CustomerProfile);
+
+        return {
           id: itemId,
-          ...(await this._sellerItemRepository.getItem<WishlistItem>(
-            itemId,
-            "name description price imageUrl"
-          )),
+          ...item,
         };
-        delete wishlistItem["_id"];
-        return wishlistItem;
       })
     );
   }
@@ -84,6 +94,14 @@ export class CustomerRepository
       if (!profileKeys.includes(key)) delete profile[key];
     });
 
-    await this.updateUser({ _id: userId, profile } as User);
+    const { profile: currentProfile } = Context.getUser();
+
+    await this.updateUser({
+      _id: userId,
+      profile: {
+        ...currentProfile,
+        ...profile,
+      },
+    } as User);
   }
 }

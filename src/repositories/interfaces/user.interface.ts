@@ -1,6 +1,5 @@
-import { UserQuery } from "../../controllers/request/user.request";
 import { MongooseQueryOptions } from "../../core";
-import { User } from "../../models";
+import { User, UserRole } from "../../models";
 
 export interface IUserRepository {
   /**
@@ -41,4 +40,9 @@ export interface IUserRepository {
   getListOfUsers<U>(
     options: MongooseQueryOptions<UserQuery, unknown>
   ): Promise<User[] | U[]>;
+}
+
+export interface UserQuery {
+  role: UserRole;
+  verified: boolean;
 }

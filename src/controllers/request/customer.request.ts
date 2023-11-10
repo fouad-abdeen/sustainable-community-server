@@ -24,8 +24,8 @@ export class ProfileUpdateRequest {
   phoneNumber?: string;
 
   @IsOptional()
-  @MinLength(30, { message: "Address cannot be shorter than 30 characters" })
-  @MaxLength(300, { message: "Address cannot be longer than 300 characters" })
+  @MinLength(15, { message: "Address cannot be shorter than 15 characters" })
+  @MaxLength(150, { message: "Address cannot be longer than 150 characters" })
   @IsString({ message: "Invalid address" })
   address?: string;
 }

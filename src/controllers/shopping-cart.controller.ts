@@ -19,7 +19,7 @@ import { CartItemRequest } from "./request";
 import { isMongoId } from "class-validator";
 import { Service } from "typedi";
 
-@JsonController()
+@JsonController("/cart")
 @Service()
 export class ShoppingCartController extends BaseService {
   constructor(
@@ -34,7 +34,7 @@ export class ShoppingCartController extends BaseService {
     roles: [UserRole.CUSTOMER],
     disclaimer: "Only customers can get their shopping cart",
   })
-  @HeaderParam("auth", { required: true })
+  @HeaderParam("auth")
   @Get("/")
   @OpenAPI({
     summary: "Get shopping cart",
@@ -59,7 +59,7 @@ export class ShoppingCartController extends BaseService {
     roles: [UserRole.CUSTOMER],
     disclaimer: "Only customers can clear their shopping cart",
   })
-  @HeaderParam("auth", { required: true })
+  @HeaderParam("auth")
   @Delete("/")
   @OpenAPI({
     summary: "Clear shopping cart",
@@ -81,7 +81,7 @@ export class ShoppingCartController extends BaseService {
     roles: [UserRole.CUSTOMER],
     disclaimer: "Only customers can add items to their shopping cart",
   })
-  @HeaderParam("auth", { required: true })
+  @HeaderParam("auth")
   @Post("/items")
   @OpenAPI({
     summary: "Add item to shopping cart",
@@ -103,7 +103,7 @@ export class ShoppingCartController extends BaseService {
     roles: [UserRole.CUSTOMER],
     disclaimer: "Only customers can remove items from their shopping cart",
   })
-  @HeaderParam("auth", { required: true })
+  @HeaderParam("auth")
   @Delete("/items/:itemId")
   @OpenAPI({
     summary: "Remove item from shopping cart",
@@ -127,7 +127,7 @@ export class ShoppingCartController extends BaseService {
     roles: [UserRole.CUSTOMER],
     disclaimer: "Only customers can update items in their shopping cart",
   })
-  @HeaderParam("auth", { required: true })
+  @HeaderParam("auth")
   @Put("/items")
   @OpenAPI({
     summary: "Update item in shopping cart",

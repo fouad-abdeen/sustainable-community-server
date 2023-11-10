@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsEmail,
   IsEnum,
   IsJWT,
@@ -7,6 +8,8 @@ import {
   IsOptional,
   IsString,
   IsStrongPassword,
+  MaxLength,
+  MinLength,
 } from "class-validator";
 import { UserRole } from "../../models";
 
@@ -42,23 +45,26 @@ export class SignupRequest {
   @IsEnum(UserRole, { message: "Invalid or missing role" })
   role: UserRole;
 
-  @IsNotEmpty({ message: "First name cannot be empty" })
-  @IsString({ message: "Invalid value for first name" })
   @IsOptional()
+  @MinLength(2, { message: "First name cannot be shorter than 2 characters" })
+  @MaxLength(50, { message: "First name cannot be longer than 50 characters" })
+  @IsString({ message: "Invalid first name" })
   firstName?: string;
 
-  @IsNotEmpty({ message: "Last name cannot be empty" })
-  @IsString({ message: "Invalid value for last name" })
   @IsOptional()
+  @MinLength(2, { message: "Last name cannot be shorter than 2 characters" })
+  @MaxLength(50, { message: "Last name cannot be longer than 50 characters" })
+  @IsString({ message: "Invalid last name" })
   lastName?: string;
 
-  @IsNotEmpty({ message: "The seller name cannot be empty" })
-  @IsString({ message: "Invalid value for the seller name" })
   @IsOptional()
+  @MinLength(2, { message: "Name cannot be shorter than 2 characters" })
+  @MaxLength(50, { message: "Name cannot be longer than 50 characters" })
+  @IsString({ message: "Invalid name" })
   sellerName?: string;
 
-  @IsMongoId({ message: "Invalid seller's category id" })
   @IsOptional()
+  @IsMongoId({ message: "Invalid seller's category id" })
   categoryId?: string;
 }
 
@@ -103,6 +109,10 @@ export class PasswordUpdateRequest {
   )
   @IsString({ message: "New password is invalid or missing" })
   newPassword: string;
+
+  @IsOptional()
+  @IsBoolean()
+  terminateAllSessions?: boolean;
 }
 
 export class RefreshTokenRequest {

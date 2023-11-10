@@ -1,5 +1,5 @@
 import { Service } from "typedi";
-import { BaseService, throwError } from "../core";
+import { BaseService, Context, throwError } from "../core";
 import { CartItem, SellerItem, ShoppingCart } from "../models";
 import { SellerItemRepository, ShoppingCartRepository } from "../repositories";
 import { CartItemRequest } from "../controllers/request";
@@ -16,6 +16,8 @@ export class ShoppingCartService extends BaseService {
   async getCart(ownerId: string): Promise<ShoppingCart> {
     const cart = await this._shoppingCartRepository.getCart(ownerId);
 
+    if (!cart) return await this._shoppingCartRepository.createCart(ownerId);
+
     return await this.updateCart(cart);
   }
 
@@ -27,40 +29,44 @@ export class ShoppingCartService extends BaseService {
 
     updatedCart.items = await (Promise.all(
       cart.items.map(async (item) => {
-        const originItem = await this.getOriginItem(item.id);
+        const sellerItem = await this.getSellerItem(item.id);
 
         if (checkout) {
-          if (originItem.quantity < 1)
-            throwError(`The item ${originItem.name} is out of stock`, 400);
+          if (sellerItem.quantity < 1)
+            throwError(`The item ${sellerItem.name} is out of stock`, 400);
 
-          if (!originItem.isAvailable)
-            throwError(`The item ${originItem.name} is not available`, 400);
+          if (!sellerItem.isAvailable)
+            throwError(`The item ${sellerItem.name} is not available`, 400);
 
-          if (item.quantity > originItem.quantity)
+          if (item.quantity > sellerItem.quantity)
             throwError(
-              `The item ${originItem.name} has only ${originItem.quantity} left in stock`,
+              `The item ${sellerItem.name} has only ${sellerItem.quantity} left in stock`,
+              400
+            );
+
+          if (item.quantity < 1 || item.quantity > 5)
+            throwError(
+              `The requested quantity of the item ${item.name} is invalid`,
               400
             );
         }
 
-        if (originItem.quantity < 1) {
-          item.isAvailable = false;
-          item.availability = 0;
-        } else {
-          item.isAvailable = originItem.isAvailable;
-          item.availability = originItem.quantity;
-        }
+        if (sellerItem.quantity < 1 || !sellerItem.isAvailable)
+          item.quantity = 0;
 
-        item.price = originItem.price;
-        item.name = originItem.name;
-        item.imageUrl = originItem.imageUrl;
+        if (item.quantity > sellerItem.quantity)
+          item.quantity = sellerItem.quantity;
+
+        item.price = sellerItem.price;
+        item.name = sellerItem.name;
+        item.imageUrl = sellerItem.imageUrl;
 
         return item;
       })
     ) as Promise<CartItem[]>);
 
     updatedCart.total = updatedCart.items.reduce(
-      (total, item) => total + item.price * item.quantity,
+      (total, item) => total + (item ? item.price * item.quantity : 0),
       0
     );
 
@@ -68,70 +74,82 @@ export class ShoppingCartService extends BaseService {
   }
 
   async addItem(ownerId: string, item: CartItemRequest): Promise<void> {
-    const originItem = await this.getOriginItem(item.id);
+    const sellerItem = await this.getSellerItem(item.id);
 
-    if (originItem.quantity < 1)
-      throwError("Item is out of stock at the moment", 400);
+    const cart =
+      (await this._shoppingCartRepository.getCart(ownerId)) ??
+      (await this._shoppingCartRepository.createCart(ownerId));
 
-    if (!originItem.isAvailable)
-      throwError("Item is not available now for purchase", 400);
+    const itemExistingInCart = cart.items.find(
+      (cartItem) => cartItem.id === item.id
+    );
 
-    if (item.quantity > originItem.quantity)
-      throwError(
-        `Not enough in-stock items available, only ${originItem.quantity} left`,
-        400
-      );
+    if (itemExistingInCart) {
+      await this.updateItem(ownerId, {
+        id: item.id,
+        quantity: itemExistingInCart.quantity + item.quantity,
+      });
+      return;
+    }
 
-    const cartItem = {
+    this.validateItemAvailability(sellerItem, item.quantity);
+
+    await this._shoppingCartRepository.addItem(ownerId, {
       ...item,
-      sellerId: originItem.sellerId,
-      price: originItem.price,
-      availability: originItem.quantity,
-      isAvailable: originItem.isAvailable,
-      name: originItem.name,
-      imageUrl: originItem.imageUrl,
-    };
-
-    await this._shoppingCartRepository.addItem(ownerId, cartItem);
-  }
-
-  async updateItem(ownerId: string, item: CartItemRequest): Promise<void> {
-    const { id, quantity } = item;
-
-    const originItem = await this.getOriginItem(id);
-
-    const {
-      sellerId,
-      price,
-      isAvailable,
-      quantity: availability,
-      name,
-      imageUrl,
-    } = originItem;
-
-    if (availability < 1) throwError("Item is out of stock at the moment", 400);
-
-    if (!isAvailable) throwError("Item is not available now for purchase", 400);
-
-    if (quantity > availability)
-      throwError(
-        `Not enough in-stock items available, only ${availability} left`,
-        400
-      );
-
-    await this._shoppingCartRepository.updateItem(ownerId, {
-      id,
-      quantity,
-      sellerId,
-      price,
-      isAvailable,
-      availability,
-      name,
-      imageUrl,
+      sellerId: sellerItem.sellerId,
+      price: sellerItem.price,
+      name: sellerItem.name,
+      imageUrl: sellerItem.imageUrl,
     });
   }
 
-  private getOriginItem(id: string): Promise<SellerItem> {
-    return this._sellerItemRepository.getItem<SellerItem>(id);
+  async updateItem(ownerId: string, item: CartItemRequest): Promise<void> {
+    const sellerItem = await this.getSellerItem(item.id);
+
+    this.validateItemAvailability(sellerItem, item.quantity);
+
+    await this._shoppingCartRepository.updateItem(ownerId, {
+      ...item,
+      sellerId: sellerItem.sellerId,
+      price: sellerItem.price,
+      name: sellerItem.name,
+      imageUrl: sellerItem.imageUrl,
+    });
+  }
+
+  private validateItemAvailability(item: SellerItem, requestedQuantity): void {
+    if (item.quantity < 1)
+      throwError("Item is out of stock at the moment", 400);
+
+    if (!item.isAvailable)
+      throwError("Item is not available now for purchase", 400);
+
+    if (requestedQuantity > 5)
+      throwError(
+        `You cannot add more than 5 items of the same type to the cart`,
+        400
+      );
+
+    if (requestedQuantity > item.quantity)
+      throwError(
+        `Not enough in-stock items available, only ${item.quantity} left`,
+        400
+      );
+  }
+
+  private async getSellerItem(id: string): Promise<SellerItem> {
+    const item = await this._sellerItemRepository.getItem<SellerItem>(
+      id,
+      undefined,
+      true
+    );
+
+    if (!item) {
+      const userId = Context.getUser()._id as string;
+      await this._shoppingCartRepository.removeItem(userId, id);
+      throwError(`Item with id ${id} does not exist anymore`, 400);
+    }
+
+    return item;
   }
 }

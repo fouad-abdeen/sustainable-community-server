@@ -79,12 +79,13 @@ export class MongoConnection<T, U extends AnyParamConstructor<T>>
   }
 
   async query<U, V, S>(options: MongooseQueryOptions<U, V>): Promise<T[] | S> {
-    const { conditions, filters, projection } = options;
+    const { conditions, filters, projection, sort } = options;
 
     try {
       return await this._model
-        .find(conditions ? conditions : {}, projection)
-        .where(filters ? filters : {})
+        .find(conditions ?? {}, projection)
+        .where(filters ?? {})
+        .sort(sort ?? {})
         .lean()
         .exec();
     } catch (error) {

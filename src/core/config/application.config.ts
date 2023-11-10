@@ -8,7 +8,7 @@ import { displayBanner } from "../utils/banner";
  * Creates the express server, launches it , and displays the banner.
  */
 export class Application {
-  server: unknown;
+  // server: unknown;
   express: Express;
 
   constructor(dirname: string) {
