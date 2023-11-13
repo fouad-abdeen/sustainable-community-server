@@ -71,7 +71,7 @@ export class CategoryRepository
     if (!categories || categories.length === 0)
       throwError(`No categories found with the properties: ${type}`, 404);
 
-    return categories;
+    return categories.sort((a, b) => a.name.localeCompare(b.name));
   }
 
   async createCategory(category: Category): Promise<Category> {

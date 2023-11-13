@@ -16,10 +16,12 @@ export interface IUserRepository {
 
   /**
    * Gets user by id
-   * @param id user's id
+   * @param options query options
    * @param projection optional fields to return
    */
-  getUserById<U>(id: string, projection: string): Promise<User | U>;
+  getUser<U>(
+    options: MongooseQueryOptions<UserQueryParams, unknown>
+  ): Promise<User | U>;
 
   /**
    * Gets user by email
@@ -38,11 +40,12 @@ export interface IUserRepository {
    * @param options query options
    */
   getListOfUsers<U>(
-    options: MongooseQueryOptions<UserQuery, unknown>
+    options: MongooseQueryOptions<UserQueryParams, unknown>
   ): Promise<User[] | U[]>;
 }
 
-export interface UserQuery {
-  role: UserRole;
-  verified: boolean;
+export interface UserQueryParams {
+  _id?: string;
+  role?: UserRole;
+  verified?: boolean;
 }

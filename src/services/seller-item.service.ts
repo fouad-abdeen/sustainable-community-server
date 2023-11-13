@@ -39,8 +39,6 @@ export class SellerItemService extends BaseService {
         400
       );
 
-    if (item.isAvailable) this.validateAvailability(item);
-
     const createdItem = await this._SellerItemRepository.createItem(item);
 
     await this._userRepository.updateUser({
@@ -60,7 +58,9 @@ export class SellerItemService extends BaseService {
     const user = Context.getUser();
     const seller =
       user.role === UserRole.ADMIN
-        ? await this._userRepository.getUserById<User>(item.sellerId)
+        ? await this._userRepository.getUser<User>({
+            conditions: { _id: item.sellerId },
+          })
         : ({} as User);
 
     if (item.sellerId) {
@@ -87,13 +87,6 @@ export class SellerItemService extends BaseService {
         );
     }
 
-    if (item.isAvailable) {
-      const currentItem = await this._SellerItemRepository.getItem<SellerItem>(
-        item._id as string
-      );
-      this.validateAvailability(item, currentItem.quantity);
-    }
-
     return await this._SellerItemRepository.updateItem(item);
   }
 
@@ -116,19 +109,5 @@ export class SellerItemService extends BaseService {
         itemsCount: ((user.profile as SellerProfile).itemsCount as number) - 1,
       },
     } as User);
-  }
-
-  private validateAvailability(
-    item: SellerItem,
-    currentQuantity?: number
-  ): void {
-    if (item.quantity === 0)
-      throwError("Item cannot be available with quantity equal to 0", 400);
-
-    if (currentQuantity === 0)
-      throwError(
-        "Item cannot be available while the current quantity is 0",
-        400
-      );
   }
 }

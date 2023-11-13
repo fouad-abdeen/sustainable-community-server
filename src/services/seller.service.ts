@@ -20,7 +20,9 @@ export class SellerService extends BaseService {
       `Attempting to remove category with id: ${categoryId} from seller with id: ${sellerId}`
     );
 
-    const user = await this._sellerRepository.getUserById<User>(sellerId);
+    const user = await this._sellerRepository.getUser<User>({
+      conditions: { _id: sellerId },
+    });
 
     if (user.role !== UserRole.SELLER)
       throwError(`User with id ${sellerId} is not a seller`, 400);

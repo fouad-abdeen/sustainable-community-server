@@ -20,8 +20,8 @@ export class ProfileUpdateRequest {
   @MinLength(50, {
     message: "Description cannot be shorter than 50 characters",
   })
-  @MaxLength(500, {
-    message: "Description cannot be longer than 500 characters",
+  @MaxLength(2000, {
+    message: "Description cannot be longer than 2000 characters",
   })
   @IsString({ message: "Invalid description" })
   description?: string;

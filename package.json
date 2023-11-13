@@ -1,8 +1,8 @@
 {
-  "name": "sustainable-community-server",
+  "name": "sustainable-market-server",
   "version": "1.0.0",
   "main": "src/main.ts",
-  "repository": "https://github.com/fouad-abdeen/sustainable-community-server.git",
+  "repository": "https://github.com/fouad-abdeen/sustainable-market-server.git",
   "author": "Fouad Abdeen <abdeen.dev@gmail.com>",
   "license": "MIT",
   "scripts": {

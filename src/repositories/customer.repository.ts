@@ -1,6 +1,6 @@
 import Container, { Service } from "typedi";
 import { ICustomerRepository } from "./interfaces";
-import { CustomerProfile, SellerItem, User, WishlistItem } from "../models";
+import { CustomerProfile, User, WishlistItem } from "../models";
 import { Context, throwError } from "../core";
 import { SellerItemRepository, UserRepository } from ".";
 
@@ -40,7 +40,7 @@ export class CustomerRepository
       `Removing item with id: ${itemId} from wishlist of user with id: ${userId}`
     );
 
-    const user = await this.getUserById<User>(userId);
+    const user = Context.getUser();
     const wishlist = (user.profile as CustomerProfile).wishlist ?? [];
 
     if (!wishlist.includes(itemId)) {

@@ -149,7 +149,7 @@ export class SellerRepository
       projection,
     });
 
-    return sellers.map((seller) => {
+    return sellers.map((seller): SellerInfo => {
       const { profile, _id } = seller;
       return {
         id: (_id as string).toString(),
@@ -161,7 +161,10 @@ export class SellerRepository
   async getSeller(userId: string): Promise<SellerInfo> {
     this._logger.info(`Getting profile of seller with id: ${userId}`);
 
-    const seller = (await this.getUserById<User>(userId, "profile")) as {
+    const seller = (await this.getUser<User>({
+      conditions: { _id: userId, verified: true },
+      projection: "profile",
+    })) as {
       profile: SellerProfile;
     };
 

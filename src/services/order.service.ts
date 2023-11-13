@@ -56,10 +56,10 @@ export class OrderService extends BaseService {
 
     const totalAmount = cart.total + shippingRate;
 
-    const customer = await this._userRepository.getUserById<User>(
-      customerId,
-      "email profile"
-    );
+    const customer = await this._userRepository.getUser<User>({
+      conditions: { _id: customerId },
+      projection: "email profile",
+    });
 
     const { email, firstName, lastName, phoneNumber, address } = {
       ...customer.profile,

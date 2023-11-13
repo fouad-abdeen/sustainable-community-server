@@ -606,7 +606,7 @@
                     },
                     "description": {
                         "type": "string",
-                        "maxLength": 500,
+                        "maxLength": 2000,
                         "minLength": 50
                     },
                     "businessEmail": {
@@ -705,7 +705,8 @@
                     },
                     "price": {
                         "type": "number",
-                        "minimum": 0
+                        "maximum": 500,
+                        "minimum": 0.5
                     },
                     "categoryId": {
                         "pattern": "^[0-9a-fA-F]{24}$",
@@ -750,7 +751,8 @@
                     },
                     "price": {
                         "type": "number",
-                        "minimum": 0
+                        "maximum": 500,
+                        "minimum": 0.5
                     },
                     "categoryId": {
                         "pattern": "^[0-9a-fA-F]{24}$",
@@ -843,49 +845,6 @@
     },
     "openapi": "3.0.0",
     "paths": {
-        "/users/{id}": {
-            "get": {
-                "operationId": "UserController.getOneUser",
-                "parameters": [
-                    {
-                        "in": "header",
-                        "name": "auth",
-                        "required": false,
-                        "schema": {}
-                    },
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "required": true,
-                        "schema": {
-                            "pattern": "[^\\/#\\?]+?",
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/UserResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                },
-                "summary": "Get user by id",
-                "tags": [
-                    "User"
-                ],
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
         "/users/": {
             "get": {
                 "operationId": "UserController.getListOfUsers",

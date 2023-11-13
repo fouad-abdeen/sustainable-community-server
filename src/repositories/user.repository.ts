@@ -6,7 +6,7 @@ import {
   MongooseQueryOptions,
   throwError,
 } from "../core";
-import { IUserRepository, UserQuery } from "./interfaces";
+import { IUserRepository, UserQueryParams } from "./interfaces";
 import { User } from "../models";
 
 @Service()
@@ -40,17 +40,19 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     );
   }
 
-  async getUserById<U>(id: string, projection?: string): Promise<User | U> {
-    this._logger.info(`Getting user by id: ${id}`);
+  async getUser<U>(
+    options: MongooseQueryOptions<UserQueryParams, unknown>
+  ): Promise<User | U> {
+    const { _id } = options.conditions as UserQueryParams;
 
-    const user = await this._connection.queryOne<{ _id: string }, User | U>(
-      {
-        _id: id,
-      },
-      projection
+    this._logger.info(`Getting user by id: ${_id}`);
+
+    const user = await this._connection.queryOne<UserQueryParams, User | U>(
+      options.conditions as UserQueryParams,
+      options.projection
     );
 
-    if (!user) throwError(`User with id ${id} not found`, 404);
+    if (!user) throwError(`User with id ${_id} not found`, 404);
 
     return user;
   }
@@ -72,9 +74,9 @@ export class UserRepository extends BaseRepository implements IUserRepository {
   }
 
   async getListOfUsers<U>(
-    options: MongooseQueryOptions<UserQuery, unknown>
+    options: MongooseQueryOptions<UserQueryParams, unknown>
   ): Promise<User[] | U[]> {
-    const conditions = options.conditions as UserQuery;
+    const conditions = options.conditions as UserQueryParams;
 
     this._logger.info(
       `Getting list of users with the properties: ${JSON.stringify(
@@ -84,7 +86,11 @@ export class UserRepository extends BaseRepository implements IUserRepository {
       )}`
     );
 
-    const users = await this._connection.query<UserQuery, unknown, User[]>({
+    const users = await this._connection.query<
+      UserQueryParams,
+      unknown,
+      User[]
+    >({
       conditions,
       projection: options.projection,
       sort: { createdAt: -1 },

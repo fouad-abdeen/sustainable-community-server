@@ -46,7 +46,7 @@ export class SellerItemRepository
       SellerItemQuery,
       unknown,
       SellerItem[]
-    >({ conditions, projection });
+    >({ conditions, projection, sort: { updatedAt: -1 } });
 
     if (!skipThrowingError && (items ?? []).length === 0)
       throwError(

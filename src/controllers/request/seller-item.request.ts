@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsString,
   IsUrl,
+  Max,
   MaxLength,
   Min,
   MinLength,
@@ -25,7 +26,8 @@ export class SellerItemCreationRequest {
   @IsString({ message: "Invalid description's value" })
   description: string;
 
-  @Min(0, { message: "Price cannot be negative" })
+  @Min(0.5, { message: "Price should be at least 50 cents" })
+  @Max(500, { message: "Price cannot be higher than 500 dollars" })
   @IsNumber({}, { message: "Invalid or missing price's value" })
   price: number;
 
@@ -67,7 +69,8 @@ export class SellerItemUpdateRequest {
   description?: string;
 
   @IsOptional()
-  @Min(0, { message: "Price cannot be negative" })
+  @Min(0.5, { message: "Price should be at least 50 cents" })
+  @Max(500, { message: "Price cannot be higher than 500 dollars" })
   @IsNumber({}, { message: "Invalid price's value" })
   price?: number;
 

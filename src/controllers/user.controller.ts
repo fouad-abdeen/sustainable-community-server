@@ -21,30 +21,6 @@ export class UserController extends BaseService {
     super(__filename);
   }
 
-  // #region Get User
-  @Authorized({
-    roles: [UserRole.ADMIN],
-    disclaimer: "Only admins can get user's info",
-  })
-  @HeaderParam("auth")
-  @Get("/:id")
-  @OpenAPI({
-    summary: "Get user by id",
-    security: [{ bearerAuth: [] }],
-  })
-  @ResponseSchema(UserResponse)
-  async getOneUser(@Param("id") id: string): Promise<UserResponse> {
-    this._logger.info(`Received a request to get user with id: ${id}`);
-
-    if (!isMongoId(id)) throwError("Invalid or missing user's id", 400);
-
-    return UserResponse.getUserResponse(
-      await this._userRepository.getUserById<User>(id),
-      true
-    );
-  }
-  // #endregion
-
   // #region Get List of Users
   @Authorized({
     roles: [UserRole.ADMIN],

@@ -87,7 +87,9 @@ export class SellerController extends BaseService {
     if (!isMongoId(categoryId))
       throwError("Invalid or missing category's id", 400);
 
-    const user = await this._sellerRepository.getUserById<User>(id);
+    const user = await this._sellerRepository.getUser<User>({
+      conditions: { _id: id },
+    });
     if (user.role !== UserRole.SELLER)
       throwError(`User with id ${id} is not a seller`, 400);
 
@@ -131,7 +133,9 @@ export class SellerController extends BaseService {
     if (!isMongoId(categoryId))
       throwError("Invalid or missing category's id", 400);
 
-    const user = await this._sellerRepository.getUserById<User>(id);
+    const user = await this._sellerRepository.getUser<User>({
+      conditions: { _id: id },
+    });
     if (user.role !== UserRole.SELLER)
       throwError(`User with id ${id} is not a seller`, 400);
 
@@ -172,7 +176,9 @@ export class SellerController extends BaseService {
     if (!isMongoId(categoryId))
       throwError("Invalid or missing category's id", 400);
 
-    const user = await this._sellerRepository.getUserById<User>(id);
+    const user = await this._sellerRepository.getUser<User>({
+      conditions: { _id: id },
+    });
     if (user.role !== UserRole.SELLER)
       throwError(`User with id ${id} is not a seller`, 400);
 
@@ -192,7 +198,9 @@ export class SellerController extends BaseService {
 
     if (!isMongoId(id)) throwError("Invalid or missing seller's id", 400);
 
-    const user = await this._sellerRepository.getUserById<User>(id);
+    const user = await this._sellerRepository.getUser<User>({
+      conditions: { _id: id },
+    });
     if (user.role !== UserRole.SELLER)
       throwError(`User with id ${id} is not a seller`, 400);
 
