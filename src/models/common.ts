@@ -130,11 +130,17 @@ export class WishlistItem {
   @IsNumber()
   price: number;
 
-  @IsString()
-  imageUrl?: string;
+  @IsNumber()
+  quantity: number;
+
+  @IsBoolean()
+  isAvailable: boolean;
 
   @IsString()
-  sellerId?: string;
+  sellerId: string;
+
+  @IsString()
+  imageUrl?: string;
 }
 
 export class ItemSeller {

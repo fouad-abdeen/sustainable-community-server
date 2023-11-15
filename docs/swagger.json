@@ -228,10 +228,16 @@
                     "price": {
                         "type": "number"
                     },
-                    "imageUrl": {
-                        "type": "string"
+                    "quantity": {
+                        "type": "number"
+                    },
+                    "isAvailable": {
+                        "type": "boolean"
                     },
                     "sellerId": {
+                        "type": "string"
+                    },
+                    "imageUrl": {
                         "type": "string"
                     }
                 },
@@ -241,8 +247,10 @@
                     "name",
                     "description",
                     "price",
-                    "imageUrl",
-                    "sellerId"
+                    "quantity",
+                    "isAvailable",
+                    "sellerId",
+                    "imageUrl"
                 ]
             },
             "ItemSeller": {

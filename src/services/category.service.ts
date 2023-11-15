@@ -27,16 +27,8 @@ export class CategoryService extends BaseService {
         )
       ).type;
 
-      if (category.type !== currentType) {
-        const isAssignedToSellers =
-          await this.checkIfCategoryIsAssignedToSellers(id);
-
-        if (isAssignedToSellers)
-          throwError(
-            "Cannot update the type of a category that is assigned to sellers",
-            400
-          );
-      }
+      if (category.type !== currentType)
+        await this.validateCategoryAvailability(id, "UPDATE");
     }
 
     return await this._categoryRepository.updateCategory({
@@ -48,31 +40,35 @@ export class CategoryService extends BaseService {
   async deleteCategory(id: string): Promise<void> {
     this._logger.info(`Attempting to delete category with id: ${id}`);
 
-    const isAssignedToSellers = await this.checkIfCategoryIsAssignedToSellers(
-      id
-    );
-
-    if (isAssignedToSellers)
-      throwError("Cannot delete a category that is assigned to sellers", 400);
+    await this.validateCategoryAvailability(id, "DELETE");
 
     await this._categoryRepository.deleteCategory(id);
   }
 
-  private async checkIfCategoryIsAssignedToSellers(
-    categoryId: string
-  ): Promise<boolean> {
+  private async validateCategoryAvailability(
+    categoryId: string,
+    action: "UPDATE" | "DELETE"
+  ): Promise<void> {
     const sellers = await this._sellerRepository.getListOfSellers(
       "profile.categoryId profile.itemCategories"
     );
 
-    return (
-      sellers.findIndex(
-        (seller) =>
-          seller.categoryId === categoryId ||
-          (seller.itemCategories ?? []).findIndex(
-            (itemCategoryId) => itemCategoryId === categoryId
-          ) > -1
-      ) > -1
-    );
+    sellers.forEach((seller) => {
+      if (seller.categoryId === categoryId)
+        throwError(
+          action === "UPDATE"
+            ? "Cannot update a service category that is associated to sellers"
+            : "Cannot delete a service category that is associated to sellers",
+          400
+        );
+
+      if ((seller.itemCategories ?? []).includes(categoryId))
+        throwError(
+          action === "UPDATE"
+            ? "Cannot update an item category that is assigned to sellers"
+            : "Cannot delete an item category that is assigned to sellers",
+          400
+        );
+    });
   }
 }

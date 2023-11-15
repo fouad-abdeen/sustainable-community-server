@@ -1,6 +1,6 @@
 import Container, { Service } from "typedi";
 import { ICustomerRepository } from "./interfaces";
-import { CustomerProfile, User, WishlistItem } from "../models";
+import { CustomerProfile, SellerItem, User, WishlistItem } from "../models";
 import { Context, throwError } from "../core";
 import { SellerItemRepository, UserRepository } from ".";
 
@@ -62,27 +62,33 @@ export class CustomerRepository
     const user = Context.getUser();
     const wishlist = (user.profile as CustomerProfile).wishlist ?? [];
 
-    return await Promise.all(
+    const items = (await Promise.all(
       wishlist.map(async (itemId) => {
-        const item = await this._menuItemRepository.getItem<WishlistItem>(
+        const item = await this._menuItemRepository.getItem<SellerItem>(
           itemId,
-          "name description price imageUrl sellerId",
+          "name description price quantity isAvailable sellerId imageUrl",
           true
         );
 
-        delete item["_id"];
-
-        if (!item)
-          this.updateProfile(userId, {
+        if (!item) {
+          await this.updateProfile(userId, {
             wishlist: wishlist.filter((id) => id !== itemId),
           } as CustomerProfile);
+          return null;
+        }
+
+        if (!item.isAvailable) return null;
+
+        delete item["_id"];
 
         return {
           id: itemId,
           ...item,
         };
       })
-    );
+    )) as WishlistItem[];
+
+    return items.filter((item) => item !== null);
   }
 
   async updateProfile(userId: string, profile: CustomerProfile): Promise<void> {
