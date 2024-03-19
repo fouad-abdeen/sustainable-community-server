@@ -847,7 +847,7 @@
         }
     },
     "info": {
-        "title": "sustainable-community-server API",
+        "title": "sustainable-market-server API",
         "version": "1.0.0",
         "description": "Generated with `routing-controllers-openapi`"
     },

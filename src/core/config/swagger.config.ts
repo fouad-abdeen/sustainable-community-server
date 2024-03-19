@@ -6,7 +6,6 @@ import {
   getMetadataArgsStorage,
 } from "routing-controllers";
 import { routingControllersToSpec } from "routing-controllers-openapi";
-import { defaultMetadataStorage as classTransformerdefaultMetadataStorage } from "class-transformer/cjs/storage";
 import { env } from ".";
 import { defaultLogger as logger } from "..";
 
@@ -17,7 +16,6 @@ export const getSwaggerSpec = (dirname: string) => {
   };
 
   const schemas = validationMetadatasToSchemas({
-    classTransformerMetadataStorage: classTransformerdefaultMetadataStorage,
     refPointerPrefix: "#/components/schemas/",
   });
 

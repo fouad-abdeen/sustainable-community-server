@@ -32,12 +32,9 @@ export const env = {
   },
 
   app: {
-    name: getEnvVariable("APP_NAME", "sustainable-community-server"),
+    name: getEnvVariable("APP_NAME", "sustainable-market-server"),
     version: getEnvVariable("APP_VERSION", "1.0.0"),
-    description: getEnvVariable(
-      "APP_DESCRIPTION",
-      "Sustainable Community Server"
-    ),
+    description: getEnvVariable("APP_DESCRIPTION", "Sustainable Market Server"),
     schema: getEnvVariable("APP_SCHEMA", "http"),
     host: getEnvVariable("APP_HOST", "localhost"),
     port: getEnvVariable("APP_PORT", "3000"),
